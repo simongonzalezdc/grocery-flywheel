@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vons Grocery Run Analysis - May 20, 2026</title>
+  <style>
+    :root {
+      --bg: #f7f5ef;
+      --panel: #ffffff;
+      --ink: #171512;
+      --muted: #6f6a60;
+      --line: #ddd6c9;
+      --soft: #ebe5d8;
+      --green: #1f8a70;
+      --green-soft: #d9eee8;
+      --red: #bd3a2b;
+      --red-soft: #f4d9d4;
+      --amber: #c58b22;
+      --amber-soft: #f4e5c5;
+      --blue: #315f8c;
+      --blue-soft: #dce8f3;
+      --purple: #6c548a;
+      --shadow: 0 18px 50px rgba(39, 34, 25, 0.10);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(1320px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      max-width: 760px;
+      font-size: clamp(32px, 4vw, 56px);
+      line-height: 0.98;
+      letter-spacing: 0;
+      font-weight: 760;
+    }
+
+    h2 {
+      font-size: 18px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .meta {
+      min-width: 260px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 16px;
+      margin: 18px 0;
+    }
+
+    .verdict, .panel, .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .verdict {
+      padding: 22px;
+      min-height: 180px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .verdict p {
+      max-width: 880px;
+      color: #3a342c;
+      font-size: clamp(18px, 2.2vw, 28px);
+      line-height: 1.18;
+      font-weight: 620;
+    }
+
+    .verdict strong { color: var(--green); }
+
+    .target-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 10px 12px;
+      background: var(--green-soft);
+      color: #11614e;
+      border: 1px solid #a8d9cb;
+      font-weight: 740;
+      width: fit-content;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .metric {
+      padding: 16px;
+      min-height: 116px;
+    }
+
+    .metric .value {
+      margin-top: 12px;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 0.95;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .metric .sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .metric.good .value { color: var(--green); }
+    .metric.warn .value { color: var(--amber); }
+    .metric.hot .value { color: var(--red); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .panel {
+      padding: 16px;
+      min-height: 420px;
+      overflow: hidden;
+    }
+
+    .panel.wide { grid-column: 1 / -1; }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+
+    .panel-head p {
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chart {
+      width: 100%;
+      height: 320px;
+      display: block;
+    }
+
+    .chart.short { height: 260px; }
+
+    .axis text, .chart-label {
+      fill: var(--muted);
+      font-size: 12px;
+    }
+
+    .chart-title {
+      fill: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      background: #fffdf9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f1eadf;
+      z-index: 1;
+      font-size: 12px;
+      color: #4b453c;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td.num, th.num { text-align: right; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: #4c463d;
+      font-weight: 680;
+      font-size: 12px;
+    }
+
+    .pill.hot { background: var(--red-soft); border-color: #dea59d; color: #8f231b; }
+    .pill.good { background: var(--green-soft); border-color: #a8d9cb; color: #11614e; }
+    .pill.cool { background: var(--blue-soft); border-color: #adc8df; color: #224d73; }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      background: #fffdf9;
+      padding: 14px;
+      min-height: 150px;
+    }
+
+    .note p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    footer a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    @media (max-width: 980px) {
+      .summary, .grid, .notes { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .topbar { display: block; }
+      .meta { text-align: left; margin-top: 14px; }
+      .panel { min-height: 360px; }
+      .chart { height: 280px; }
+    }
+
+    @media (max-width: 560px) {
+      main { width: min(100vw - 20px, 1320px); padding-top: 16px; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .panel, .verdict, .metric { padding: 13px; }
+      .panel-head { display: block; }
+      .panel-head p { margin-top: 8px; }
+      .chart { height: 250px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="topbar">
+      <div>
+        <h1>Vons grocery run: cost, runway, and price defense.</h1>
+      </div>
+      <div class="meta">
+        <div>Order 172751073</div>
+        <div>Placed May 20, 2026</div>
+        <div>Pickup: 600 E Broadway</div>
+      </div>
+    </header>
+
+    <section class="summary">
+      <div class="verdict">
+        <p>
+          This order only needs to last <strong>more than 14 days</strong> to beat your recent Vons pattern.
+          The high-leverage change is simple: <strong>37.5% more units</strong> for only <strong>5.7% more spend</strong>,
+          with the unit cost down about <strong>23%</strong>.
+        </p>
+        <div class="target-date">Target next full grocery order: June 6 to June 13</div>
+      </div>
+      <div class="verdict">
+        <h3>Inflation Read</h3>
+        <p style="font-size: 22px;">
+          Inflation means the <strong>same item</strong> getting more expensive over time.
+          Rice is not a spend driver here; it is a 5 lb to 20 lb bulk conversion that lowered unit cost.
+          The real question is which repeated staples are rising.
+        </p>
+      </div>
+    </section>
+
+    <section class="kpi-grid" aria-label="Key metrics">
+      <div class="metric good">
+        <h3>Final Total</h3>
+        <div class="value">$112.19</div>
+        <div class="sub">22 units, 19 unique SKUs</div>
+      </div>
+      <div class="metric good">
+        <h3>Cost / Unit</h3>
+        <div class="value">$5.10</div>
+        <div class="sub">Previous online average: $6.63</div>
+      </div>
+      <div class="metric warn">
+        <h3>Old Cadence</h3>
+        <div class="value">13 days</div>
+        <div class="sub">Median interval between Vons online orders</div>
+      </div>
+      <div class="metric hot">
+        <h3>Hot Public CPI</h3>
+        <div class="value">Coffee</div>
+        <div class="sub">BLS coffee: +18.5% year over year</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Purchase Cadence</h2>
+            <p>Recent Vons online orders show a 13.25-day average interval. This order must clear day 14 to outperform the old loop.</p>
+          </div>
+        </div>
+        <svg id="ordersChart" class="chart" role="img" aria-label="Order totals and gap between orders"></svg>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Efficiency Change</h2>
+            <p>Spend barely increased, while items rose sharply. This is the whole ROI story.</p>
+          </div>
+        </div>
+        <svg id="efficiencyChart" class="chart" role="img" aria-label="Previous average versus current order efficiency"></svg>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Official CPI Context</h2>
+            <p>Public category inflation from BLS April 2026 CPI. This is not your personal item inflation; it is the outside pressure on each category.</p>
+          </div>
+        </div>
+        <svg id="inflationChart" class="chart" role="img" aria-label="Inflation by grocery category"></svg>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Runway Scenarios</h2>
+            <p>Cost per day falls hard if rice, beans, lentils, tofu, and pasta actually enter rotation.</p>
+          </div>
+        </div>
+        <svg id="runwayChart" class="chart" role="img" aria-label="Duration scenarios and cost per day"></svg>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Coffee Correction</h2>
+            <p>Past Vons orders undercounted coffee demand because you were using a previous stockpile. This section treats coffee as its own recurring staple.</p>
+          </div>
+        </div>
+        <div class="notes" style="margin-top: 0;">
+          <div class="note">
+            <h2>What Two Bricks Mean</h2>
+            <p>Two 10 oz bricks equal about 567 g of ground coffee. At one moka-pot brew per day, that is roughly 19-38 days depending on basket size and dose.</p>
+          </div>
+          <div class="note">
+            <h2>Interpretation Fix</h2>
+            <p>The dashboard should not read “coffee suddenly got expensive because you overbought.” It should read “coffee demand returned after the old stash ran out.”</p>
+          </div>
+          <div class="note">
+            <h2>Buying Rule</h2>
+            <p>Use Vons only when convenient or under about $6.50 per brick. Prefer Target deals or Walmart bulk when the effective price drops near $6.10 per brick or below.</p>
+          </div>
+        </div>
+        <div class="grid" style="margin-top: 12px;">
+          <div>
+            <h3>Coffee Runway</h3>
+            <svg id="coffeeRunwayChart" class="chart short" role="img" aria-label="Coffee runway by daily dose"></svg>
+          </div>
+          <div>
+            <h3>Where To Buy Next</h3>
+            <div class="table-wrap" style="margin-top: 10px;">
+              <table style="min-width: 680px;">
+                <thead>
+                  <tr>
+                    <th>Source</th>
+                    <th>Format</th>
+                    <th class="num">Unit Price</th>
+                    <th class="num">Per Oz</th>
+                    <th>Read</th>
+                  </tr>
+                </thead>
+                <tbody id="coffeeRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Storage Mix</h2>
+            <p>Half the spend is shelf-stable. That is what makes this order compound into the next one.</p>
+          </div>
+        </div>
+        <svg id="storageChart" class="chart short" role="img" aria-label="Storage mix donut chart"></svg>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Same-Item Price Checks</h2>
+            <p>Only exact repeats count as item inflation. Package-size changes and brand swaps are shown as unit economics.</p>
+          </div>
+        </div>
+        <svg id="priceCheckChart" class="chart short" role="img" aria-label="Same item and unit price change checks"></svg>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Price Normalization Details</h2>
+            <p>These use real Vons order details where visible. Exact SKU repeats answer inflation; substitutions answer whether the new cart is economically smarter.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Comparison</th>
+                <th>Type</th>
+                <th>Earlier Point</th>
+                <th>Current Point</th>
+                <th class="num">Unit Change</th>
+                <th>Read</th>
+              </tr>
+            </thead>
+            <tbody id="priceCheckRows"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Next Stop: Spice + Gap Top-Up</h2>
+            <p>The next stop should not be another full grocery run. It should buy flavor and small unlocks for the pantry base already purchased.</p>
+          </div>
+        </div>
+        <div class="notes" style="margin-top: 0;">
+          <div class="note">
+            <h2>Buy First</h2>
+            <p>Spices. You reported only garlic powder, onion powder, salt, and red pepper flakes. Flavor variety is now the highest-ROI missing system piece.</p>
+          </div>
+          <div class="note">
+            <h2>Buy If Needed</h2>
+            <p>Eggs, fruit, fresh greens or crisp vegetables, salsa/hot sauce, lemon/lime, or soy sauce. These unlock the rice/beans/tofu/chicken base without creating another giant cart.</p>
+          </div>
+          <div class="note">
+            <h2>Chicken Correction</h2>
+            <p>Do not repeat diced microwave chicken by default. Saved Vons math had Tyson grilled strips at the same 22 oz / $9.99 shelf price as Tyson diced, so strips or fillets should be the next prepared-chicken target.</p>
+          </div>
+          <div class="note">
+            <h2>Do Not Auto-Add</h2>
+            <p>Greek yogurt, peanut butter, ready-rice pouches, canned beans, Just Bare, Lavazza, or Kashi Chocolate Crunch. They were removed or replaced; removal is data.</p>
+          </div>
+        </div>
+        <div class="table-wrap" style="margin-top: 12px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Priority</th>
+                <th>Cart-Ready Spice</th>
+                <th class="num">Est. Price</th>
+                <th>Unlocks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Signature SELECT Black Pepper Ground - 1.5 oz</td>
+                <td class="num">$3.49</td>
+                <td>Basic missing foundation for eggs, chicken, pasta, beans, tofu, vegetables, and pizza.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Signature SELECT Chili Powder - 2.5 oz</td>
+                <td class="num">$2.99</td>
+                <td>Turns beans, lentils, rice, chicken, tofu, and burritos into a Tex-Mex lane.</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Signature SELECT Cumin Ground - 2 oz</td>
+                <td class="num">$4.49</td>
+                <td>Core rice/beans/lentils/garbanzo spice.</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>O Organics Smoked Paprika - 1.6 oz</td>
+                <td class="num">$3.99</td>
+                <td>Adds smoke and depth to tofu, chicken, lentils, beans, rice, and frozen vegetables.</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Signature SELECT Oregano Leaves - 0.75 oz</td>
+                <td class="num">$2.49</td>
+                <td>Covers pasta, pizza, tomato sauce, beans, chicken, and chickpeas.</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>O Organics Curry Ground - 1.8 oz</td>
+                <td class="num">$3.99</td>
+                <td>Creates a separate lentil/garbanzo/tofu/rice lane from the same staples.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top: 10px; color: var(--muted); font-size: 13px;">
+          Full Vons spice capsule: $21.44. Minimum viable set: black pepper, chili powder, cumin, and oregano for $13.46; add smoked paprika and curry when budget allows.
+        </p>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Real Vons Order History Data Points</h2>
+            <p>These are the actual online purchase-history rows visible in Vons. The gap column is what drives the baseline cadence calculation.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Order</th>
+                <th class="num">Items</th>
+                <th class="num">Total</th>
+                <th class="num">Gap</th>
+                <th class="num">Cost / Item</th>
+                <th>Visible Repeat Signals</th>
+              </tr>
+            </thead>
+            <tbody id="historyRows"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Older In-Store Data Points</h2>
+            <p>These were visible on the Vons in-store purchase tab. They are older 2025 context, so they are shown separately and not used for the recent 2026 cadence baseline.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th class="num">Items</th>
+                <th class="num">Total</th>
+                <th class="num">Cost / Item</th>
+                <th>Use In Model</th>
+              </tr>
+            </thead>
+            <tbody id="storeRows"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Item-Level Analysis</h2>
+            <p>Every item mapped to role, storage, price, and CPI proxy. Proxy means the CPI category is the best available public category, not the exact SKU price.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Role</th>
+                <th>Storage</th>
+                <th class="num">Qty</th>
+                <th class="num">Spend</th>
+                <th class="num">CPI Proxy YoY</th>
+                <th>Read</th>
+              </tr>
+            </thead>
+            <tbody id="itemRows"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="notes">
+      <div class="note">
+        <h2>What Changed</h2>
+        <p>The old pattern was frequent mid-size orders with expensive bridge foods. This order still has bridge foods, but it adds durable base infrastructure: 20 lb rice, dry legumes, tofu, pasta, sauce, and cheese.</p>
+      </div>
+      <div class="note">
+        <h2>Inflation Strategy</h2>
+        <p>Do not treat bigger packages as inflation. Track exact repeat staples first, then compare substitutions by unit cost. Coffee needs sale-cycle monitoring; rice and dried legumes are the pressure-release valve.</p>
+      </div>
+      <div class="note">
+        <h2>Next Top-Up Rule</h2>
+        <p>Small top-ups are allowed before June 6 only if they unlock the pantry base: eggs, fruit, one vegetable, salsa/hot sauce, or another low-friction protein. Avoid a second full order.</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Latest Runway Pulse</h2>
+            <p>User-reported depletion through May 23. This is behavior data, not a reorder trigger.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Reported State</th>
+                <th>Model Read</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Burritos</td>
+                <td>Finished.</td>
+                <td>8 of 8 eaten. Burrito bridge lane is fully depleted, which matches the normal bridge-first pattern.</td>
+              </tr>
+              <tr>
+                <td>Waffles</td>
+                <td>14 waffles left.</td>
+                <td>Breakfast bridge is still healthy. With 4 waffles previously eaten, the box appears to have started around 18 waffles.</td>
+              </tr>
+              <tr>
+                <td>Pizza</td>
+                <td>Eaten.</td>
+                <td>Real-pizza bridge lane is depleted. It no longer protects a low-effort meal moment.</td>
+              </tr>
+              <tr>
+                <td>Cereal</td>
+                <td>About 2/3 full.</td>
+                <td>Kashi cereal is active; about 1/3 is consumed.</td>
+              </tr>
+              <tr>
+                <td>Milk / Fairlife</td>
+                <td>About 2/3 full.</td>
+                <td>Assuming this is the May 20 Fairlife, about 1/3 is consumed.</td>
+              </tr>
+              <tr>
+                <td>Cheese</td>
+                <td>No change from May 21.</td>
+                <td>Still about 1/8 used from the 32 oz block; cheese is stable.</td>
+              </tr>
+              <tr>
+                <td>Coffee</td>
+                <td>One Bustelo brick just opened; second brick sealed.</td>
+                <td>Coffee runway is healthy. Do not rebuy yet; start the consumption clock from the opened brick.</td>
+              </tr>
+              <tr>
+                <td>Juice</td>
+                <td>About 1/10 consumed.</td>
+                <td>About 5.2 fl oz used from 52 fl oz; not a fast depletion risk.</td>
+              </tr>
+              <tr>
+                <td>Pantry Base</td>
+                <td>Half of one tofu eaten; rice, beans, and vegetables still buffered by older stock.</td>
+                <td>The cooking phase is confirmed. Count half of one tofu as consumed and half as active/open inventory.</td>
+              </tr>
+              <tr>
+                <td>Known May 20 Drawdown</td>
+                <td>About $18.21 excluding coffee.</td>
+                <td>About 16.2% of the $112.19 order is clearly depleted. Bridge foods led, and cooking is now confirmed through tofu.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Calculation Correction</h2>
+            <p>Because older pantry stock still exists, May 20 order depletion and total eating are now separate calculations.</p>
+          </div>
+        </div>
+        <div class="notes" style="margin-top: 0;">
+          <div class="note">
+            <h2>Known Drawdown</h2>
+            <p>Known May 20 depletion is about $18.21 so far: 8 burritos, half of one tofu, 4 waffles, pizza, 1/3 cereal, 1/3 Fairlife, 1/8 cheese, and 1/10 juice. Coffee is opened but not counted as consumed.</p>
+          </div>
+          <div class="note">
+            <h2>Model Meaning</h2>
+            <p>That is roughly 16.2% of the order, but it is not your total daily food cost because older groceries are still feeding some meals.</p>
+          </div>
+          <div class="note">
+            <h2>Forecast Shift</h2>
+            <p>The reorder forecast is still strong overall. The expected phase change has started: bridge foods first, then cooking, now with tofu opened.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-head">
+          <div>
+            <h2>Bridge-First Pattern</h2>
+            <p>User correction: this is normal. Ready foods get exhausted first, then cooking starts. The model should support the transition instead of treating it as a failure.</p>
+          </div>
+        </div>
+        <div class="notes" style="margin-top: 0;">
+          <div class="note">
+            <h2>What It Means</h2>
+            <p>Burrito and pizza depletion did not mean the grocery run was failing. It meant the order was moving from no-thought food into pantry-cooking mode, and the opened tofu confirms that transition.</p>
+          </div>
+          <div class="note">
+            <h2>Support Needed</h2>
+            <p>The highest ROI support is not another full order. It is spices, sauce/acid, and one obvious way to finish the opened tofu with rice, vegetables, pasta, or beans.</p>
+          </div>
+          <div class="note">
+            <h2>Next Signal</h2>
+            <p>The next useful check is whether the opened tofu gets eaten smoothly, and which cooked lane actually works.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="notes">
+      <div class="note">
+        <h2>Live Update Loop</h2>
+        <p>A recurring check-in now runs every 3 days to capture what is gone, what remains, and whether the pantry staples are actually being used.</p>
+      </div>
+      <div class="note">
+        <h2>New Vons Data</h2>
+        <p>When a new order, cart, receipt, or item-detail page appears, add date, order number, item count, total, full item list, repeated SKUs, substitutions, and removed items.</p>
+      </div>
+      <div class="note">
+        <h2>Runway Metric</h2>
+        <p>The real win condition is actual days lasted. Because older pantry stock is still being used, the May 20 order may last longer than the first depletion read suggested.</p>
+      </div>
+    </section>
+
+    <footer>
+      Sources: Vons order confirmation, May 8 item-detail page, purchase history, and Vons meal-plan/product pages visible on May 20, 2026.
+      Public inflation context from
+      <a href="https://www.bls.gov/news.release/archives/cpi_05122026.htm">BLS CPI April 2026 release</a>,
+      <a href="https://www.ers.usda.gov/data-products/food-price-outlook/summary-findings">USDA ERS Food Price Outlook summary</a>,
+      and <a href="https://www.ers.usda.gov/data-products/food-at-home-monthly-area-prices">USDA ERS F-MAP data description</a>.
+      Coffee alternatives checked from
+      <a href="https://www.target.com/c/ground-coffee-beverages-grocery/cafe-bustelo/-/N-x2hqvZ56692">Target Cafe Bustelo listings</a>,
+      <a href="https://www.walmart.com/browse/food/cafe-bustelo/976759_1086446_7145434?facet=retailer_type%3AWalmart">Walmart Cafe Bustelo listings</a>,
+      <a href="https://www.ralphs.com/q/bustelo">Ralphs Bustelo listings</a>,
+      and <a href="https://www.smartandfinal.com/product/cafe-bustelo-ground-espresso-coffee-id-00074471017201">Smart &amp; Final listing</a>.
+      Next-stop spice prices checked from visible Vons meal-plan/product pages for Signature SELECT chili powder, cumin, black pepper, oregano, and O Organics smoked paprika/curry.
+    </footer>
+  </main>
+
+  <script>
+    const orders = [
+      { date: "2026-02-03", order: "158388275", items: 19, total: 107.48, signals: "Goldminer sourdough, Just Bare chicken, El Monterey taquitos" },
+      { date: "2026-02-17", order: "160251984", items: 15, total: 90.55, signals: "Oreo family size, Coke Zero, El Monterey taquitos" },
+      { date: "2026-02-26", order: "161469200", items: 19, total: 111.43, signals: "Coke Zero, El Monterey taquitos, Goldminer sourdough" },
+      { date: "2026-03-16", order: "163942236", items: 16, total: 138.76, signals: "Kashi chocolate crunch, Kodiak waffles, El Monterey taquitos" },
+      { date: "2026-03-25", order: "165139686", items: 15, total: 94.20, signals: "Kodiak waffles, Goldminer sourdough, O Organics tofu" },
+      { date: "2026-04-14", order: "167881615", items: 16, total: 93.12, signals: "El Monterey taquitos, Kodiak waffles, O Organics tofu" },
+      { date: "2026-04-20", order: "168708014", items: 16, total: 114.09, signals: "Kodiak waffles, Goldminer sourdough, El Monterey taquitos" },
+      { date: "2026-05-08", order: "171153544", items: 12, total: 99.54, signals: "El Monterey taquitos, Kodiak waffles, Fairlife chocolate" },
+      { date: "2026-05-20", order: "172751073", items: 22, total: 112.19, current: true, signals: "Bustelo, grapefruit juice, Kashi peanut butter, bulk staples" }
+    ];
+
+    const storePurchases = [
+      { date: "2025-06-10", items: 6, total: 42.71 },
+      { date: "2025-06-16", items: 27, total: 149.50 },
+      { date: "2025-06-23", items: 17, total: 119.95 },
+      { date: "2025-07-05", items: 8, total: 102.61 },
+      { date: "2025-08-16", items: 10, total: 72.78 },
+      { date: "2025-08-31", items: 10, total: 68.71 },
+      { date: "2025-09-17", items: 10, total: 66.06 },
+      { date: "2025-09-23", items: 36, total: 236.81 }
+    ];
+
+    const items = [
+      { item: "Cafe Bustelo Espresso Style Ground Coffee, 10 oz", qty: 2, spend: 13.84, role: "Coffee ritual", storage: "Shelf", cpi: 18.5, cpiLabel: "Coffee", read: "High inflation. Bustelo is still the value pick versus premium espresso." },
+      { item: "Florida's Natural Ruby Red Grapefruit Juice, 52 fl oz", qty: 1, spend: 3.47, role: "Interesting drink", storage: "Fridge", cpi: 2.9, cpiLabel: "Juices/drinks", read: "Fine as a controlled pleasure item; do not multiply juices." },
+      { item: "Kashi Go Peanut Butter Cereal, 16.9 oz", qty: 1, spend: 3.46, role: "No-cook breakfast", storage: "Shelf", cpi: 3.7, cpiLabel: "Breakfast cereal", read: "Good sale item. Watch if it returns to full price." },
+      { item: "Signature SELECT Dark Brown Sugar, 32 oz", qty: 1, spend: 2.97, role: "Pantry support", storage: "Shelf", cpi: 0.7, cpiLabel: "Sugar substitutes", read: "Low pressure and shelf-stable." },
+      { item: "Fairlife Chocolate 2%, 52 fl oz", qty: 1, spend: 6.49, role: "Required protein drink", storage: "Fridge", cpi: 0.5, cpiLabel: "Milk", read: "Not cheap, but behaviorally important and inflation-favorable." },
+      { item: "Lucerne Sharp Cheddar, 32 oz", qty: 1, spend: 7.91, role: "Flavor/protein anchor", storage: "Fridge", cpi: -3.1, cpiLabel: "Cheese", read: "Good category right now, though coupon mismatch should be watched." },
+      { item: "El Monterey Bean & Cheese Burritos, 8 ct", qty: 1, spend: 6.42, role: "Immediate meal", storage: "Frozen", cpi: -0.1, cpiLabel: "Frozen prepared foods", read: "Better ROI than taquitos for immediate eating." },
+      { item: "Signature SELECT California Vegetables, 32 oz", qty: 1, spend: 4.94, role: "Frozen vegetables", storage: "Frozen", cpi: 1.8, cpiLabel: "Frozen vegetables", read: "Good top-up candidate when gone." },
+      { item: "Signature SELECT Homestyle Waffles, 29.6 oz", qty: 1, spend: 5.43, role: "Instant breakfast", storage: "Frozen", cpi: -0.1, cpiLabel: "Frozen prepared foods", read: "Cheaper format than protein waffles." },
+      { item: "Signature SELECT Rising Crust Supreme Pizza, 33.5 oz", qty: 1, spend: 4.94, role: "Real pizza", storage: "Frozen", cpi: -0.1, cpiLabel: "Frozen prepared foods", read: "High morale per dollar. Keep to one." },
+      { item: "Azumaya Extra Firm Tofu, 14 oz", qty: 3, spend: 5.91, role: "Protein base", storage: "Fridge", cpi: 2.2, cpiLabel: "Other foods proxy", read: "Strong low-cost protein; needs sauce/rice/veg to become easy." },
+      { item: "Botan Calrose Rice, 20 lb", qty: 1, spend: 19.80, role: "Staple base", storage: "Shelf", cpi: 4.9, cpiLabel: "Rice", read: "Strategic bulk buy: higher ticket, lower per-pound cost than the prior 5 lb bag." },
+      { item: "Signature SELECT Garbanzo Beans, 16 oz", qty: 1, spend: 1.98, role: "Loved dry legume", storage: "Shelf", cpi: 1.1, cpiLabel: "Dried beans/lentils", read: "Excellent inflation defense and preference match." },
+      { item: "Signature SELECT Pinto Beans, 32 oz", qty: 1, spend: 2.97, role: "Dry bean base", storage: "Shelf", cpi: 1.1, cpiLabel: "Dried beans/lentils", read: "High yield. Better than canned if soaking happens." },
+      { item: "Signature SELECT Lentils, 32 oz", qty: 1, spend: 2.97, role: "Fast legume", storage: "Shelf", cpi: 1.1, cpiLabel: "Dried beans/lentils", read: "No overnight soak needed. This should be first batch-cook candidate." },
+      { item: "Signature SELECT Rigatoni, 16 oz", qty: 1, spend: 1.48, role: "Low-effort meal base", storage: "Shelf", cpi: 2.5, cpiLabel: "Rice/pasta/cornmeal", read: "Cheap, reliable fallback." },
+      { item: "Signature SELECT Tomato Basil Pasta Sauce, 25 oz", qty: 1, spend: 2.27, role: "Sauce shortcut", storage: "Shelf", cpi: 3.7, cpiLabel: "Sauces/condiments", read: "Useful friction reducer; inflation is above grocery average." },
+      { item: "Signature SELECT Pesto Sauce, 8.3 oz", qty: 1, spend: 4.75, role: "Flavor shortcut", storage: "Shelf", cpi: 3.7, cpiLabel: "Sauces/condiments", read: "Higher unit cost but makes tofu/pasta/rice easier." },
+      { item: "Tyson Grilled & Ready Diced Chicken, 22 oz", qty: 1, spend: 9.89, role: "Meat protein", storage: "Frozen", cpi: -0.7, cpiLabel: "Chicken", read: "Cheaper than Just Bare, but later rejected on diced form factor; next target is Tyson grilled strips, fillets, or whole pieces." }
+    ];
+
+    const coffeeSources = [
+      { source: "Vons final order", format: "2 x 10 oz bricks", unit: 6.92, perOz: 0.692, read: "Baseline. Convenient, but not the best replenishment source." },
+      { source: "Target", format: "10 oz brick; BOGO 25% deal on select Bustelo", unit: 6.12, perOz: 0.612, read: "Best practical two-brick replenishment if the deal is live." },
+      { source: "Walmart", format: "10 oz brick", unit: 6.62, perOz: 0.662, read: "Slightly better than Vons, weaker than Target deal." },
+      { source: "Walmart", format: "12-pack x 10 oz bricks", unit: 5.96, perOz: 0.596, read: "Best confirmed bulk option found; only buy if storing 12 bricks is acceptable." },
+      { source: "Ralphs", format: "10 oz can", unit: 7.99, perOz: 0.799, read: "Not better than Vons unless a coupon appears." },
+      { source: "Smart & Final", format: "10 oz listing", unit: 7.99, perOz: 0.799, read: "Not better than Vons in current visible listings." }
+    ];
+
+    const coffeeRunway = [
+      { label: "30 g/day", days: 19, note: "Large moka or strong habit" },
+      { label: "25 g/day", days: 23, note: "6-cup moka range" },
+      { label: "20 g/day", days: 28, note: "Moderate daily dose" },
+      { label: "15 g/day", days: 38, note: "3-cup moka range" }
+    ];
+
+    const storageMix = [
+      { label: "Shelf-stable", spend: 56.49, color: "#315f8c" },
+      { label: "Frozen", spend: 31.62, color: "#1f8a70" },
+      { label: "Refrigerated", spend: 23.78, color: "#c58b22" }
+    ];
+
+    const inflationCategories = [
+      { label: "Coffee", value: 18.5, spend: 13.84 },
+      { label: "Rice", value: 4.9, spend: 19.80 },
+      { label: "Sauces", value: 3.7, spend: 7.02 },
+      { label: "Breakfast cereal", value: 3.7, spend: 3.46 },
+      { label: "Food at home avg", value: 2.9, spend: 111.89, baseline: true },
+      { label: "Juices/drinks", value: 2.9, spend: 3.47 },
+      { label: "Tofu proxy", value: 2.2, spend: 5.91 },
+      { label: "Frozen vegetables", value: 1.8, spend: 4.94 },
+      { label: "Dried legumes", value: 1.1, spend: 7.92 },
+      { label: "Milk", value: 0.5, spend: 6.49 },
+      { label: "Frozen prepared", value: -0.1, spend: 16.79 },
+      { label: "Chicken", value: -0.7, spend: 9.89 },
+      { label: "Cheese", value: -3.1, spend: 7.91 }
+    ];
+
+    const priceChecks = [
+      {
+        label: "Bustelo 10 oz",
+        type: "Exact SKU",
+        earlier: "May 8: $6.90 / 10 oz",
+        current: "May 20: $6.92 / 10 oz",
+        change: 0.3,
+        read: "No meaningful Vons price jump across these two orders. Coffee remains the public inflation risk, but the two-brick buy should last longer."
+      },
+      {
+        label: "Fairlife Chocolate 52 fl oz",
+        type: "Exact SKU",
+        earlier: "May 8: $6.49 / 52 fl oz",
+        current: "May 20: $6.49 / 52 fl oz",
+        change: 0.0,
+        read: "Flat in the visible order history. This is required and not the current price-increase problem."
+      },
+      {
+        label: "Rice per lb",
+        type: "Package + brand change",
+        earlier: "May 8: Signature SELECT 5 lb, $6.90 ($1.38/lb)",
+        current: "May 20: Botan 20 lb, $19.80 ($0.99/lb)",
+        change: -28.3,
+        read: "This is the correction you called out: higher basket spend because the bag is 4x larger, but the unit cost fell sharply."
+      },
+      {
+        label: "Frozen veg per oz",
+        type: "Brand swap",
+        earlier: "May 8: O Organics 32 oz, $5.42 ($0.169/oz)",
+        current: "May 20: Signature SELECT 32 oz, $4.94 ($0.154/oz)",
+        change: -8.9,
+        read: "Same format, cheaper store-brand unit economics. Not inflation; this is a useful substitution."
+      },
+      {
+        label: "Chicken per oz",
+        type: "Brand swap",
+        earlier: "May 8: Just Bare 24 oz, $13.80 ($0.575/oz)",
+        current: "May 20: Tyson diced chicken 22 oz, $9.89 ($0.450/oz); Tyson grilled strips snapshot was $9.99 / 22 oz ($0.454/oz)",
+        change: -21.8,
+        read: "Economic win versus Just Bare, but form-factor miss. Same-brand Tyson grilled strips were effectively the same unit price and should be the next default."
+      },
+      {
+        label: "Waffles per oz",
+        type: "Format swap",
+        earlier: "May 8: Kodiak 10.72 oz, $5.92 ($0.552/oz)",
+        current: "May 20: Signature SELECT 29.6 oz, $5.43 ($0.183/oz)",
+        change: -66.8,
+        read: "This trades protein branding for cheap immediate-food volume. Good executive-function ROI if protein is covered elsewhere."
+      },
+      {
+        label: "Immediate frozen meal per oz",
+        type: "Role swap",
+        earlier: "May 8: El Monterey taquitos 20 oz, $6.89 ($0.345/oz)",
+        current: "May 20: El Monterey burritos 32 oz, $6.42 ($0.201/oz)",
+        change: -41.8,
+        read: "This is exactly the no-thought food upgrade: same emergency-food role, much better cost per ounce."
+      }
+    ];
+
+    const money = value => "$" + value.toFixed(2);
+    const pct = value => (value > 0 ? "+" : "") + value.toFixed(1) + "%";
+    const dayMs = 24 * 60 * 60 * 1000;
+    const fmtDate = iso => new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const avg = arr => arr.reduce((sum, value) => sum + value, 0) / arr.length;
+
+    function svgEl(name, attrs = {}, text) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", name);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+      if (text !== undefined) el.textContent = text;
+      return el;
+    }
+
+    function clear(svg) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+    }
+
+    function getSize(svg) {
+      const rect = svg.getBoundingClientRect();
+      return { width: Math.max(320, rect.width), height: Math.max(220, rect.height) };
+    }
+
+    function renderOrdersChart() {
+      const svg = document.getElementById("ordersChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const margin = { top: 24, right: 18, bottom: 52, left: 48 };
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const maxTotal = Math.max(...orders.map(d => d.total)) * 1.15;
+      const barW = plotW / orders.length * 0.62;
+      const gaps = orders.map((order, i) => i === 0 ? null : Math.round((new Date(order.date) - new Date(orders[i - 1].date)) / dayMs));
+
+      svg.appendChild(svgEl("text", { x: margin.left, y: 16, class: "chart-title" }, "Order total bars, gap labels in days"));
+      [0, 50, 100, 150].forEach(tick => {
+        const y = margin.top + plotH - (tick / maxTotal) * plotH;
+        svg.appendChild(svgEl("line", { x1: margin.left, x2: width - margin.right, y1: y, y2: y, stroke: "#e8e1d6", "stroke-width": 1 }));
+        svg.appendChild(svgEl("text", { x: 8, y: y + 4, class: "chart-label" }, "$" + tick));
+      });
+
+      orders.forEach((order, i) => {
+        const x = margin.left + (i + 0.19) * (plotW / orders.length);
+        const h = (order.total / maxTotal) * plotH;
+        const y = margin.top + plotH - h;
+        const color = order.current ? "#1f8a70" : "#315f8c";
+        svg.appendChild(svgEl("rect", { x, y, width: barW, height: h, fill: color }));
+        svg.appendChild(svgEl("text", { x: x + barW / 2, y: y - 6, "text-anchor": "middle", class: "chart-label" }, money(order.total)));
+        svg.appendChild(svgEl("text", { x: x + barW / 2, y: height - 30, "text-anchor": "middle", class: "chart-label" }, fmtDate(order.date)));
+        if (gaps[i]) {
+          svg.appendChild(svgEl("text", { x: x + barW / 2, y: height - 12, "text-anchor": "middle", class: "chart-label" }, gaps[i] + "d"));
+        }
+      });
+    }
+
+    function renderEfficiencyChart() {
+      const svg = document.getElementById("efficiencyChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const metrics = [
+        { label: "Items", old: 16, current: 22, suffix: "" },
+        { label: "Spend", old: 106.15, current: 112.19, suffix: "$" },
+        { label: "Cost/unit", old: 6.63, current: 5.10, suffix: "$", lowerBetter: true }
+      ];
+      const margin = { top: 34, right: 18, bottom: 42, left: 28 };
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const groupW = plotW / metrics.length;
+      const max = 125;
+      svg.appendChild(svgEl("text", { x: margin.left, y: 18, class: "chart-title" }, "Previous average vs current order"));
+
+      metrics.forEach((m, i) => {
+        const baseX = margin.left + i * groupW + groupW * 0.22;
+        const oldH = (m.old / max) * plotH;
+        const curH = (m.current / max) * plotH;
+        const yOld = margin.top + plotH - oldH;
+        const yCur = margin.top + plotH - curH;
+        svg.appendChild(svgEl("rect", { x: baseX, y: yOld, width: groupW * 0.18, height: oldH, fill: "#b8aa96" }));
+        svg.appendChild(svgEl("rect", { x: baseX + groupW * 0.22, y: yCur, width: groupW * 0.18, height: curH, fill: m.lowerBetter ? "#1f8a70" : "#315f8c" }));
+        const labelOld = m.suffix === "$" ? money(m.old) : m.old.toString();
+        const labelCur = m.suffix === "$" ? money(m.current) : m.current.toString();
+        svg.appendChild(svgEl("text", { x: baseX + groupW * 0.09, y: yOld - 6, "text-anchor": "middle", class: "chart-label" }, labelOld));
+        svg.appendChild(svgEl("text", { x: baseX + groupW * 0.31, y: yCur - 6, "text-anchor": "middle", class: "chart-label" }, labelCur));
+        svg.appendChild(svgEl("text", { x: baseX + groupW * 0.2, y: height - 18, "text-anchor": "middle", class: "chart-label" }, m.label));
+      });
+
+      svg.appendChild(svgEl("rect", { x: width - 140, y: 8, width: 12, height: 12, fill: "#b8aa96" }));
+      svg.appendChild(svgEl("text", { x: width - 122, y: 18, class: "chart-label" }, "Previous avg"));
+      svg.appendChild(svgEl("rect", { x: width - 140, y: 26, width: 12, height: 12, fill: "#315f8c" }));
+      svg.appendChild(svgEl("text", { x: width - 122, y: 36, class: "chart-label" }, "Current"));
+    }
+
+    function renderInflationChart() {
+      const svg = document.getElementById("inflationChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const margin = { top: 22, right: 34, bottom: 22, left: 150 };
+      const plotW = width - margin.left - margin.right;
+      const rowH = (height - margin.top - margin.bottom) / inflationCategories.length;
+      const min = -4;
+      const max = 20;
+      const zeroX = margin.left + ((0 - min) / (max - min)) * plotW;
+      const avgX = margin.left + ((2.9 - min) / (max - min)) * plotW;
+
+      svg.appendChild(svgEl("line", { x1: zeroX, x2: zeroX, y1: margin.top, y2: height - margin.bottom, stroke: "#5c554c", "stroke-width": 1 }));
+      svg.appendChild(svgEl("line", { x1: avgX, x2: avgX, y1: margin.top, y2: height - margin.bottom, stroke: "#c58b22", "stroke-width": 1, "stroke-dasharray": "4 4" }));
+      svg.appendChild(svgEl("text", { x: avgX + 4, y: margin.top - 6, class: "chart-label" }, "Food at home +2.9%"));
+
+      inflationCategories.forEach((d, i) => {
+        const y = margin.top + i * rowH + rowH * 0.18;
+        const x = margin.left + ((Math.min(0, d.value) - min) / (max - min)) * plotW;
+        const barW = Math.abs(d.value) / (max - min) * plotW;
+        const color = d.value > 2.9 ? "#bd3a2b" : d.value < 0 ? "#315f8c" : "#1f8a70";
+        svg.appendChild(svgEl("text", { x: 8, y: y + rowH * 0.52, class: "chart-label" }, d.label));
+        svg.appendChild(svgEl("rect", { x, y, width: Math.max(1, barW), height: rowH * 0.55, fill: color, opacity: d.baseline ? 0.50 : 0.92 }));
+        svg.appendChild(svgEl("text", { x: d.value >= 0 ? x + barW + 6 : x - 6, y: y + rowH * 0.42, "text-anchor": d.value >= 0 ? "start" : "end", class: "chart-label" }, pct(d.value)));
+      });
+    }
+
+    function renderRunwayChart() {
+      const svg = document.getElementById("runwayChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const scenarios = [
+        { label: "Old baseline", days: 13.25, date: "Jun 2", color: "#bd3a2b" },
+        { label: "Conservative", days: 17, date: "Jun 6", color: "#c58b22" },
+        { label: "Good", days: 21, date: "Jun 10", color: "#1f8a70" },
+        { label: "Strong", days: 24, date: "Jun 13", color: "#315f8c" }
+      ];
+      const total = 112.19;
+      const margin = { top: 24, right: 110, bottom: 36, left: 116 };
+      const plotW = width - margin.left - margin.right;
+      const rowH = (height - margin.top - margin.bottom) / scenarios.length;
+      const maxDays = 26;
+      scenarios.forEach((d, i) => {
+        const y = margin.top + i * rowH + rowH * 0.22;
+        const w = (d.days / maxDays) * plotW;
+        svg.appendChild(svgEl("text", { x: 8, y: y + rowH * 0.42, class: "chart-label" }, d.label));
+        svg.appendChild(svgEl("rect", { x: margin.left, y, width: w, height: rowH * 0.48, fill: d.color }));
+        svg.appendChild(svgEl("text", { x: margin.left + w + 8, y: y + rowH * 0.36, class: "chart-label" }, d.days + " days"));
+        svg.appendChild(svgEl("text", { x: width - margin.right + 24, y: y + rowH * 0.36, class: "chart-label" }, d.date));
+        svg.appendChild(svgEl("text", { x: width - margin.right + 24, y: y + rowH * 0.70, class: "chart-label" }, money(total / d.days) + "/day"));
+      });
+    }
+
+    function arcPath(cx, cy, rOuter, rInner, startAngle, endAngle) {
+      const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+      const p1 = [cx + rOuter * Math.cos(startAngle), cy + rOuter * Math.sin(startAngle)];
+      const p2 = [cx + rOuter * Math.cos(endAngle), cy + rOuter * Math.sin(endAngle)];
+      const p3 = [cx + rInner * Math.cos(endAngle), cy + rInner * Math.sin(endAngle)];
+      const p4 = [cx + rInner * Math.cos(startAngle), cy + rInner * Math.sin(startAngle)];
+      return `M ${p1[0]} ${p1[1]} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${p2[0]} ${p2[1]} L ${p3[0]} ${p3[1]} A ${rInner} ${rInner} 0 ${largeArc} 0 ${p4[0]} ${p4[1]} Z`;
+    }
+
+    function renderStorageChart() {
+      const svg = document.getElementById("storageChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const total = storageMix.reduce((sum, d) => sum + d.spend, 0);
+      const cx = Math.min(width * 0.34, 190);
+      const cy = height / 2;
+      const rOuter = Math.min(96, height * 0.36);
+      const rInner = rOuter * 0.58;
+      let angle = -Math.PI / 2;
+      storageMix.forEach(d => {
+        const next = angle + (d.spend / total) * Math.PI * 2;
+        svg.appendChild(svgEl("path", { d: arcPath(cx, cy, rOuter, rInner, angle, next), fill: d.color }));
+        angle = next;
+      });
+      svg.appendChild(svgEl("text", { x: cx, y: cy - 4, "text-anchor": "middle", class: "chart-title" }, money(total)));
+      svg.appendChild(svgEl("text", { x: cx, y: cy + 16, "text-anchor": "middle", class: "chart-label" }, "subtotal"));
+      storageMix.forEach((d, i) => {
+        const x = Math.max(width * 0.58, cx + rOuter + 44);
+        const y = cy - 45 + i * 34;
+        svg.appendChild(svgEl("rect", { x, y: y - 11, width: 13, height: 13, fill: d.color }));
+        svg.appendChild(svgEl("text", { x: x + 20, y, class: "chart-label" }, `${d.label}: ${money(d.spend)} (${(d.spend / total * 100).toFixed(1)}%)`));
+      });
+    }
+
+    function renderCoffeeRunwayChart() {
+      const svg = document.getElementById("coffeeRunwayChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const margin = { top: 12, right: 74, bottom: 24, left: 74 };
+      const plotW = width - margin.left - margin.right;
+      const rowH = (height - margin.top - margin.bottom) / coffeeRunway.length;
+      const maxDays = 42;
+      coffeeRunway.forEach((d, i) => {
+        const y = margin.top + i * rowH + rowH * 0.22;
+        const w = (d.days / maxDays) * plotW;
+        const color = d.days >= 28 ? "#1f8a70" : d.days >= 21 ? "#c58b22" : "#bd3a2b";
+        svg.appendChild(svgEl("text", { x: 8, y: y + rowH * 0.42, class: "chart-label" }, d.label));
+        svg.appendChild(svgEl("rect", { x: margin.left, y, width: w, height: rowH * 0.46, fill: color }));
+        svg.appendChild(svgEl("text", { x: margin.left + w + 8, y: y + rowH * 0.38, class: "chart-label" }, d.days + " days"));
+        svg.appendChild(svgEl("text", { x: margin.left, y: y + rowH * 0.82, class: "chart-label" }, d.note));
+      });
+    }
+
+    function renderPriceCheckChart() {
+      const svg = document.getElementById("priceCheckChart");
+      clear(svg);
+      const { width, height } = getSize(svg);
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      const margin = { top: 16, right: 54, bottom: 18, left: 150 };
+      const plotW = width - margin.left - margin.right;
+      const rowH = (height - margin.top - margin.bottom) / priceChecks.length;
+      const min = -70;
+      const max = 10;
+      const zeroX = margin.left + ((0 - min) / (max - min)) * plotW;
+      svg.appendChild(svgEl("line", { x1: zeroX, x2: zeroX, y1: margin.top, y2: height - margin.bottom, stroke: "#5c554c", "stroke-width": 1 }));
+      svg.appendChild(svgEl("text", { x: zeroX + 4, y: 12, class: "chart-label" }, "same unit cost"));
+      priceChecks.forEach((d, i) => {
+        const y = margin.top + i * rowH + rowH * 0.18;
+        const start = Math.min(0, d.change);
+        const x = margin.left + ((start - min) / (max - min)) * plotW;
+        const w = Math.max(2, Math.abs(d.change) / (max - min) * plotW);
+        const color = d.change > 2 ? "#bd3a2b" : d.change < -2 ? "#1f8a70" : "#315f8c";
+        svg.appendChild(svgEl("text", { x: 8, y: y + rowH * 0.42, class: "chart-label" }, d.label));
+        svg.appendChild(svgEl("rect", { x, y, width: w, height: rowH * 0.52, fill: color }));
+        svg.appendChild(svgEl("text", { x: d.change >= 0 ? x + w + 6 : x - 6, y: y + rowH * 0.39, "text-anchor": d.change >= 0 ? "start" : "end", class: "chart-label" }, pct(d.change)));
+      });
+    }
+
+    function renderPriceCheckRows() {
+      const body = document.getElementById("priceCheckRows");
+      body.innerHTML = "";
+      priceChecks.forEach(d => {
+        const tr = document.createElement("tr");
+        const className = d.change > 2 ? "hot" : d.change < -2 ? "good" : "cool";
+        tr.innerHTML = `
+          <td>${d.label}</td>
+          <td>${d.type}</td>
+          <td>${d.earlier}</td>
+          <td>${d.current}</td>
+          <td class="num"><span class="pill ${className}">${pct(d.change)}</span></td>
+          <td>${d.read}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderRows() {
+      const body = document.getElementById("itemRows");
+      body.innerHTML = "";
+      items.forEach(d => {
+        const tr = document.createElement("tr");
+        const className = d.cpi > 2.9 ? "hot" : d.cpi < 0 ? "cool" : "good";
+        tr.innerHTML = `
+          <td>${d.item}</td>
+          <td>${d.role}</td>
+          <td>${d.storage}</td>
+          <td class="num">${d.qty}</td>
+          <td class="num">${money(d.spend)}</td>
+          <td class="num"><span class="pill ${className}">${pct(d.cpi)}</span></td>
+          <td><strong>${d.cpiLabel}:</strong> ${d.read}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderCoffeeRows() {
+      const body = document.getElementById("coffeeRows");
+      body.innerHTML = "";
+      coffeeSources.forEach(d => {
+        const tr = document.createElement("tr");
+        const className = d.perOz <= 0.612 ? "good" : d.perOz <= 0.692 ? "cool" : "hot";
+        tr.innerHTML = `
+          <td>${d.source}</td>
+          <td>${d.format}</td>
+          <td class="num">${money(d.unit)}</td>
+          <td class="num"><span class="pill ${className}">${money(d.perOz)}/oz</span></td>
+          <td>${d.read}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderHistoryRows() {
+      const body = document.getElementById("historyRows");
+      body.innerHTML = "";
+      orders.forEach((d, i) => {
+        const gap = i === 0 ? "baseline" : Math.round((new Date(d.date) - new Date(orders[i - 1].date)) / dayMs) + " days";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.current ? "<strong>" + d.date + "</strong>" : d.date}</td>
+          <td>${d.order}</td>
+          <td class="num">${d.items}</td>
+          <td class="num">${money(d.total)}</td>
+          <td class="num">${gap}</td>
+          <td class="num">${money(d.total / d.items)}</td>
+          <td>${d.signals}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderStoreRows() {
+      const body = document.getElementById("storeRows");
+      body.innerHTML = "";
+      storePurchases.forEach(d => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${d.date}</td>
+          <td class="num">${d.items}</td>
+          <td class="num">${money(d.total)}</td>
+          <td class="num">${money(d.total / d.items)}</td>
+          <td>Context only: older 2025 in-store purchase</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAll() {
+      renderOrdersChart();
+      renderEfficiencyChart();
+      renderInflationChart();
+      renderRunwayChart();
+      renderCoffeeRunwayChart();
+      renderStorageChart();
+      renderPriceCheckChart();
+      renderPriceCheckRows();
+      renderCoffeeRows();
+      renderHistoryRows();
+      renderStoreRows();
+      renderRows();
+    }
+
+    window.addEventListener("resize", renderAll);
+    renderAll();
+  </script>
+</body>
+</html>

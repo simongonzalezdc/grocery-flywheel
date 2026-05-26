@@ -1,0 +1,48 @@
+{
+  "updated_at": "2026-05-19T21:08:00-07:00",
+  "nodes": [
+    {
+      "name": "simons-mac-mini",
+      "tailscale_ip": "100.115.175.18",
+      "status": "local",
+      "os": "macOS 26.4",
+      "hardware": "Mac mini Mac16,10, Apple M4, 10 cores, 16 GB RAM",
+      "disk": "/ has 12Gi used, 69Gi available, 228Gi total reported by df",
+      "role": "orchestrator, local file ops, content pipeline control"
+    },
+    {
+      "name": "nucbox",
+      "tailscale_ip": "100.113.174.74",
+      "status": "ssh_ok",
+      "os": "Linux 6.17.0-1023-oem x86_64",
+      "hardware": "AMD RYZEN AI MAX+ 395 w/ Radeon 8060S, 32 CPUs, 86Gi RAM",
+      "disk": "/ has 591G used, 164G available, 787G total, 79% used",
+      "open_model_ports_checked": {
+        "1234_lm_studio": "closed",
+        "11434_ollama": "closed",
+        "8080_llama_server": "closed",
+        "50052_llama_rpc": "closed"
+      },
+      "role": "strong local compute node; model server not currently exposed on checked ports"
+    },
+    {
+      "name": "simons-macbook-air",
+      "tailscale_ip": "100.97.231.117",
+      "status": "tailscale_active_ssh_denied",
+      "role": "opportunistic burst/client node after auth setup"
+    },
+    {
+      "name": "simons-macbook-pro",
+      "tailscale_ip": "100.123.79.5",
+      "status": "tailscale_visible_ssh_denied",
+      "role": "cleanup target and future Apple Silicon worker after Remote Login key setup"
+    },
+    {
+      "name": "srv1542844",
+      "tailscale_ip": "100.92.68.103",
+      "status": "tailscale_active_ssh_denied_for_simon",
+      "role": "VPS/public glue; separate auth path needed"
+    }
+  ]
+}
+

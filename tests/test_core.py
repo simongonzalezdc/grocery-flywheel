@@ -1,0 +1,36 @@
+import json
+from pathlib import Path
+
+from grocery_flywheel.core import analyze_state, item_consumed_fraction
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_item_consumed_fraction_from_units():
+    item = {"units_total": 8, "units_remaining": 2}
+    assert item_consumed_fraction(item) == 0.75
+
+
+def test_item_consumed_fraction_from_remaining_fraction():
+    item = {"remaining_fraction": 0.25}
+    assert item_consumed_fraction(item) == 0.75
+
+
+def test_sample_state_produces_runway_and_preference_signal():
+    state = json.loads((ROOT / "examples" / "sample_state.json").read_text())
+    analysis = analyze_state(state)
+
+    assert analysis["consumed_value"] > 15
+    assert analysis["estimated_days_remaining"] is not None
+    assert any(pref["key"] == "avoid_diced_chicken" for pref in analysis["preferences"])
+
+
+def test_substitution_prefers_better_fit_even_when_unit_price_is_tied():
+    state = json.loads((ROOT / "examples" / "sample_state.json").read_text())
+    analysis = analyze_state(state)
+
+    top = analysis["substitutions"][0]
+    assert top["candidate"] == "Tyson grilled strips"
+    assert top["fit"] == "better"
+

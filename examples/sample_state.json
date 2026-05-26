@@ -1,0 +1,151 @@
+{
+  "as_of": "2026-05-24",
+  "order": {
+    "store": "Example Grocery",
+    "date": "2026-05-20",
+    "total": 112.19
+  },
+  "items": [
+    {
+      "name": "Bean and cheese burritos",
+      "role": "bridge_food",
+      "storage": "frozen",
+      "spend": 6.42,
+      "units_total": 8,
+      "units_remaining": 0,
+      "notes": "Immediate food. Expected to deplete first."
+    },
+    {
+      "name": "Homestyle waffles",
+      "role": "bridge_food",
+      "storage": "frozen",
+      "spend": 5.43,
+      "remaining_fraction": 0.78,
+      "notes": "Low-friction breakfast."
+    },
+    {
+      "name": "Rising crust pizza",
+      "role": "bridge_food",
+      "storage": "frozen",
+      "spend": 4.94,
+      "remaining_fraction": 0,
+      "notes": "Morale food, one per run."
+    },
+    {
+      "name": "Extra firm tofu",
+      "role": "protein",
+      "storage": "fridge",
+      "spend": 5.91,
+      "units_total": 3,
+      "units_remaining": 2.5,
+      "notes": "Cooking phase started."
+    },
+    {
+      "name": "Chocolate protein milk",
+      "role": "drink",
+      "storage": "fridge",
+      "spend": 6.49,
+      "remaining_fraction": 0.67,
+      "notes": "Required ready protein drink."
+    },
+    {
+      "name": "Grapefruit juice",
+      "role": "drink",
+      "storage": "fridge",
+      "spend": 3.47,
+      "remaining_fraction": 0.9,
+      "notes": "Interesting non-water drink."
+    },
+    {
+      "name": "Cafe Bustelo bricks",
+      "role": "coffee",
+      "storage": "shelf",
+      "spend": 13.84,
+      "units_total": 2,
+      "units_remaining": 1.9,
+      "notes": "One opened, one sealed."
+    },
+    {
+      "name": "Calrose rice 20 lb",
+      "role": "pantry_base",
+      "storage": "shelf",
+      "spend": 19.8,
+      "remaining_fraction": 1,
+      "notes": "Bulk runway extender."
+    },
+    {
+      "name": "Dry lentils",
+      "role": "pantry_base",
+      "storage": "shelf",
+      "spend": 2.97,
+      "remaining_fraction": 1,
+      "notes": "Fast legume, no soak."
+    },
+    {
+      "name": "Dry garbanzo beans",
+      "role": "pantry_base",
+      "storage": "shelf",
+      "spend": 1.98,
+      "remaining_fraction": 1,
+      "notes": "Preferred staple."
+    },
+    {
+      "name": "Pasta sauce and pesto",
+      "role": "flavor_unlock",
+      "storage": "shelf",
+      "spend": 7.02,
+      "remaining_fraction": 1,
+      "notes": "Friction reducer for pantry meals."
+    }
+  ],
+  "pulses": [
+    {
+      "date": "2026-05-21",
+      "text": "2 burritos, 4 waffles, 1/8 cheese eaten; one coffee brick opened."
+    },
+    {
+      "date": "2026-05-23",
+      "text": "1 burrito left, pizza eaten, cereal and milk 2/3 full."
+    },
+    {
+      "date": "2026-05-24",
+      "text": "Burritos finished, tofu half eaten."
+    }
+  ],
+  "preferences": [
+    {
+      "key": "avoid_diced_chicken",
+      "signal": "Diced microwave chicken was rejected.",
+      "rule": "Prefer strips, fillets, or whole pieces."
+    },
+    {
+      "key": "bridge_first",
+      "signal": "Bridge foods are normally exhausted before cooking starts.",
+      "rule": "Model bridge-first depletion as expected, not failure."
+    },
+    {
+      "key": "dry_legumes_ok",
+      "signal": "Overnight soaking is viable.",
+      "rule": "Prefer dry beans and lentils over cans unless emergency food is needed."
+    }
+  ],
+  "substitutions": [
+    {
+      "current": "Tyson diced chicken",
+      "candidate": "Tyson grilled strips",
+      "current_unit_price": 0.45,
+      "candidate_unit_price": 0.454,
+      "fit": "better",
+      "read": "Same price tier, better form factor."
+    },
+    {
+      "current": "Cafe Bustelo from grocery store",
+      "candidate": "Cafe Bustelo bulk or alternate retailer",
+      "current_unit_price": 0.692,
+      "candidate_unit_price": 0.596,
+      "fit": "better_if_storage_ok",
+      "read": "Coffee may be a cross-store optimization."
+    }
+  ]
+}
+
