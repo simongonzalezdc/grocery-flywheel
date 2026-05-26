@@ -6,6 +6,20 @@
   },
   "acquisition_channel": "retailer_history_import",
   "retailer_profiles": ["generic.browser_retailer"],
+  "dietary_profiles": [
+    {
+      "profile_id": "household-default",
+      "label": "Household default",
+      "restrictions": [
+        {
+          "type": "user_defined_avoid",
+          "value": "example disliked ingredient",
+          "safety_tier": "preference",
+          "behavior": "warn"
+        }
+      ]
+    }
+  ],
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",

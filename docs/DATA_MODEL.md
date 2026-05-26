@@ -20,6 +20,7 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
   "items": [],
   "pulses": [],
   "preferences": [],
+  "dietary_profiles": [],
   "substitutions": [],
   "sourcing_research": [],
   "retailer_profiles": []
@@ -87,6 +88,31 @@ Known channels:
   "rule": "Prefer strips, fillets, or whole pieces."
 }
 ```
+
+## Dietary Profile
+
+```json
+{
+  "profile_id": "household-default",
+  "label": "Household default",
+  "restrictions": [
+    {
+      "type": "food_allergy",
+      "value": "peanuts",
+      "safety_tier": "safety_critical",
+      "behavior": "block_until_review"
+    },
+    {
+      "type": "lifestyle",
+      "value": "vegetarian",
+      "safety_tier": "strong_preference",
+      "behavior": "warn"
+    }
+  ]
+}
+```
+
+Dietary profiles are optional and explicit. Allergies are one type of dietary restriction, not the top-level module. Safety-critical restrictions default to `needs review` when product data is missing or ambiguous.
 
 ## Substitution
 

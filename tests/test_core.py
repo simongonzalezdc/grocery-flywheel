@@ -32,6 +32,7 @@ def test_sample_state_produces_runway_and_preference_signal():
     assert analysis["inventory_surface"]["type"] == "personal_grocery"
     assert any(item["role"] == "critical_household_essential" for item in analysis["items"])
     assert any(row["item"] == "Dish soap" for row in analysis["sourcing_research"])
+    assert analysis["dietary_profiles"][0]["profile_id"] == "household-default"
     assert any(pref["key"] == "avoid_diced_chicken" for pref in analysis["preferences"])
 
 

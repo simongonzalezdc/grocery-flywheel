@@ -45,7 +45,7 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 12. Support a sourcing research stage for selected recurring or overpriced items.
 13. Support generic retailer adapter profiles and capability detection.
 14. Maintain privacy/security baseline suitable for hosted testers.
-15. Support allergy-safe cart scanning as an adjacent safety module.
+15. Support dietary restrictions optimization, with allergy-safe cart scanning as a safety-critical subset.
 
 ## Non-Goals
 
@@ -95,9 +95,9 @@ As a user, I can see when an item is worth buying online, at a warehouse store, 
 
 As a user, I can add or configure a retailer the product does not know yet by mapping its purchase history, prices, and available capabilities into the common adapter contract.
 
-### Job 10: Avoid Allergy Risks
+### Job 10: Respect Dietary Restrictions
 
-As a user with allergy constraints, I can flag allergens and see cart/product warnings before accepting substitutions or checkout plans.
+As a user with dietary constraints, I can choose presets or custom restrictions and see cart/product warnings before accepting substitutions or checkout plans.
 
 ## Acceptance Criteria
 
@@ -114,4 +114,4 @@ As a user with allergy constraints, I can flag allergens and see cart/product wa
 - Sourcing alternatives appear in the data model and dashboard.
 - Retailer adapter profiles can be validated and ranked for import usefulness.
 - The decision register exists and maps user answers to product choices.
-- Privacy/security and allergy safety baselines are documented.
+- Privacy/security and dietary restriction safety baselines are documented.

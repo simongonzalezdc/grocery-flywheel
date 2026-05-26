@@ -5,7 +5,7 @@ This is the default trust posture for Grocery Flywheel as of May 2026. It is pro
 ## Core Requirements
 
 1. Collect only what is needed for the current user-visible purpose.
-2. Keep purchase history, household inventory, allergy profiles, and retailer sessions private by default.
+2. Keep purchase history, household inventory, dietary profiles, allergy profiles, and retailer sessions private by default.
 3. Do not store retailer passwords.
 4. Encrypt hosted user data at rest and in transit.
 5. Keep local mode available for private use.
@@ -22,7 +22,8 @@ This is the default trust posture for Grocery Flywheel as of May 2026. It is pro
 | Retailer account/session | High | Session-scoped, no password storage, revoke/clear controls |
 | Purchase history | High | Local-first, encrypted in hosted mode, export/delete |
 | Household inventory | High | Local-first, minimize sharing |
-| Allergy profile | Very high | Explicit opt-in, strong warnings, never used for ads |
+| Dietary profile | High | Explicit opt-in, never used for ads |
+| Allergy or safety-critical dietary profile | Very high | Explicit opt-in, strong warnings, never used for ads |
 | Cart draft | Medium/high | User-visible, approval-gated |
 | Correction telemetry | Medium | Consent-based, delete/export with account |
 | Aggregated product analytics | Lower | De-identify where possible, document clearly |
@@ -55,4 +56,3 @@ This is the default trust posture for Grocery Flywheel as of May 2026. It is pro
 - NIST Privacy Framework: https://www.nist.gov/privacy-framework
 - Apple App Review privacy guidance: https://developer.apple.com/app-store/review/guidelines/
 - OWASP ASVS: https://github.com/OWASP/ASVS
-

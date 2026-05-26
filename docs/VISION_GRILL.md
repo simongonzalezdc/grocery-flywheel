@@ -48,6 +48,8 @@ Current recommendation: primary surface should be a guided setup plus command ce
 
 User update: first wow result is estimated savings and sourcing alternatives. Restock draft and stockout prevention matter later, but are not the opening wow.
 
+User correction: the allergy module should be a broader dietary restrictions optimization path. Allergies are one safety-critical subset, alongside other presets and custom dietary constraints.
+
 ### 4. Data Source Strategy
 
 Should the MVP use manual entry, receipt imports, browser-assisted grocery history, or direct integrations?

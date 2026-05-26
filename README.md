@@ -42,7 +42,7 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 - `docs/WORKFLOW_SPEC.md` - operating loop and state transitions.
 - `docs/DATA_MODEL.md` - JSON state contract.
 - `docs/PRIVACY_SECURITY_BASELINE.md` - enterprise-grade privacy/security defaults.
-- `docs/ALLERGY_SAFETY_MODULE.md` - allergy-safe cart scanning module.
+- `docs/DIETARY_RESTRICTIONS_MODULE.md` - dietary restrictions optimization path, with allergies as a safety-critical subset.
 - `docs/META_PATTERNS.md` - reusable product patterns extracted from the grocery workflow.
 - `docs/EXPANSION_USE_CASES.md` - restaurant, office, lab, household, and other restocking markets.
 - `docs/ONBOARDING.md` - first-run flows for users with or without purchase history.

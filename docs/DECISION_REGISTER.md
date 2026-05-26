@@ -36,7 +36,7 @@ This register maps the user's answer dump onto the earlier product questions. Wh
 | P1-11 | Usage cadence | Mostly before shopping; optional daily/weekly depletion pulses; feedback always available when trying products. | Resolved |
 | P1-12 | Product feel | Calm, helpful, accessible, extremely easy to read. Designed for neurodivergent needs without labeling it that way. | Resolved |
 | P1-13 | Opinionated vs configurable | Product is opinionated in workflow but user-configurable in optimization objective. | Resolved |
-| P1-14 | Optimization target | User chooses: lowest cost, lowest decision fatigue, best quality, fewer trips, balanced ROI, allergy-safe, or custom. | Resolved |
+| P1-14 | Optimization target | User chooses: lowest cost, lowest decision fatigue, best quality, fewer trips, balanced ROI, dietary restrictions, allergy-safe, or custom. | Resolved |
 | P1-15 | Beautiful means | Premium, cozy, editorial, clean, high-quality, almost black/Apple-like but warmer and more useful. | Resolved |
 
 ## P1 Retailer Adapter System
@@ -57,7 +57,7 @@ This register maps the user's answer dump onto the earlier product questions. Wh
 | P1-22 | Enough history | 3+ months preferred, 3 orders acceptable, 1 order allowed with low confidence. | Defaulted |
 | P1-23 | Learning method | Explicit corrections are high confidence. Repeated behavior can be inferred but should remain lower confidence until confirmed. | Defaulted |
 | P1-24 | Food/non-food model | Shared replenishment core with role/category modules for food, household consumables, pet supplies, operator supplies, allergies, etc. | Resolved |
-| P1-25 | Nutrition/protein | Do not make nutrition a default product promise. Support optional user goals. Prioritize allergy/safety flags over health advice. | Defaulted |
+| P1-25 | Nutrition/protein | Do not make nutrition a default product promise. Support optional dietary restriction and nutrition goals. Prioritize safety-critical restrictions, including allergies, over general health advice. | Defaulted |
 | P1-26 | Price history | Track same-SKU price history, personal price history, and current unit economics separately. | Defaulted |
 | P1-27 | Confidence | Show confidence and evidence. Low-confidence outputs are allowed if clearly labeled and useful. | Defaulted |
 
@@ -78,7 +78,7 @@ This register maps the user's answer dump onto the earlier product questions. Wh
 | P2-33 | Scope timing | Build for the user first, but aim immediately at other personal household users/testers. | Resolved |
 | P2-34 | Business shape | Likely open-source toolkit plus paid hosted app and/or implementation services. Keep options open. | Inferred |
 | P2-35 | Public/private split | Eventually public core plus private examples is plausible. Current repo stays private until explicit permission. | Resolved |
-| P2-36 | First paid use case | Household grocery savings is first. Allergy-safe cart scanning is a strong adjacent paid/safety module. | Resolved |
+| P2-36 | First paid use case | Household grocery savings is first. Dietary restrictions optimization is a strong adjacent paid/safety path, with allergy-safe cart scanning as a subset. | Resolved |
 
 ## P2 Trust, Safety, UX
 
@@ -87,8 +87,8 @@ This register maps the user's answer dump onto the earlier product questions. Wh
 | P2-37 | Delete history | Yes. Self-serve export and delete are required. | Defaulted |
 | P2-38 | Evidence | Yes. Use progressive disclosure: summary first, evidence drawer when wanted. | Defaulted |
 | P2-39 | AI labels | Yes. Label AI-generated recommendations and show evidence/provenance. | Defaulted |
-| P2-40 | Correction chips | Include: never again, buy elsewhere, emergency only, good default, wrong size, wrong format, too expensive, allergy risk, bad quality, too much friction. | Defaulted |
-| P2-41 | Worst failure | Priority: allergy/unsafe item, unauthorized checkout, wrong item/cart mutation, wrong price, missed critical stockout, too many questions. | Defaulted |
+| P2-40 | Correction chips | Include: never again, buy elsewhere, emergency only, good default, wrong size, wrong format, too expensive, dietary conflict, allergy risk, bad quality, too much friction. | Defaulted |
+| P2-41 | Worst failure | Priority: safety-critical dietary/allergy conflict, unauthorized checkout, wrong item/cart mutation, wrong price, missed critical stockout, too many questions. | Defaulted |
 
 ## Remaining Taste Decisions
 
@@ -96,7 +96,6 @@ These do not block the next prototype, but they should be revisited after seeing
 
 1. Exact visual style: premium black editorial vs warmer household command center.
 2. Hosted app business model: hosted subscription, implementation service, or open-core hybrid.
-3. Allergy module depth: label scanner only, cart-level blocker, or household profile system.
+3. Dietary restrictions module depth: label scanner only, cart-level blocker, or household profile system.
 4. In-person shopping mode: checklist, aisle route, or store-agnostic run sheet.
 5. How much automation users trust before they want to inspect every step.
-

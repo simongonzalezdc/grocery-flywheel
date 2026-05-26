@@ -104,6 +104,10 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         <h2>Preference Signals</h2>
         {render_preferences(analysis['preferences'])}
       </article>
+      <article class="panel span-6">
+        <h2>Dietary Restrictions</h2>
+        {render_dietary_profiles(analysis['dietary_profiles'])}
+      </article>
       <article class="panel span-12">
         <h2>Items</h2>
         {render_items(analysis['items'])}
@@ -154,6 +158,22 @@ def render_preferences(rows: list[dict[str, Any]]) -> str:
         f"<p><strong>{escape(row['key'])}</strong><br>{escape(row['signal'])}<br><span class='muted'>{escape(row['rule'])}</span></p>"
         for row in rows
     )
+
+
+def render_dietary_profiles(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "<p class='muted'>No dietary restriction profile configured.</p>"
+    blocks = []
+    for profile in rows:
+        restrictions = profile.get("restrictions", [])
+        chips = "".join(
+            f"<span class='tag'>{escape(item.get('value', ''))}: {escape(item.get('behavior', 'review'))}</span>"
+            for item in restrictions
+        )
+        blocks.append(
+            f"<p><strong>{escape(profile.get('label', 'Dietary profile'))}</strong><br>{chips}</p>"
+        )
+    return "".join(blocks)
 
 
 def render_substitutions(rows: list[dict[str, Any]]) -> str:
