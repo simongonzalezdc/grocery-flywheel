@@ -38,6 +38,12 @@ Is the product's main output a dashboard, a next-cart draft, or an always-on ass
 
 Recommended answer: the assistant loop is the product, the dashboard is the proof surface, and the next-cart draft is the high-ROI action.
 
+User answer: product surface is not decided yet. It must be easy to set up, beautiful, human-readable, and useful immediately.
+
+Research update: add a sourcing research stage so the product can recommend alternative places to buy specific items, including online, warehouse, specialty, restaurant supply, or other store types.
+
+Current recommendation: primary surface should be a guided setup plus command center dashboard plus assistant loop, not a pure dashboard or pure chat interface.
+
 ### 4. Data Source Strategy
 
 Should the MVP use manual entry, receipt imports, browser-assisted grocery history, or direct integrations?
@@ -68,5 +74,7 @@ Recommended answer: first private tool, then consulting/productized workflow, th
 - First expansion persona.
 - Automation boundary.
 - First data source.
+- Primary product surface.
+- Sourcing research stage boundaries.
 - Whether private source snapshots stay in repo long-term.
 - Whether the dashboard is static HTML, local app, or hosted app.

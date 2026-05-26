@@ -20,7 +20,8 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
   "items": [],
   "pulses": [],
   "preferences": [],
-  "substitutions": []
+  "substitutions": [],
+  "sourcing_research": []
 }
 ```
 
@@ -97,3 +98,25 @@ Known channels:
   "read": "Same price tier, better form factor."
 }
 ```
+
+## Sourcing Research
+
+```json
+{
+  "item": "Dish soap",
+  "current_source": "Default grocery store",
+  "current_unit_price": 0.19,
+  "recommendation": "Research warehouse or online refill options.",
+  "alternatives": [
+    {
+      "source": "Warehouse store",
+      "unit_price": 0.12,
+      "constraints": ["membership", "storage"],
+      "confidence": "low",
+      "checked_date": "2026-05-25"
+    }
+  ]
+}
+```
+
+Use sourcing research only when it is likely to change behavior. The product should not make the user compare ten stores for every item.

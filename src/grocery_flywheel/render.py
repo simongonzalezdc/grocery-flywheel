@@ -113,6 +113,10 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         {render_substitutions(analysis['substitutions'])}
       </article>
       <article class="panel span-6">
+        <h2>Sourcing Research</h2>
+        {render_sourcing(analysis['sourcing_research'])}
+      </article>
+      <article class="panel span-12">
         <h2>Recent Pulses</h2>
         {render_pulses(analysis['pulses'])}
       </article>
@@ -162,6 +166,21 @@ def render_substitutions(rows: list[dict[str, Any]]) -> str:
         for row in rows
     )
     return f"<table><thead><tr><th>Candidate</th><th>Replaces</th><th>Unit</th><th>Fit</th><th>Read</th></tr></thead><tbody>{body}</tbody></table>"
+
+
+def render_sourcing(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "<p class='muted'>No sourcing research yet.</p>"
+    body = []
+    for row in rows:
+        alternatives = row.get("alternatives", [])
+        best = alternatives[0] if alternatives else {}
+        body.append(
+            f"<tr><td>{escape(row['item'])}</td><td>{escape(row.get('current_source', ''))}</td>"
+            f"<td>{escape(best.get('source', ''))}</td><td>${float(best.get('unit_price', 0)):.3f}</td>"
+            f"<td>{escape(best.get('savings', ''))}</td><td>{escape(row.get('recommendation', ''))}</td></tr>"
+        )
+    return "<table><thead><tr><th>Item</th><th>Current</th><th>Best alternative</th><th>Unit</th><th>Savings</th><th>Read</th></tr></thead><tbody>" + "".join(body) + "</tbody></table>"
 
 
 def render_pulses(rows: list[dict[str, Any]]) -> str:

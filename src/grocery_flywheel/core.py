@@ -91,6 +91,7 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
         "role_summary": summarize_roles(role_spend, role_consumed),
         "preferences": state.get("preferences", []),
         "substitutions": substitutions,
+        "sourcing_research": state.get("sourcing_research", []),
         "pulses": state.get("pulses", []),
     }
 

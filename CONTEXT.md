@@ -84,6 +84,10 @@ A multi-person or business restocking workflow, such as restaurant mise en place
 
 A reusable product mechanic extracted from the grocery module, such as runway, depletion pulses, preference signals, substitution graphs, friction budgets, and approval-first actions.
 
+### Sourcing Research
+
+A stage that evaluates whether selected items should be bought from a different source than the default grocery run, such as online, warehouse, specialty, restaurant supply, ethnic market, or office supplier.
+
 ## Current Product Language
 
-Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.
+Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", "sourcing research", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.

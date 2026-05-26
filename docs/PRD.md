@@ -15,6 +15,7 @@ The user does not need another static shopping list. The user needs a system tha
 - Preserves no-thought food as a real requirement, not a moral failure.
 - Treats cleaning supplies, paper goods, toiletries, pet supplies, and other household consumables as first-class inventory.
 - Distinguishes price wins from items that will not get used.
+- Researches whether recurring items should be bought somewhere else.
 - Reduces repeated decision work at the next grocery run.
 
 ## Target User
@@ -36,6 +37,7 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 7. Produce next-cart recommendations without submitting purchases.
 8. Support first-run onboarding when the user has no digital order history.
 9. Support in-person shopping through receipt/manual/photo-friendly state entry.
+10. Support a sourcing research stage for selected recurring or overpriced items.
 
 ## Non-Goals
 
@@ -73,6 +75,10 @@ As a user with no prior order history, I can onboard from an in-person store tri
 
 As a product builder, I can identify which grocery mechanics also apply to restaurant restocking, office supplies, and other inventory surfaces.
 
+### Job 7: Buy The Right Thing In The Right Place
+
+As a user, I can see when an item is worth buying online, at a warehouse store, at a specialty store, or from a restaurant/office supplier instead of my default grocery store.
+
 ## Acceptance Criteria
 
 - A sample state file can be rendered into a static dashboard.
@@ -84,3 +90,4 @@ As a product builder, I can identify which grocery mechanics also apply to resta
 - The docs cover in-person onboarding and store-agnostic acquisition channels.
 - Meta-patterns are documented separately from grocery-specific behavior.
 - Non-food household consumables are represented in the docs and sample state.
+- Sourcing alternatives appear in the data model and dashboard.

@@ -8,9 +8,10 @@
 4. Collect depletion pulses.
 5. Compute runway and risk.
 6. Record preference signals.
-7. Recommend the next stop.
-8. Render dashboard.
-9. Wait for user approval before any cart mutation or purchase.
+7. Run sourcing research for selected recurring, bulk-friendly, or suspiciously expensive items.
+8. Recommend the next stop.
+9. Render dashboard.
+10. Wait for user approval before any cart mutation or purchase.
 
 ## Acquisition Channels
 
@@ -52,8 +53,17 @@ The system can map this into structured state later. The user should not have to
 3. Treat dry legumes and bulk staples as runway extenders when the user can actually prepare them.
 4. Treat spices and sauces as high-leverage because they unlock multiple pantry-base meals.
 5. Treat critical household essentials as stockout-sensitive even when they are not expensive.
-6. Never confuse same-SKU inflation with package-size or brand substitutions.
-7. Keep checkout and live-cart changes approval-first.
+6. Research alternative sources for high-leverage items, but do not split the cart unless savings, reliability, or quality justify the extra trip.
+7. Never confuse same-SKU inflation with package-size or brand substitutions.
+8. Keep checkout and live-cart changes approval-first.
+
+## Sourcing Research Stage
+
+See `docs/SOURCING_RESEARCH_STAGE.md`.
+
+This stage asks: "Is this item worth buying somewhere else?"
+
+Candidate sources can include the current grocery store, another grocery store, a warehouse club, Target/Walmart-style retailer, online retailer, ethnic market, restaurant supply store, office supplier, or specialty store.
 
 ## Current Known Preference Rules
 

@@ -14,7 +14,8 @@ Most grocery tools optimize lists. Grocery Flywheel optimizes the replenishment 
 2. Capture tiny depletion pulses after eating.
 3. Separate preference signals from pure price math.
 4. Recommend the next cart by runway, friction, unit economics, and likelihood of actually being eaten.
-5. Render a dashboard that explains the decision instead of making the user re-decide everything.
+5. Research better sources for selected recurring items when the current store may not be the best place to buy.
+6. Render a dashboard that explains the decision instead of making the user re-decide everything.
 
 The product is local-first and approval-first. It can prepare recommendations, but it should not place orders or modify carts without explicit user approval.
 
@@ -42,6 +43,9 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 - `docs/META_PATTERNS.md` - reusable product patterns extracted from the grocery workflow.
 - `docs/EXPANSION_USE_CASES.md` - restaurant, office, lab, household, and other restocking markets.
 - `docs/ONBOARDING.md` - first-run flows for users with or without purchase history.
+- `docs/SOURCING_RESEARCH_STAGE.md` - cross-store and online sourcing logic.
+- `docs/PRODUCT_DESIGN_RESEARCH_2026.md` - May 2026 product-design research synthesis.
+- `DESIGN.md` - design source of truth.
 - `docs/VISION_GRILL.md` - interview/grilling doc for landing the full vision.
 - `docs/adr/0001-local-first-private-workflow.md` - initial architecture decision.
 - `source-material/private-brain-dump-snapshot/` - copied private source material.

@@ -171,5 +171,39 @@
       "fit": "better_if_storage_ok",
       "read": "Coffee may be a cross-store optimization."
     }
+  ],
+  "sourcing_research": [
+    {
+      "item": "Cafe Bustelo bricks",
+      "current_source": "Example Grocery",
+      "current_unit_price": 0.692,
+      "recommendation": "Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.",
+      "alternatives": [
+        {
+          "source": "Online bulk pack",
+          "unit_price": 0.596,
+          "savings": "14%",
+          "constraints": ["bulk storage", "availability changes"],
+          "confidence": "medium",
+          "checked_date": "2026-05-25"
+        }
+      ]
+    },
+    {
+      "item": "Dish soap",
+      "current_source": "Example Grocery",
+      "current_unit_price": 0.19,
+      "recommendation": "Research refill or warehouse options, but only split the trip if the savings beats the extra errand.",
+      "alternatives": [
+        {
+          "source": "Warehouse or online refill",
+          "unit_price": 0.12,
+          "savings": "37%",
+          "constraints": ["membership or shipping", "storage"],
+          "confidence": "low",
+          "checked_date": "2026-05-25"
+        }
+      ]
+    }
   ]
 }
