@@ -12,6 +12,15 @@
 8. Render dashboard.
 9. Wait for user approval before any cart mutation or purchase.
 
+## Acquisition Channels
+
+- `digital_history`: prior grocery orders or store account history.
+- `receipt_import`: paper or email receipts entered manually or parsed later.
+- `in_person_onboarding`: first store trip with no prior structured history.
+- `manual_inventory`: shelf, pantry, fridge, freezer, or stockroom scan.
+- `photo_assisted`: images used to identify items and rough quantities.
+- `operator_log`: multi-person restocking notes for restaurant, office, or studio use.
+
 ## Item Roles
 
 - `bridge_food`: immediate eating with very low decision load.
@@ -48,3 +57,6 @@ The system can map this into structured state later. The user should not have to
 - Diced microwave chicken is rejected; prefer strips, fillets, or whole pieces.
 - Bridge foods get eaten first, then cooking starts. This is expected behavior.
 
+## Generalization Rule
+
+When adding a feature, ask whether it is grocery-specific or a replenishment flywheel primitive. Keep grocery-specific language in module docs and promote reusable mechanics into `META_PATTERNS.md`.

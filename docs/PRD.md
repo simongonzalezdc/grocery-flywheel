@@ -2,7 +2,9 @@
 
 ## Product
 
-Grocery Flywheel is a local-first assistant workflow for neurodivergent-friendly grocery planning. It learns from real orders, small depletion check-ins, and explicit user corrections to produce high-ROI next-cart recommendations.
+Grocery Flywheel is a local-first assistant workflow for neurodivergent-friendly grocery planning. It learns from real orders, in-person store inputs, small depletion check-ins, and explicit user corrections to produce high-ROI next-cart recommendations.
+
+Grocery is the first module. The reusable product pattern is a replenishment flywheel for any inventory surface where the user needs restocking decisions with low cognitive overhead.
 
 ## Problem
 
@@ -20,6 +22,8 @@ Primary: one person managing groceries under variable executive function, variab
 
 Secondary: households that want a private, explainable grocery planning loop without handing purchase history to another SaaS vendor.
 
+Expansion: small operators with recurring restocking needs, such as restaurants, cafes, office kitchens, studios, labs, and event teams.
+
 ## MVP Goals
 
 1. Maintain a structured grocery state file.
@@ -29,6 +33,8 @@ Secondary: households that want a private, explainable grocery planning loop wit
 5. Compare substitutions by unit economics and preference fit.
 6. Render a readable static dashboard.
 7. Produce next-cart recommendations without submitting purchases.
+8. Support first-run onboarding when the user has no digital order history.
+9. Support in-person shopping through receipt/manual/photo-friendly state entry.
 
 ## Non-Goals
 
@@ -37,6 +43,7 @@ Secondary: households that want a private, explainable grocery planning loop wit
 - Do not give medical or dietary prescriptions.
 - Do not scrape authenticated grocery data without an explicit connector/session.
 - Do not shame bridge-food behavior.
+- Do not become a full restaurant POS, accounting, or compliance system in the MVP.
 
 ## Core Jobs
 
@@ -56,6 +63,14 @@ As a user, when I say "do not buy diced chicken again", the system remembers tha
 
 As a user, I can see why an item is recommended or rejected, including when a cheaper item loses because it adds friction or fails a preference signal.
 
+### Job 5: Start From Zero
+
+As a user with no prior order history, I can onboard from an in-person store trip, receipt, or manual shelf scan without needing perfect data.
+
+### Job 6: Generalize The Pattern
+
+As a product builder, I can identify which grocery mechanics also apply to restaurant restocking, office supplies, and other inventory surfaces.
+
 ## Acceptance Criteria
 
 - A sample state file can be rendered into a static dashboard.
@@ -64,4 +79,5 @@ As a user, I can see why an item is recommended or rejected, including when a ch
 - Same-brand substitution comparisons show unit price and fit.
 - The docs state that checkout is approval-only.
 - Tests cover consumption math and substitution ranking.
-
+- The docs cover in-person onboarding and store-agnostic acquisition channels.
+- Meta-patterns are documented separately from grocery-specific behavior.

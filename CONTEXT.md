@@ -1,6 +1,6 @@
 # Context
 
-Grocery Flywheel is a local-first grocery operating system. It turns purchase history, small consumption check-ins, and user preference corrections into lower-friction future carts.
+Grocery Flywheel is a local-first grocery operating system and the first module of a broader replenishment flywheel. It turns purchase history, small consumption check-ins, and user preference corrections into lower-friction future carts.
 
 ## Domain Terms
 
@@ -52,7 +52,30 @@ A change in package size, form factor, or preparation level, such as 5 lb rice t
 
 The system can analyze, recommend, and prepare drafts, but purchase submission and external account mutation require explicit user approval.
 
+### Replenishment Flywheel
+
+The reusable pattern behind groceries: track what exists, observe what gets used, identify what unlocks future use, recommend the next restock, and preserve corrections.
+
+### Inventory Surface
+
+Any context where stocked items are consumed and need replenishment: home groceries, restaurant pantry, office kitchen, maker lab, event supplies, or household essentials.
+
+### Acquisition Channel
+
+How inventory enters the system: digital order history, receipt import, manual entry, barcode scan, photo capture, or in-person onboarding.
+
+### Onboarding Run
+
+The first setup flow for a user with little or no structured history. It creates a starter inventory, captures constraints, and schedules early depletion pulses.
+
+### Operator Use Case
+
+A multi-person or business restocking workflow, such as restaurant mise en place, cafe supplies, office snacks, or studio consumables. Operator use cases need stronger auditability and role boundaries than personal groceries.
+
+### Meta Pattern
+
+A reusable product mechanic extracted from the grocery module, such as runway, depletion pulses, preference signals, substitution graphs, friction budgets, and approval-first actions.
+
 ## Current Product Language
 
-Use "runway", "depletion pulse", "bridge food", "pantry base", "preference signal", and "friction budget" consistently. Avoid reducing the product to a generic grocery list app.
-
+Use "runway", "depletion pulse", "bridge food", "pantry base", "preference signal", "friction budget", "acquisition channel", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app.

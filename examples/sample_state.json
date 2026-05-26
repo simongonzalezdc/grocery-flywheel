@@ -1,5 +1,10 @@
 {
   "as_of": "2026-05-24",
+  "inventory_surface": {
+    "type": "personal_grocery",
+    "label": "Home groceries"
+  },
+  "acquisition_channel": "digital_history",
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",
@@ -148,4 +153,3 @@
     }
   ]
 }
-

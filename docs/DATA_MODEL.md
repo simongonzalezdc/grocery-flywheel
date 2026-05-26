@@ -7,6 +7,11 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
 ```json
 {
   "as_of": "2026-05-24",
+  "inventory_surface": {
+    "type": "personal_grocery",
+    "label": "Home groceries"
+  },
+  "acquisition_channel": "digital_history",
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",
@@ -36,6 +41,37 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
 
 Use `units_total` and `units_remaining` when countable. Use `remaining_fraction` when the user reports a rough fullness signal such as `2/3 full`.
 
+## Inventory Surface
+
+```json
+{
+  "type": "restaurant_pantry",
+  "label": "Cafe dry storage",
+  "operators": 3
+}
+```
+
+Known surface types:
+
+- `personal_grocery`
+- `household_essentials`
+- `restaurant_pantry`
+- `office_kitchen`
+- `studio_supplies`
+- `event_inventory`
+- `custom`
+
+## Acquisition Channel
+
+Known channels:
+
+- `digital_history`
+- `receipt_import`
+- `in_person_onboarding`
+- `manual_inventory`
+- `photo_assisted`
+- `operator_log`
+
 ## Preference
 
 ```json
@@ -58,4 +94,3 @@ Use `units_total` and `units_remaining` when countable. Use `remaining_fraction`
   "read": "Same price tier, better form factor."
 }
 ```
-

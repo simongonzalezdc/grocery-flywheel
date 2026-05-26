@@ -23,6 +23,8 @@ def test_sample_state_produces_runway_and_preference_signal():
 
     assert analysis["consumed_value"] > 15
     assert analysis["estimated_days_remaining"] is not None
+    assert analysis["acquisition_channel"] == "digital_history"
+    assert analysis["inventory_surface"]["type"] == "personal_grocery"
     assert any(pref["key"] == "avoid_diced_chicken" for pref in analysis["preferences"])
 
 
@@ -33,4 +35,3 @@ def test_substitution_prefers_better_fit_even_when_unit_price_is_tied():
     top = analysis["substitutions"][0]
     assert top["candidate"] == "Tyson grilled strips"
     assert top["fit"] == "better"
-

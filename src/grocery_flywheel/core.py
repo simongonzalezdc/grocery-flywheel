@@ -79,6 +79,8 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "order": order,
         "as_of": state["as_of"],
+        "inventory_surface": state.get("inventory_surface", {}),
+        "acquisition_channel": state.get("acquisition_channel", "unknown"),
         "days_elapsed": days_elapsed,
         "items": item_rows,
         "consumed_value": round(consumed_value, 2),
@@ -122,4 +124,3 @@ def summarize_roles(
             }
         )
     return rows
-

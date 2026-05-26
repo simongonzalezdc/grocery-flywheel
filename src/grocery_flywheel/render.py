@@ -6,6 +6,9 @@ from typing import Any
 
 def render_dashboard(analysis: dict[str, Any]) -> str:
     order = analysis["order"]
+    surface = analysis.get("inventory_surface") or {}
+    surface_label = surface.get("label") or surface.get("type") or "Inventory surface"
+    acquisition_channel = analysis.get("acquisition_channel", "unknown")
     runway = (
         f"{analysis['estimated_days_remaining']} days remaining"
         if analysis["estimated_days_remaining"] is not None
@@ -75,7 +78,7 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
     <header>
       <p class="muted">Local-first grocery operations</p>
       <h1>Grocery Flywheel</h1>
-      <p>{escape(order['store'])} run from {escape(order['date'])}, analyzed as of {escape(analysis['as_of'])}.</p>
+      <p>{escape(str(surface_label))} via {escape(str(acquisition_channel))}. {escape(order['store'])} run from {escape(order['date'])}, analyzed as of {escape(analysis['as_of'])}.</p>
     </header>
     <section class="grid">
       <article class="panel span-4">
@@ -172,4 +175,3 @@ def render_pulses(rows: list[dict[str, Any]]) -> str:
 def render_bar(fraction: float) -> str:
     pct = max(0, min(100, round(float(fraction) * 100)))
     return f"<div class='bar' aria-label='{pct}% consumed'><span style='width:{pct}%'></span></div>"
-
