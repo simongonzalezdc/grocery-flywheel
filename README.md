@@ -38,8 +38,11 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 - `src/grocery_flywheel/` - small standard-library CLI and analysis engine.
 - `examples/sample_state.json` - sanitized example state based on the original workflow shape.
 - `docs/PRD.md` - product requirements and MVP boundary.
+- `docs/DECISION_REGISTER.md` - answered questions, inferred decisions, and best-practice defaults.
 - `docs/WORKFLOW_SPEC.md` - operating loop and state transitions.
 - `docs/DATA_MODEL.md` - JSON state contract.
+- `docs/PRIVACY_SECURITY_BASELINE.md` - enterprise-grade privacy/security defaults.
+- `docs/ALLERGY_SAFETY_MODULE.md` - allergy-safe cart scanning module.
 - `docs/META_PATTERNS.md` - reusable product patterns extracted from the grocery workflow.
 - `docs/EXPANSION_USE_CASES.md` - restaurant, office, lab, household, and other restocking markets.
 - `docs/ONBOARDING.md` - first-run flows for users with or without purchase history.

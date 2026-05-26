@@ -6,6 +6,8 @@ Grocery Flywheel is a local-first assistant workflow for neurodivergent-friendly
 
 Grocery is the first module. The reusable product pattern is a replenishment flywheel for any inventory surface where the user needs restocking decisions with low cognitive overhead.
 
+The first wow result is estimated savings plus sourcing alternatives. Restock drafts and stockout prevention are important, but they happen after the user sees that the product found money and better buying options.
+
 ## Problem
 
 The user does not need another static shopping list. The user needs a system that:
@@ -34,13 +36,16 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 3. Capture depletion pulses quickly.
 4. Compute known consumption value and rough runway.
 5. Compare substitutions by unit economics and preference fit.
-6. Render a readable static dashboard.
-7. Produce next-cart recommendations without submitting purchases.
-8. Make retailer purchase-history import the default first-run path.
-9. Support first-run onboarding when the user has no retailer order history.
-10. Support in-person shopping through receipt/manual/photo-friendly state entry as fallback paths.
-11. Support a sourcing research stage for selected recurring or overpriced items.
-12. Support generic retailer adapter profiles and capability detection.
+6. Estimate savings and identify sourcing alternatives.
+7. Render a readable static dashboard.
+8. Produce next-cart recommendations without submitting purchases.
+9. Make retailer purchase-history import the default first-run path.
+10. Support first-run onboarding when the user has no retailer order history.
+11. Support in-person shopping through receipt/manual/photo-friendly state entry as fallback paths.
+12. Support a sourcing research stage for selected recurring or overpriced items.
+13. Support generic retailer adapter profiles and capability detection.
+14. Maintain privacy/security baseline suitable for hosted testers.
+15. Support allergy-safe cart scanning as an adjacent safety module.
 
 ## Non-Goals
 
@@ -90,6 +95,10 @@ As a user, I can see when an item is worth buying online, at a warehouse store, 
 
 As a user, I can add or configure a retailer the product does not know yet by mapping its purchase history, prices, and available capabilities into the common adapter contract.
 
+### Job 10: Avoid Allergy Risks
+
+As a user with allergy constraints, I can flag allergens and see cart/product warnings before accepting substitutions or checkout plans.
+
 ## Acceptance Criteria
 
 - A sample state file can be rendered into a static dashboard.
@@ -104,3 +113,5 @@ As a user, I can add or configure a retailer the product does not know yet by ma
 - Non-food household consumables are represented in the docs and sample state.
 - Sourcing alternatives appear in the data model and dashboard.
 - Retailer adapter profiles can be validated and ranked for import usefulness.
+- The decision register exists and maps user answers to product choices.
+- Privacy/security and allergy safety baselines are documented.

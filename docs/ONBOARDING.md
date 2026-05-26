@@ -31,8 +31,9 @@ Flow:
 2. Detect retailer adapter capabilities.
 3. Normalize purchases into canonical order items.
 4. Classify item roles.
-5. Ask for current remaining-stock signal.
-6. Generate runway and next-cart risks.
+5. Estimate savings and sourcing alternatives.
+6. Ask for current remaining-stock signal.
+7. Generate runway and next-cart risks.
 
 ### 2. Add A Retailer
 

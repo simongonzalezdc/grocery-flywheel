@@ -2,6 +2,8 @@
 
 This doc is the interview surface for landing the full vision. It should be updated as answers become decisions.
 
+Current canonical decision state lives in `docs/DECISION_REGISTER.md`.
+
 ## Current Product Thesis
 
 Grocery Flywheel is not a grocery list or a food planner. It is a private, approval-first life-ops loop that turns purchase history and tiny depletion pulses into better future household replenishment decisions.
@@ -43,6 +45,8 @@ User answer: product surface is not decided yet. It must be easy to set up, beau
 Research update: add a sourcing research stage so the product can recommend alternative places to buy specific items, including online, warehouse, specialty, restaurant supply, or other store types.
 
 Current recommendation: primary surface should be a guided setup plus command center dashboard plus assistant loop, not a pure dashboard or pure chat interface.
+
+User update: first wow result is estimated savings and sourcing alternatives. Restock draft and stockout prevention matter later, but are not the opening wow.
 
 ### 4. Data Source Strategy
 

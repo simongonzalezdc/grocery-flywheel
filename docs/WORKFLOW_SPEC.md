@@ -13,6 +13,8 @@
 9. Render dashboard.
 10. Wait for user approval before any cart mutation or purchase.
 
+The first-run dashboard should emphasize estimated savings and sourcing alternatives before deeper restock automation.
+
 ## Retailer Adapter Loop
 
 1. Create or select retailer profile.

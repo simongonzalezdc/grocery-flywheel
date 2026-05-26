@@ -20,10 +20,11 @@ Recommended surface:
 
 1. **Start Page**: one human-readable page that says what this does, what it needs, and what the user gets in 2 minutes.
 2. **Guided Setup**: retailer history import first, fallback paths second. No perfect data required.
-3. **Command Center**: the beautiful dashboard, optimized for scanability and action.
-4. **Assistant Loop**: recurring depletion pulses and correction capture.
-5. **Restock Draft**: an explainable next-cart or next-run plan.
-6. **Sourcing Research Stage**: optional cross-store/online alternatives for selected items.
+3. **First Wow**: estimated savings and sourcing alternatives.
+4. **Command Center**: the beautiful dashboard, optimized for scanability and action.
+5. **Assistant Loop**: recurring depletion pulses and correction capture.
+6. **Restock Draft**: an explainable next-cart or next-run plan.
+7. **Sourcing Research Stage**: optional cross-store/online alternatives for selected items.
 
 This gives the user immediate value while preserving automation. The dashboard is the proof surface; the assistant loop is the habit; the restock draft is the action.
 
