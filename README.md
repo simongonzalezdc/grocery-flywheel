@@ -19,7 +19,7 @@ Most grocery tools optimize lists. Grocery Flywheel optimizes the replenishment 
 
 The product is local-first and approval-first. It can prepare recommendations, but it should not place orders or modify carts without explicit user approval.
 
-The workflow must support digital order history, receipts, manual entry, and first-time in-person store onboarding.
+The primary setup path is retailer history import because past purchases are the fastest way to get useful data. Receipt, photo, in-person, and manual entry remain fallback paths for users without account history or when retailer import fails.
 
 ## Quick Start
 

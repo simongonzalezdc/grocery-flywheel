@@ -4,7 +4,7 @@
     "type": "personal_grocery",
     "label": "Home groceries"
   },
-  "acquisition_channel": "digital_history",
+  "acquisition_channel": "retailer_history_import",
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",

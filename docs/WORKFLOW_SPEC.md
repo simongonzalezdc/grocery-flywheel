@@ -16,6 +16,7 @@
 ## Acquisition Channels
 
 - `digital_history`: prior grocery orders or store account history.
+- `retailer_history_import`: preferred first-run path using purchase history from retailer accounts.
 - `receipt_import`: paper or email receipts entered manually or parsed later.
 - `in_person_onboarding`: first store trip with no prior structured history.
 - `manual_inventory`: shelf, pantry, fridge, freezer, or stockroom scan.

@@ -23,7 +23,7 @@ def test_sample_state_produces_runway_and_preference_signal():
 
     assert analysis["consumed_value"] > 15
     assert analysis["estimated_days_remaining"] is not None
-    assert analysis["acquisition_channel"] == "digital_history"
+    assert analysis["acquisition_channel"] == "retailer_history_import"
     assert analysis["inventory_surface"]["type"] == "personal_grocery"
     assert any(item["role"] == "critical_household_essential" for item in analysis["items"])
     assert any(row["item"] == "Dish soap" for row in analysis["sourcing_research"])

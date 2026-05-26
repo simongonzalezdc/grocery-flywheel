@@ -52,7 +52,9 @@ The system should know why item A can replace item B:
 
 ## 8. Acquisition Channel Independence
 
-The flywheel should work whether data comes from a store account, paper receipt, photo, manual shelf scan, or in-person onboarding.
+The flywheel should work whether data comes from retailer history, a store account, paper receipt, photo, manual shelf scan, or in-person onboarding.
+
+Default to retailer history import when available. Use receipt and manual entry as fallback paths, not as the ideal setup experience.
 
 ## 9. Approval-First Action Boundary
 

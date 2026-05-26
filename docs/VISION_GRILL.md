@@ -48,7 +48,11 @@ Current recommendation: primary surface should be a guided setup plus command ce
 
 Should the MVP use manual entry, receipt imports, browser-assisted grocery history, or direct integrations?
 
-Recommended answer: start with manual JSON plus receipt/browser import scripts. Direct grocery integrations can come later because account automation and checkout boundaries are sensitive.
+Recommended answer: support all paths, but make retailer history import the default happy path. Receipt and manual flows are fallback paths because they produce weaker data and more user burden.
+
+User answer: all paths are needed, but retailer login/history import is the simplest and fastest way to get meaningful past-purchase data. Receipt and manual entry should not be treated as the primary path.
+
+Status: resolved. Default setup path is retailer history import; receipt/manual/photo/in-person flows remain fallbacks.
 
 ### 5. Automation Boundary
 

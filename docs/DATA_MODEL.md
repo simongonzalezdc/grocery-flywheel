@@ -11,7 +11,7 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
     "type": "personal_grocery",
     "label": "Home groceries"
   },
-  "acquisition_channel": "digital_history",
+  "acquisition_channel": "retailer_history_import",
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",
@@ -69,6 +69,7 @@ Known surface types:
 
 Known channels:
 
+- `retailer_history_import`
 - `digital_history`
 - `receipt_import`
 - `in_person_onboarding`
@@ -120,3 +121,5 @@ Known channels:
 ```
 
 Use sourcing research only when it is likely to change behavior. The product should not make the user compare ten stores for every item.
+
+`retailer_history_import` is the preferred setup path. Receipt import, photo-assisted entry, and manual inventory exist because real users sometimes lack account history, shop in person, or need a rescue path.

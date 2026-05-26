@@ -19,7 +19,7 @@ The product should not be "a dashboard" or "a chatbot" alone.
 Recommended surface:
 
 1. **Start Page**: one human-readable page that says what this does, what it needs, and what the user gets in 2 minutes.
-2. **Guided Setup**: fast import or manual start. No perfect data required.
+2. **Guided Setup**: retailer history import first, fallback paths second. No perfect data required.
 3. **Command Center**: the beautiful dashboard, optimized for scanability and action.
 4. **Assistant Loop**: recurring depletion pulses and correction capture.
 5. **Restock Draft**: an explainable next-cart or next-run plan.
@@ -31,11 +31,15 @@ This gives the user immediate value while preserving automation. The dashboard i
 
 ### 1. First Use Must Produce A Result Immediately
 
-Apple's onboarding guidance says onboarding should be fast, optional, and interactive. For this product, the first-run experience should let the user pick one of three starts:
+Apple's onboarding guidance says onboarding should be fast, optional, and interactive. For this product, the first-run experience should strongly prefer retailer purchase history because it produces the best immediate baseline.
 
-- Import order history.
-- Scan or type a receipt.
-- Start from a 10-item shelf/pantry/cabinet walkthrough.
+Ranked setup paths:
+
+1. Import retailer order history.
+2. Browser-assisted retailer import.
+3. Email receipt/order confirmation import.
+4. Paper receipt scan.
+5. 10-item shelf/pantry/cabinet walkthrough.
 
 The user should see a first dashboard even with rough data. Confidence labels can be low, but the product should not wait for perfect input.
 
@@ -46,6 +50,8 @@ Apple's data-entry guidance says to minimize manual input and use available syst
 Bad: "Fill out this schema."
 
 Good: "I found 18 items. These 4 look like household essentials. Is that right?"
+
+Better: "I found 8 months of your purchases. These are your recurring household essentials, pantry staples, and bridge foods. What is still in the house?"
 
 ### 3. Human-Readable Beats Technically Complete
 

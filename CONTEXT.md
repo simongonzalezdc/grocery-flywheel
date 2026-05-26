@@ -70,7 +70,11 @@ Any context where stocked items are consumed or used and need replenishment: hom
 
 ### Acquisition Channel
 
-How inventory enters the system: digital order history, receipt import, manual entry, barcode scan, photo capture, or in-person onboarding.
+How inventory enters the system: retailer purchase history, receipt import, manual entry, barcode scan, photo capture, or in-person onboarding.
+
+### Retailer History Import
+
+The preferred first-run acquisition channel. The user connects or exports purchase history from a retailer account so the product can build a useful baseline from repeated real purchases instead of relying on one receipt or manual entry.
 
 ### Onboarding Run
 
@@ -90,4 +94,4 @@ A stage that evaluates whether selected items should be bought from a different 
 
 ## Current Product Language
 
-Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", "sourcing research", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.
+Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", "retailer history import", "sourcing research", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.

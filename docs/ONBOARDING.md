@@ -2,20 +2,46 @@
 
 The product must work even when the user has no grocery history, shops in person, or needs non-food household replenishment.
 
+## Onboarding Principle
+
+Use retailer history import as the default path. It is the fastest way to get a meaningful baseline because it captures repeated behavior, not one random receipt.
+
+Support every path, but rank them honestly:
+
+1. Retailer history import.
+2. Browser-assisted retailer account import.
+3. Email receipt or order confirmation import.
+4. Paper receipt scan.
+5. In-person store walkthrough.
+6. Manual shelf scan.
+
+Manual and receipt flows are fallback/rescue paths, not the desired happy path.
+
 ## Onboarding Modes
 
-### 1. History Import
+### 1. Retailer History Import
 
-Best when the user has digital order history, receipts, or account access.
+Best when the user has retailer account access or exportable order history.
 
 Flow:
 
-1. Import recent purchases.
+1. Connect, export, or browser-import recent purchases.
 2. Classify item roles.
 3. Ask for current remaining-stock signal.
 4. Generate runway and next-cart risks.
 
-### 2. Receipt First
+### 2. Email Or Digital Receipt Import
+
+Best when full retailer history is unavailable but order confirmations or emailed receipts exist.
+
+Flow:
+
+1. Import receipts or order confirmations.
+2. Cluster repeated items.
+3. Ask whether this represents normal behavior or a one-off run.
+4. Generate a lower-confidence baseline.
+
+### 3. Paper Receipt Fallback
 
 Best when the user just went to a physical store.
 
@@ -26,7 +52,7 @@ Flow:
 3. Mark which items are immediate food, pantry base, flavor unlocks, cleaning supplies, paper goods, toiletries, pet supplies, or recurring essentials.
 4. Schedule depletion pulse.
 
-### 3. Store Walkthrough
+### 4. Store Walkthrough
 
 Best when the user is starting from zero.
 
@@ -39,7 +65,7 @@ Flow:
 5. Build a starter inventory map.
 6. Capture the first purchase or planned purchase.
 
-### 4. Manual Shelf Scan
+### 5. Manual Shelf Scan
 
 Best when the user has inventory but no records.
 
@@ -53,6 +79,7 @@ Flow:
 ## First-Run Questions
 
 - What inventory surface are we managing?
+- Which retailer accounts or order histories can we use?
 - How many people or service periods does it need to cover?
 - What is the budget pressure?
 - What can be cooked, cleaned, prepped, stored, or delegated?
@@ -65,6 +92,7 @@ Flow:
 The onboarding flow must support:
 
 - grocery pickup history
+- retailer account history
 - in-person grocery stores
 - cleaning, paper goods, toiletries, pet supplies, basic pharmacy, and other grocery-store categories
 - warehouse stores

@@ -35,9 +35,10 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 5. Compare substitutions by unit economics and preference fit.
 6. Render a readable static dashboard.
 7. Produce next-cart recommendations without submitting purchases.
-8. Support first-run onboarding when the user has no digital order history.
-9. Support in-person shopping through receipt/manual/photo-friendly state entry.
-10. Support a sourcing research stage for selected recurring or overpriced items.
+8. Make retailer purchase-history import the default first-run path.
+9. Support first-run onboarding when the user has no retailer order history.
+10. Support in-person shopping through receipt/manual/photo-friendly state entry as fallback paths.
+11. Support a sourcing research stage for selected recurring or overpriced items.
 
 ## Non-Goals
 
@@ -71,11 +72,15 @@ As a user, I can see why an item is recommended or rejected, including when a ch
 
 As a user with no prior order history, I can onboard from an in-person store trip, receipt, or manual shelf scan without needing perfect data.
 
-### Job 6: Generalize The Pattern
+### Job 6: Import Real History Fast
+
+As a user with retailer accounts, I can connect or export my purchase history so the product can build a useful baseline from my actual repeated purchases.
+
+### Job 7: Generalize The Pattern
 
 As a product builder, I can identify which grocery mechanics also apply to restaurant restocking, office supplies, and other inventory surfaces.
 
-### Job 7: Buy The Right Thing In The Right Place
+### Job 8: Buy The Right Thing In The Right Place
 
 As a user, I can see when an item is worth buying online, at a warehouse store, at a specialty store, or from a restaurant/office supplier instead of my default grocery store.
 
@@ -87,7 +92,8 @@ As a user, I can see when an item is worth buying online, at a warehouse store, 
 - Same-brand substitution comparisons show unit price and fit.
 - The docs state that checkout is approval-only.
 - Tests cover consumption math and substitution ranking.
-- The docs cover in-person onboarding and store-agnostic acquisition channels.
+- The docs make retailer history import the preferred first-run path.
+- The docs cover in-person onboarding and store-agnostic fallback acquisition channels.
 - Meta-patterns are documented separately from grocery-specific behavior.
 - Non-food household consumables are represented in the docs and sample state.
 - Sourcing alternatives appear in the data model and dashboard.
