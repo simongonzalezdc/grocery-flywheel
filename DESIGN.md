@@ -16,6 +16,8 @@ Use a three-part product surface:
 
 The dashboard is the proof surface. The assistant loop is the habit. The restock draft is the action.
 
+Guided setup starts with stores, not forms: "Which retailers do you use?" The product should then detect or build retailer adapter profiles and pull history where possible.
+
 ## Visual Direction
 
 Style: editorial operations dashboard.
@@ -90,6 +92,19 @@ One row of the highest-leverage actions: buy, wait, research, cook, check stock,
 
 Shows whether an item is worth buying elsewhere. It includes current source, best alternative, unit price, savings, constraints, and confidence.
 
+### Retailer Adapter Card
+
+Shows which stores are connected or configured, what each adapter can do, and where the data came from:
+
+- history import
+- price lookup
+- unit price
+- availability
+- substitutions
+- cart draft
+
+The UI should make incomplete adapters feel useful, not broken. A local market with receipt-only support can still be a valid source.
+
 ### Correction Chips
 
 One-tap ways to teach the system:
@@ -110,4 +125,3 @@ Expandable details for users who want the math.
 The interface should make the user think:
 
 "I can trust this, I can understand this, and I do not have to solve the whole grocery problem again."
-

@@ -76,6 +76,14 @@ How inventory enters the system: retailer purchase history, receipt import, manu
 
 The preferred first-run acquisition channel. The user connects or exports purchase history from a retailer account so the product can build a useful baseline from repeated real purchases instead of relying on one receipt or manual entry.
 
+### Retailer Adapter
+
+A reusable connector profile that maps a retailer's store-specific account, history, search, price, substitution, and cart behavior into Grocery Flywheel's canonical model.
+
+### Adapter Capability
+
+A specific ability exposed by a retailer adapter, such as purchase history import, product search, price lookup, unit-price normalization, availability, substitutions, or cart draft.
+
 ### Onboarding Run
 
 The first setup flow for a user with little or no structured history. It creates a starter inventory, captures constraints, and schedules early depletion pulses.
@@ -94,4 +102,4 @@ A stage that evaluates whether selected items should be bought from a different 
 
 ## Current Product Language
 
-Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", "retailer history import", "sourcing research", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.
+Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", "retailer history import", "retailer adapter", "adapter capability", "sourcing research", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.

@@ -54,6 +54,10 @@ User answer: all paths are needed, but retailer login/history import is the simp
 
 Status: resolved. Default setup path is retailer history import; receipt/manual/photo/in-person flows remain fallbacks.
 
+User correction: do not pick a single first connector as the product architecture. Retailers share common primitives, so the product needs reusable retailer adapters and user-configurable retailer profiles.
+
+Status update: retailer adapter architecture is the product decision. Individual retailers are adapter instances.
+
 ### 5. Automation Boundary
 
 What should the system be allowed to do without asking?

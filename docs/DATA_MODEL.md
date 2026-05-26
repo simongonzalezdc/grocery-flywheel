@@ -21,7 +21,8 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
   "pulses": [],
   "preferences": [],
   "substitutions": [],
-  "sourcing_research": []
+  "sourcing_research": [],
+  "retailer_profiles": []
 }
 ```
 
@@ -123,3 +124,27 @@ Known channels:
 Use sourcing research only when it is likely to change behavior. The product should not make the user compare ten stores for every item.
 
 `retailer_history_import` is the preferred setup path. Receipt import, photo-assisted entry, and manual inventory exist because real users sometimes lack account history, shop in person, or need a rescue path.
+
+## Retailer Profile
+
+Retailer profiles describe what a store adapter can do. See `docs/RETAILER_ADAPTERS.md` for the full contract.
+
+```json
+{
+  "id": "generic.browser_retailer",
+  "name": "Generic Browser Retailer",
+  "type": "grocery",
+  "channels": ["pickup", "delivery", "in_person"],
+  "acquisition_methods": ["retailer_history_import", "browser_assisted"],
+  "capabilities": {
+    "purchase_history": true,
+    "product_search": true,
+    "price_lookup": true,
+    "unit_price": true,
+    "availability": true,
+    "substitutions": true,
+    "cart_draft": true,
+    "order_submit": false
+  }
+}
+```

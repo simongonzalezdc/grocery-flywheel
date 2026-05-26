@@ -56,6 +56,21 @@ The flywheel should work whether data comes from retailer history, a store accou
 
 Default to retailer history import when available. Use receipt and manual entry as fallback paths, not as the ideal setup experience.
 
+## 11. Adapter Contract Over Hardcoded Connectors
+
+Do not build the product around one retailer at a time. Define the shared adapter contract first, then map specific retailers into it.
+
+Reusable adapter primitives:
+
+- purchase history
+- item normalization
+- unit price
+- product search
+- availability
+- substitutions
+- cart draft
+- provenance
+
 ## 9. Approval-First Action Boundary
 
 The system can recommend and prepare drafts, but purchasing and external mutations require explicit approval.

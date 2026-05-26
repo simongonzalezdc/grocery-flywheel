@@ -5,6 +5,7 @@
     "label": "Home groceries"
   },
   "acquisition_channel": "retailer_history_import",
+  "retailer_profiles": ["generic.browser_retailer"],
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",

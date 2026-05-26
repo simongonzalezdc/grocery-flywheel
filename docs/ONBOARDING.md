@@ -6,6 +6,8 @@ The product must work even when the user has no grocery history, shops in person
 
 Use retailer history import as the default path. It is the fastest way to get a meaningful baseline because it captures repeated behavior, not one random receipt.
 
+Retailer import must be adapter-based, not hardcoded to one store. The setup asks which stores the user uses, then creates retailer profiles and detects which capabilities each store supports.
+
 Support every path, but rank them honestly:
 
 1. Retailer history import.
@@ -26,11 +28,25 @@ Best when the user has retailer account access or exportable order history.
 Flow:
 
 1. Connect, export, or browser-import recent purchases.
-2. Classify item roles.
-3. Ask for current remaining-stock signal.
-4. Generate runway and next-cart risks.
+2. Detect retailer adapter capabilities.
+3. Normalize purchases into canonical order items.
+4. Classify item roles.
+5. Ask for current remaining-stock signal.
+6. Generate runway and next-cart risks.
 
-### 2. Email Or Digital Receipt Import
+### 2. Add A Retailer
+
+Best when the retailer is not prebuilt.
+
+Flow:
+
+1. Name the retailer.
+2. Choose type: grocery, warehouse, online, local market, restaurant supply, office supplier, specialty.
+3. Choose available acquisition methods.
+4. Test with one sample order, export, or receipt.
+5. Save a retailer adapter profile.
+
+### 3. Email Or Digital Receipt Import
 
 Best when full retailer history is unavailable but order confirmations or emailed receipts exist.
 
@@ -41,7 +57,7 @@ Flow:
 3. Ask whether this represents normal behavior or a one-off run.
 4. Generate a lower-confidence baseline.
 
-### 3. Paper Receipt Fallback
+### 4. Paper Receipt Fallback
 
 Best when the user just went to a physical store.
 
@@ -52,7 +68,7 @@ Flow:
 3. Mark which items are immediate food, pantry base, flavor unlocks, cleaning supplies, paper goods, toiletries, pet supplies, or recurring essentials.
 4. Schedule depletion pulse.
 
-### 4. Store Walkthrough
+### 5. Store Walkthrough
 
 Best when the user is starting from zero.
 
@@ -65,7 +81,7 @@ Flow:
 5. Build a starter inventory map.
 6. Capture the first purchase or planned purchase.
 
-### 5. Manual Shelf Scan
+### 6. Manual Shelf Scan
 
 Best when the user has inventory but no records.
 

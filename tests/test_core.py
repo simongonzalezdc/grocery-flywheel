@@ -2,6 +2,11 @@ import json
 from pathlib import Path
 
 from grocery_flywheel.core import analyze_state, item_consumed_fraction
+from grocery_flywheel.retailer_adapter import (
+    best_import_profiles,
+    capability_matrix,
+    validate_retailer_profile,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,3 +42,42 @@ def test_substitution_prefers_better_fit_even_when_unit_price_is_tied():
     top = analysis["substitutions"][0]
     assert top["candidate"] == "Tyson grilled strips"
     assert top["fit"] == "better"
+
+
+def test_retailer_profiles_validate_and_rank_import_paths():
+    profiles = json.loads((ROOT / "examples" / "retailer_profiles.json").read_text())
+
+    errors = [error for profile in profiles for error in validate_retailer_profile(profile)]
+    assert errors == []
+
+    matrix = capability_matrix(profiles)
+    assert matrix[0]["id"] == "generic.browser_retailer"
+    assert "purchase_history" in matrix[0]["enabled_capabilities"]
+
+    import_profiles = best_import_profiles(profiles)
+    assert [profile["id"] for profile in import_profiles] == [
+        "generic.browser_retailer",
+        "generic.warehouse_or_online",
+    ]
+
+
+def test_retailer_profile_rejects_order_submission_for_mvp():
+    profile = {
+        "id": "bad.submitter",
+        "name": "Bad Submitter",
+        "type": "grocery",
+        "channels": ["delivery"],
+        "acquisition_methods": ["retailer_history_import"],
+        "capabilities": {
+            "purchase_history": True,
+            "product_search": True,
+            "price_lookup": True,
+            "unit_price": True,
+            "availability": True,
+            "substitutions": True,
+            "cart_draft": True,
+            "order_submit": True,
+        },
+    }
+
+    assert "order_submit must stay false for MVP adapter profiles" in validate_retailer_profile(profile)

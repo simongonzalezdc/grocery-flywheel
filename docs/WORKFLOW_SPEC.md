@@ -13,6 +13,17 @@
 9. Render dashboard.
 10. Wait for user approval before any cart mutation or purchase.
 
+## Retailer Adapter Loop
+
+1. Create or select retailer profile.
+2. Detect adapter capabilities.
+3. Import purchase history when possible.
+4. Normalize orders and items into the canonical data model.
+5. Use search/price capabilities for sourcing research.
+6. Use cart-draft capabilities only after explicit user approval.
+
+Do not hardcode product decisions around specific retailers. Specific stores are adapter instances.
+
 ## Acquisition Channels
 
 - `digital_history`: prior grocery orders or store account history.

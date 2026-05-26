@@ -44,6 +44,7 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 - `docs/EXPANSION_USE_CASES.md` - restaurant, office, lab, household, and other restocking markets.
 - `docs/ONBOARDING.md` - first-run flows for users with or without purchase history.
 - `docs/SOURCING_RESEARCH_STAGE.md` - cross-store and online sourcing logic.
+- `docs/RETAILER_ADAPTERS.md` - reusable retailer connector architecture.
 - `docs/PRODUCT_DESIGN_RESEARCH_2026.md` - May 2026 product-design research synthesis.
 - `DESIGN.md` - design source of truth.
 - `docs/VISION_GRILL.md` - interview/grilling doc for landing the full vision.

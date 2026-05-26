@@ -16,6 +16,7 @@ The user does not need another static shopping list. The user needs a system tha
 - Treats cleaning supplies, paper goods, toiletries, pet supplies, and other household consumables as first-class inventory.
 - Distinguishes price wins from items that will not get used.
 - Researches whether recurring items should be bought somewhere else.
+- Lets users set up their own retailers through reusable adapter profiles instead of waiting for hardcoded connectors.
 - Reduces repeated decision work at the next grocery run.
 
 ## Target User
@@ -39,6 +40,7 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 9. Support first-run onboarding when the user has no retailer order history.
 10. Support in-person shopping through receipt/manual/photo-friendly state entry as fallback paths.
 11. Support a sourcing research stage for selected recurring or overpriced items.
+12. Support generic retailer adapter profiles and capability detection.
 
 ## Non-Goals
 
@@ -84,6 +86,10 @@ As a product builder, I can identify which grocery mechanics also apply to resta
 
 As a user, I can see when an item is worth buying online, at a warehouse store, at a specialty store, or from a restaurant/office supplier instead of my default grocery store.
 
+### Job 9: Add My Store
+
+As a user, I can add or configure a retailer the product does not know yet by mapping its purchase history, prices, and available capabilities into the common adapter contract.
+
 ## Acceptance Criteria
 
 - A sample state file can be rendered into a static dashboard.
@@ -97,3 +103,4 @@ As a user, I can see when an item is worth buying online, at a warehouse store, 
 - Meta-patterns are documented separately from grocery-specific behavior.
 - Non-food household consumables are represented in the docs and sample state.
 - Sourcing alternatives appear in the data model and dashboard.
+- Retailer adapter profiles can be validated and ranked for import usefulness.
