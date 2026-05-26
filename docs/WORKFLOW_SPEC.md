@@ -2,8 +2,8 @@
 
 ## Loop
 
-1. Start from a grocery run.
-2. Classify items by role: bridge food, pantry base, protein, flavor unlock, drink, coffee, or household support.
+1. Start from a grocery-store or household restocking run.
+2. Classify items by role: bridge food, pantry base, protein, flavor unlock, drink, coffee, household consumable, critical household essential, pet supply, operator consumable, or support.
 3. Record price, size, quantity, storage, and friction.
 4. Collect depletion pulses.
 5. Compute runway and risk.
@@ -29,7 +29,11 @@
 - `flavor_unlock`: spice, sauce, acid, salsa, condiment, or ingredient that makes staples edible.
 - `drink`: non-water drink or ready protein drink.
 - `coffee`: dedicated caffeine/ritual supply.
-- `support`: household or baking/pantry support.
+- `household_consumable`: recurring non-food household item such as dish soap, paper towels, detergent, toiletries, or trash bags.
+- `critical_household_essential`: non-food item whose stockout creates outsized disruption.
+- `pet_supply`: pet food, litter, medicine basics, or recurring animal-care consumables.
+- `operator_consumable`: restaurant, cafe, office, studio, lab, or event supply that is depleted through operations.
+- `support`: baking, pantry, household, or miscellaneous support.
 
 ## Depletion Pulse Shape
 
@@ -43,12 +47,13 @@ The system can map this into structured state later. The user should not have to
 
 ## Recommendation Rules
 
-1. Prefer foods that will actually be eaten over foods that only win on spreadsheet math.
+1. Prefer items that will actually be eaten or used over items that only win on spreadsheet math.
 2. Preserve bridge foods, but track their cost and depletion speed.
 3. Treat dry legumes and bulk staples as runway extenders when the user can actually prepare them.
 4. Treat spices and sauces as high-leverage because they unlock multiple pantry-base meals.
-5. Never confuse same-SKU inflation with package-size or brand substitutions.
-6. Keep checkout and live-cart changes approval-first.
+5. Treat critical household essentials as stockout-sensitive even when they are not expensive.
+6. Never confuse same-SKU inflation with package-size or brand substitutions.
+7. Keep checkout and live-cart changes approval-first.
 
 ## Current Known Preference Rules
 

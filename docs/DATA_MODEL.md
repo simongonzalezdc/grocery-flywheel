@@ -30,6 +30,7 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
 {
   "name": "Example burritos",
   "role": "bridge_food",
+  "category": "frozen_meal",
   "storage": "frozen",
   "spend": 6.42,
   "units_total": 8,
@@ -40,6 +41,8 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
 ```
 
 Use `units_total` and `units_remaining` when countable. Use `remaining_fraction` when the user reports a rough fullness signal such as `2/3 full`.
+
+Use `category` to distinguish food and non-food inventory inside the same run. Examples: `frozen_meal`, `dry_good`, `coffee`, `cleaning_supply`, `paper_good`, `toiletry`, `pet_supply`, `pharmacy_basic`, `operator_supply`.
 
 ## Inventory Surface
 

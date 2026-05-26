@@ -4,7 +4,7 @@ Status: Accepted
 
 ## Context
 
-The workflow uses sensitive purchase history, eating behavior, and preference corrections. It can produce high-leverage recommendations, but checkout automation and grocery-account mutation have real risk.
+The workflow uses sensitive purchase history, eating behavior, household usage behavior, and preference corrections. It can produce high-leverage recommendations, but checkout automation and grocery-account mutation have real risk.
 
 ## Decision
 
@@ -22,4 +22,3 @@ Grocery Flywheel starts as a local-first private workflow. It stores state in lo
 - Hosted SaaS first: rejected because privacy, auth, and checkout risk would dominate the MVP.
 - Fully manual notes only: rejected because the workflow needs repeatable calculations and rendered decision surfaces.
 - Autonomous checkout: rejected because purchase submission is irreversible enough to require explicit user approval.
-

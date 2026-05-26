@@ -1,6 +1,6 @@
 # Onboarding
 
-The product must work even when the user has no grocery history and shops in person.
+The product must work even when the user has no grocery history, shops in person, or needs non-food household replenishment.
 
 ## Onboarding Modes
 
@@ -23,7 +23,7 @@ Flow:
 
 1. Enter or scan receipt.
 2. Confirm item names and rough categories.
-3. Mark which items are immediate food, pantry base, flavor unlocks, or recurring essentials.
+3. Mark which items are immediate food, pantry base, flavor unlocks, cleaning supplies, paper goods, toiletries, pet supplies, or recurring essentials.
 4. Schedule depletion pulse.
 
 ### 3. Store Walkthrough
@@ -55,7 +55,7 @@ Flow:
 - What inventory surface are we managing?
 - How many people or service periods does it need to cover?
 - What is the budget pressure?
-- What can be cooked, prepped, stored, or delegated?
+- What can be cooked, cleaned, prepped, stored, or delegated?
 - What items must never run out?
 - What items are disliked, avoided, or not worth repeating?
 - What store types are allowed: grocery, warehouse, restaurant supply, farmers market, convenience, online?
@@ -66,10 +66,10 @@ The onboarding flow must support:
 
 - grocery pickup history
 - in-person grocery stores
+- cleaning, paper goods, toiletries, pet supplies, basic pharmacy, and other grocery-store categories
 - warehouse stores
 - small ethnic markets
 - farmers markets
 - restaurant supply stores
 - office or operator restocking
 - manual entry when no receipt exists
-

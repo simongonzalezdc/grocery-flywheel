@@ -2,7 +2,7 @@
 
 ## Product
 
-Grocery Flywheel is a local-first assistant workflow for neurodivergent-friendly grocery planning. It learns from real orders, in-person store inputs, small depletion check-ins, and explicit user corrections to produce high-ROI next-cart recommendations.
+Grocery Flywheel is a local-first assistant workflow for neurodivergent-friendly grocery-store and household replenishment. It learns from real orders, in-person store inputs, small depletion check-ins, and explicit user corrections to produce high-ROI next-cart recommendations.
 
 Grocery is the first module. The reusable product pattern is a replenishment flywheel for any inventory surface where the user needs restocking decisions with low cognitive overhead.
 
@@ -11,14 +11,15 @@ Grocery is the first module. The reusable product pattern is a replenishment fly
 The user does not need another static shopping list. The user needs a system that:
 
 - Knows what was actually bought.
-- Understands what gets eaten first versus what remains.
+- Understands what gets eaten, opened, used first, or left untouched.
 - Preserves no-thought food as a real requirement, not a moral failure.
-- Distinguishes price wins from food that will not get used.
+- Treats cleaning supplies, paper goods, toiletries, pet supplies, and other household consumables as first-class inventory.
+- Distinguishes price wins from items that will not get used.
 - Reduces repeated decision work at the next grocery run.
 
 ## Target User
 
-Primary: one person managing groceries under variable executive function, variable cooking energy, and price pressure.
+Primary: one person managing groceries and household consumables under variable executive function, variable cooking/cleaning/shopping energy, and price pressure.
 
 Secondary: households that want a private, explainable grocery planning loop without handing purchase history to another SaaS vendor.
 
@@ -27,7 +28,7 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 ## MVP Goals
 
 1. Maintain a structured grocery state file.
-2. Track grocery runs, items, roles, prices, and remaining inventory.
+2. Track grocery-store runs, household items, roles, prices, and remaining inventory.
 3. Capture depletion pulses quickly.
 4. Compute known consumption value and rough runway.
 5. Compare substitutions by unit economics and preference fit.
@@ -43,17 +44,18 @@ Expansion: small operators with recurring restocking needs, such as restaurants,
 - Do not give medical or dietary prescriptions.
 - Do not scrape authenticated grocery data without an explicit connector/session.
 - Do not shame bridge-food behavior.
+- Do not limit the product to edible items.
 - Do not become a full restaurant POS, accounting, or compliance system in the MVP.
 
 ## Core Jobs
 
 ### Job 1: Know What Is Left
 
-As a user, I can report tiny inventory signals so the system estimates what remains without requiring a full pantry audit.
+As a user, I can report tiny inventory signals so the system estimates what remains without requiring a full pantry, fridge, freezer, cabinet, or cleaning-supply audit.
 
 ### Job 2: Build a Better Next Cart
 
-As a user, I can see what should be bought next based on actual depletion, missing flavor unlocks, price per useful unit, and foods I will actually eat.
+As a user, I can see what should be bought next based on actual depletion, missing unlocks, critical household stockouts, price per useful unit, and items I will actually use.
 
 ### Job 3: Preserve Preference Corrections
 
@@ -81,3 +83,4 @@ As a product builder, I can identify which grocery mechanics also apply to resta
 - Tests cover consumption math and substitution ranking.
 - The docs cover in-person onboarding and store-agnostic acquisition channels.
 - Meta-patterns are documented separately from grocery-specific behavior.
+- Non-food household consumables are represented in the docs and sample state.

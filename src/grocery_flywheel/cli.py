@@ -10,7 +10,7 @@ from .render import render_dashboard
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Render a Grocery Flywheel dashboard.")
-    parser.add_argument("state", type=Path, help="Path to grocery state JSON.")
+    parser.add_argument("state", type=Path, help="Path to replenishment state JSON.")
     parser.add_argument("--output", "-o", type=Path, required=True, help="HTML output path.")
     args = parser.parse_args()
 
@@ -23,4 +23,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

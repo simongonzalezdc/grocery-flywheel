@@ -50,6 +50,7 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
             {
                 "name": item["name"],
                 "role": role,
+                "category": item.get("category", ""),
                 "storage": item.get("storage", ""),
                 "spend": spend,
                 "consumed_fraction": consumed_fraction,

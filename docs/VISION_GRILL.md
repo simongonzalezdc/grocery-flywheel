@@ -4,9 +4,9 @@ This doc is the interview surface for landing the full vision. It should be upda
 
 ## Current Product Thesis
 
-Grocery Flywheel is not a grocery list. It is a private, approval-first life-ops loop that turns purchase history and tiny depletion pulses into better future grocery decisions.
+Grocery Flywheel is not a grocery list or a food planner. It is a private, approval-first life-ops loop that turns purchase history and tiny depletion pulses into better future household replenishment decisions.
 
-Decision: start as a grocery module, but extract meta-patterns throughout the drill. The product should stay compatible with many grocery types, in-person shopping, and first-run users without digital purchase history.
+Decision: start as a grocery module, but define grocery as the full grocery-store and household replenishment surface, not food only. Extract meta-patterns throughout the drill. The product should stay compatible with many grocery types, cleaning supplies, household consumables, in-person shopping, and first-run users without digital purchase history.
 
 ## Open Questions
 
@@ -18,13 +18,19 @@ Recommended answer: start as a grocery product with architecture that can later 
 
 User answer: start as a grocery module, but deliberately extract reusable meta-patterns and adjacent use cases, including restaurant inventory and restocking.
 
-Status: resolved for now. Grocery is the first module; the larger abstraction is the replenishment flywheel.
+Additional user correction: this is not just food. It includes everything sold at grocery stores and everything a household needs, including cleaning supplies.
+
+Status: resolved for now. Grocery-store and household replenishment is the first module; the larger abstraction is the replenishment flywheel.
 
 ### 2. First Expansion Persona
 
 After the original personal grocery workflow, which expansion persona should shape the next layer of product decisions?
 
 Recommended answer: choose "small operator with recurring restocking pain" as the first expansion persona, especially restaurants/cafes or office kitchens. This is close enough to groceries to reuse the same mechanics, but different enough to force the product to handle multi-person inventory, in-person buying, and restock thresholds.
+
+User answer: small operator restocking is good.
+
+Status: resolved. First expansion persona is small operator restocking.
 
 ### 3. Primary Output
 

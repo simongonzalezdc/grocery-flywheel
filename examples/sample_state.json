@@ -8,12 +8,13 @@
   "order": {
     "store": "Example Grocery",
     "date": "2026-05-20",
-    "total": 112.19
+    "total": 117.18
   },
   "items": [
     {
       "name": "Bean and cheese burritos",
       "role": "bridge_food",
+      "category": "frozen_meal",
       "storage": "frozen",
       "spend": 6.42,
       "units_total": 8,
@@ -23,6 +24,7 @@
     {
       "name": "Homestyle waffles",
       "role": "bridge_food",
+      "category": "frozen_breakfast",
       "storage": "frozen",
       "spend": 5.43,
       "remaining_fraction": 0.78,
@@ -31,6 +33,7 @@
     {
       "name": "Rising crust pizza",
       "role": "bridge_food",
+      "category": "frozen_meal",
       "storage": "frozen",
       "spend": 4.94,
       "remaining_fraction": 0,
@@ -39,6 +42,7 @@
     {
       "name": "Extra firm tofu",
       "role": "protein",
+      "category": "refrigerated_protein",
       "storage": "fridge",
       "spend": 5.91,
       "units_total": 3,
@@ -48,6 +52,7 @@
     {
       "name": "Chocolate protein milk",
       "role": "drink",
+      "category": "ready_drink",
       "storage": "fridge",
       "spend": 6.49,
       "remaining_fraction": 0.67,
@@ -56,6 +61,7 @@
     {
       "name": "Grapefruit juice",
       "role": "drink",
+      "category": "ready_drink",
       "storage": "fridge",
       "spend": 3.47,
       "remaining_fraction": 0.9,
@@ -64,6 +70,7 @@
     {
       "name": "Cafe Bustelo bricks",
       "role": "coffee",
+      "category": "coffee",
       "storage": "shelf",
       "spend": 13.84,
       "units_total": 2,
@@ -73,6 +80,7 @@
     {
       "name": "Calrose rice 20 lb",
       "role": "pantry_base",
+      "category": "dry_good",
       "storage": "shelf",
       "spend": 19.8,
       "remaining_fraction": 1,
@@ -81,6 +89,7 @@
     {
       "name": "Dry lentils",
       "role": "pantry_base",
+      "category": "dry_good",
       "storage": "shelf",
       "spend": 2.97,
       "remaining_fraction": 1,
@@ -89,6 +98,7 @@
     {
       "name": "Dry garbanzo beans",
       "role": "pantry_base",
+      "category": "dry_good",
       "storage": "shelf",
       "spend": 1.98,
       "remaining_fraction": 1,
@@ -97,10 +107,20 @@
     {
       "name": "Pasta sauce and pesto",
       "role": "flavor_unlock",
+      "category": "sauce",
       "storage": "shelf",
       "spend": 7.02,
       "remaining_fraction": 1,
       "notes": "Friction reducer for pantry meals."
+    },
+    {
+      "name": "Dish soap",
+      "role": "critical_household_essential",
+      "category": "cleaning_supply",
+      "storage": "under_sink",
+      "spend": 4.99,
+      "remaining_fraction": 0.5,
+      "notes": "Non-food household consumable; stockout creates cleanup friction."
     }
   ],
   "pulses": [
@@ -114,7 +134,7 @@
     },
     {
       "date": "2026-05-24",
-      "text": "Burritos finished, tofu half eaten."
+      "text": "Burritos finished, tofu half eaten, dish soap about half full."
     }
   ],
   "preferences": [

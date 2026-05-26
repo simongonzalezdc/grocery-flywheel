@@ -6,7 +6,7 @@ These are the reusable mechanics being extracted from the grocery module.
 
 Observe inventory, track usage, preserve corrections, recommend the next restock, and repeat.
 
-This applies to groceries, restaurant pantry, office kitchens, maker supplies, household essentials, and event inventory.
+This applies to groceries, cleaning supplies, toiletries, restaurant pantry, office kitchens, maker supplies, household essentials, and event inventory.
 
 ## 2. Runway Over Stock Count
 
@@ -31,11 +31,11 @@ Restocking decisions must account for the effort needed to use the item. A cheap
 
 ## 5. Preference Signals Beat Naive Price Math
 
-If the user rejects diced chicken, diced chicken stops being the default even if it is cheaper. This generalizes to brand, texture, package size, prep format, storage, and workflow fit.
+If the user rejects diced chicken, diced chicken stops being the default even if it is cheaper. If a detergent scent is disliked, that detergent stops being the default even if the price is strong. This generalizes to brand, texture, scent, package size, prep format, storage, and workflow fit.
 
 ## 6. Bridge Inventory
 
-Some inventory exists to prevent failure states. In groceries this is immediate food. In restaurants it might be emergency prep or backup disposables. In offices it might be reliable coffee or snacks.
+Some inventory exists to prevent failure states. In groceries this is immediate food. In households it is toilet paper, dish soap, laundry detergent, trash bags, pet food, or medicine basics. In restaurants it might be emergency prep or backup disposables. In offices it might be reliable coffee or snacks.
 
 Bridge inventory is not wasteful by default; it needs its own ROI model.
 
@@ -61,4 +61,3 @@ The system can recommend and prepare drafts, but purchasing and external mutatio
 ## 10. Explainable Recommendations
 
 Every recommendation should show the reason: price, runway, preference, friction, quality, or missing unlock.
-

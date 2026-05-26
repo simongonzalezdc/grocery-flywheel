@@ -76,7 +76,7 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
 <body>
   <main>
     <header>
-      <p class="muted">Local-first grocery operations</p>
+      <p class="muted">Local-first household replenishment</p>
       <h1>Grocery Flywheel</h1>
       <p>{escape(str(surface_label))} via {escape(str(acquisition_channel))}. {escape(order['store'])} run from {escape(order['date'])}, analyzed as of {escape(analysis['as_of'])}.</p>
     </header>
@@ -135,11 +135,12 @@ def render_role_table(rows: list[dict[str, Any]]) -> str:
 def render_items(rows: list[dict[str, Any]]) -> str:
     body = "\n".join(
         f"<tr><td>{escape(row['name'])}</td><td>{escape(row['role'])}</td>"
+        f"<td>{escape(row.get('category', ''))}</td>"
         f"<td>${row['spend']:.2f}</td><td>{row['consumed_fraction'] * 100:.0f}%</td>"
         f"<td>{escape(row['notes'])}</td></tr>"
         for row in rows
     )
-    return f"<table><thead><tr><th>Item</th><th>Role</th><th>Spend</th><th>Consumed</th><th>Notes</th></tr></thead><tbody>{body}</tbody></table>"
+    return f"<table><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Spend</th><th>Consumed</th><th>Notes</th></tr></thead><tbody>{body}</tbody></table>"
 
 
 def render_preferences(rows: list[dict[str, Any]]) -> str:

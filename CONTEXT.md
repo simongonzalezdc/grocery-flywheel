@@ -1,12 +1,12 @@
 # Context
 
-Grocery Flywheel is a local-first grocery operating system and the first module of a broader replenishment flywheel. It turns purchase history, small consumption check-ins, and user preference corrections into lower-friction future carts.
+Grocery Flywheel is a local-first grocery-store and household replenishment system and the first module of a broader replenishment flywheel. It turns purchase history, small usage check-ins, and user preference corrections into lower-friction future carts.
 
 ## Domain Terms
 
 ### Grocery Run
 
-A completed grocery order or shopping event. A run has a date, store, total cost, and item list.
+A completed grocery-store, household, or restocking shopping event. A run has a date, store, total cost, and item list.
 
 ### Cart Draft
 
@@ -20,21 +20,29 @@ Longer-lived staples that make many meals possible: rice, dry beans, lentils, pa
 
 Immediate or near-immediate food that prevents executive-function collapse: burritos, waffles, pizza, microwave chicken, cereal, ready drinks. Bridge foods can be rational even when unit economics are weaker.
 
+### Household Consumable
+
+A recurring non-food household item sold through grocery-style restocking channels: cleaning supplies, detergent, trash bags, toilet paper, paper towels, toiletries, pet supplies, basic pharmacy, batteries, and similar essentials.
+
+### Critical Household Essential
+
+A household consumable whose stockout creates disproportionate disruption, such as toilet paper, dish soap, laundry detergent, trash bags, medication basics, or pet food.
+
 ### Runway
 
-The estimated number of days before the current grocery run stops covering the user's real eating pattern.
+The estimated number of days before the current grocery or household setup stops covering the user's real usage pattern.
 
 ### Depletion Pulse
 
-A small user report about what has been eaten or opened. A pulse should be cheap to give: "2 burritos left", "opened tofu", "coffee brick sealed".
+A small user report about what has been eaten, opened, used, or depleted. A pulse should be cheap to give: "2 burritos left", "opened tofu", "coffee brick sealed", "dish soap half full".
 
 ### Preference Signal
 
-Evidence that an item is or is not actually usable for the user. Preference signals override naive price math when they change the probability of consumption.
+Evidence that an item is or is not actually usable for the user. Preference signals override naive price math when they change the probability of consumption or use.
 
 ### Friction Budget
 
-The available cooking, cleanup, planning, and decision energy required to transform food into meals.
+The available cooking, cleanup, planning, storage, shopping, and decision energy required to transform inventory into useful outcomes.
 
 ### Unit Economics
 
@@ -58,7 +66,7 @@ The reusable pattern behind groceries: track what exists, observe what gets used
 
 ### Inventory Surface
 
-Any context where stocked items are consumed and need replenishment: home groceries, restaurant pantry, office kitchen, maker lab, event supplies, or household essentials.
+Any context where stocked items are consumed or used and need replenishment: home groceries, household essentials, restaurant pantry, office kitchen, maker lab, event supplies, or operator consumables.
 
 ### Acquisition Channel
 
@@ -70,7 +78,7 @@ The first setup flow for a user with little or no structured history. It creates
 
 ### Operator Use Case
 
-A multi-person or business restocking workflow, such as restaurant mise en place, cafe supplies, office snacks, or studio consumables. Operator use cases need stronger auditability and role boundaries than personal groceries.
+A multi-person or business restocking workflow, such as restaurant mise en place, cafe supplies, office snacks, cleaning supplies, or studio consumables. Operator use cases need stronger auditability and role boundaries than personal groceries.
 
 ### Meta Pattern
 
@@ -78,4 +86,4 @@ A reusable product mechanic extracted from the grocery module, such as runway, d
 
 ## Current Product Language
 
-Use "runway", "depletion pulse", "bridge food", "pantry base", "preference signal", "friction budget", "acquisition channel", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app.
+Use "runway", "depletion pulse", "bridge food", "pantry base", "household consumable", "critical household essential", "preference signal", "friction budget", "acquisition channel", and "replenishment flywheel" consistently. Avoid reducing the product to a generic grocery list app or a food-only planner.

@@ -4,7 +4,9 @@ Grocery Flywheel starts with personal groceries, but the mechanics point to a la
 
 ## Personal Grocery
 
-Core use case. Optimizes groceries around decision fatigue, real eating patterns, budget, pantry runway, and preference corrections.
+Core use case. Optimizes grocery-store replenishment around decision fatigue, real eating and household usage patterns, budget, pantry/cabinet runway, and preference corrections.
+
+This includes food and non-food household consumables: cleaning supplies, paper goods, toiletries, pet supplies, basic pharmacy, batteries, and other recurring items sold through grocery-style channels.
 
 ## Restaurant Or Cafe Restocking
 
@@ -72,4 +74,3 @@ Useful mechanics:
 ## Product Implication
 
 The product should not hardcode grocery assumptions into the core model. The core should speak in inventory surfaces, roles, runway, depletion pulses, substitutions, acquisition channels, and approvals. Grocery-specific labels should be a module layer.
-

@@ -1,14 +1,14 @@
 # Grocery Flywheel
 
-Local-first grocery operations for lowering decision fatigue, tracking pantry runway, and turning real purchase history into better next carts.
+Local-first grocery-store and household replenishment for lowering decision fatigue, tracking runway, and turning real purchase history into better next carts.
 
-Grocery is the first module. The broader product pattern is a replenishment flywheel: observe inventory, capture tiny usage signals, preserve preference corrections, and recommend the next restock with an approval boundary.
+Grocery is the first module, but grocery does not mean food only. It includes everything a grocery store or household restock trip can cover: food, coffee, cleaning supplies, paper goods, toiletries, pet supplies, basic pharmacy, and other recurring consumables. The broader product pattern is a replenishment flywheel: observe inventory, capture tiny usage signals, preserve preference corrections, and recommend the next restock with an approval boundary.
 
 This repo was productized from a private brain-dump workflow. The original source notes are copied under `source-material/private-brain-dump-snapshot/` for traceability. The product surface lives in `src/`, `docs/`, and `examples/`.
 
 ## Product Bet
 
-Most grocery tools optimize lists. Grocery Flywheel optimizes the loop:
+Most grocery tools optimize lists. Grocery Flywheel optimizes the replenishment loop:
 
 1. Import or record what was bought.
 2. Capture tiny depletion pulses after eating.
