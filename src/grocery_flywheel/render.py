@@ -207,7 +207,7 @@ def render_pulses(rows: list[dict[str, Any]]) -> str:
     if not rows:
         return "<p class='muted'>No pulses yet.</p>"
     return "".join(
-        f"<p><span class='tag'>{escape(row['date'])}</span>{escape(row['text'])}</p>"
+        f"<p><span class='tag'>{escape(row['date'])}</span>{escape(row.get('note',''))}</p>"
         for row in rows[-5:]
     )
 
