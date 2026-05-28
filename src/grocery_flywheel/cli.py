@@ -157,10 +157,13 @@ def cmd_checkin(args) -> None:
     state = load(args)
     note = getattr(args, "quick", None)
     if not note:
-        prompt = "Check-in. Describe changes.\n> "
-        note = input(prompt).strip()
+        note = input("Check-in. Describe changes.\n> ").strip()
         if not note:
             print("Aborted."); return
+    _do_checkin(args, state, note)
+
+
+def _do_checkin(args, state, note: str) -> None:
     parsed = parse_checkin_note(note, state.get("items", []))
     add_pulse(state, note, parsed)
     save(args, state)
@@ -168,7 +171,7 @@ def cmd_checkin(args) -> None:
         for p in parsed:
             print(f"    * {p['name']}")
     else:
-        print(f'  OK: "{note}"')
+        print(f"  OK: \"{note}\"")
 
 
 def cmd_order(args) -> None:
@@ -237,8 +240,69 @@ def cmd_dashboard(args) -> None:
         webbrowser.open(f"file://{out.resolve()}")
 
 
+def _briefing(state, args) -> None:
+    """Morning briefing: quick status + interactive check-in prompt."""
+    items = state.get("items", [])
+    order = state["order"]
+    order_total = float(order.get("total", 0))
+    as_of = date.fromisoformat(state["as_of"])
+    order_date = date.fromisoformat(order["date"])
+    days = max(1, (as_of - order_date).days)
+    consumed_value = sum(float(i.get("spend", 0)) * consumed_fraction(i) for i in items)
+    known_frac = consumed_value / order_total if order_total else 0
+    est_rem = None
+    if known_frac > 0:
+        est = round(days / known_frac, 1)
+        est_rem = round(max(0, est - days), 1)
+
+    print("Good morning! Here is your grocery status.")
+    print(f"  Runway: ~{est_rem}d remaining" if est_rem else "  Runway: need more data")
+
+    depleted = [i for i in items if consumed_fraction(i) >= 1.0]
+    low = [i for i in items if 0.75 <= consumed_fraction(i) < 1.0]
+    if depleted:
+        names = ", ".join(i["name"] for i in depleted)
+        print(f"  Depleted: {names}")
+    if low:
+        names = ", ".join(i["name"] for i in low)
+        print(f"  Low: {names}")
+    if not depleted and not low:
+        print("  All good.")
+
+    print()
+    print("Check-in? Type what you ate/used, or Enter to skip.")
+    print("Examples: \"2 coffees, eggo waffles\", \"none\", \"opened tofu\"")
+    note = input("> ").strip()
+    if not note:
+        print("  Skipped.")
+        return
+    _do_checkin(args, state, note)
+
+    # After check-in, refresh dashboard + log (same as monitor)
+    analysis = analyze_state(state)
+    from .render import render_dashboard
+    out = Path(getattr(args, "output", None) or "dist/dashboard.html")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render_dashboard(analysis))
+    lp = out.parent / "monitor-log.json"
+    log = json.loads(lp.read_text()) if lp.exists() else []
+    log.append({
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "alerts": [],
+        "runway": analysis.get("estimated_days_remaining"),
+    })
+    lp.write_text(json.dumps(log[-90:], indent=2))
+    print(f"  State updated. ~{analysis.get('estimated_days_remaining')}d runway.")
+
+
 def cmd_monitor(args) -> None:
     state = load(args)
+
+    # Briefing mode: short status + check-in prompt (for 9 AM fire)
+    if getattr(args, "briefing", False):
+        _briefing(state, args)
+        return
+
     analysis = analyze_state(state)
     alerts: list[str] = []
 
@@ -290,114 +354,58 @@ def cmd_monitor(args) -> None:
 def cmd_install(args) -> None:
     wf_dir = Path(__file__).resolve().parent.parent
     state_file = state_path(args)
-    label = "com.grocery-flywheel.heartbeat"
-    plist_dir = Path.home() / "Library" / "LaunchAgents"
-    plist_dir.mkdir(parents=True, exist_ok=True)
-    pl = plist_dir / f"{label}.plist"
     python_path = Path(sys.executable).resolve()
-    gf_path = Path(__file__).resolve()
-    plist_xml = f'''<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-<key>Label</key><string>{label}</string>
-<key>ProgramArguments</key><array>
-  <string>{python_path}</string>
-  <string>{gf_path}</string>
-  <string>--state</string>
-  <string>{state_file}</string>
-  <string>monitor</string>
-  <string>--quiet</string>
-</array>
-<key>WorkingDirectory</key><string>{wf_dir}</string>
-<key>StartCalendarInterval</key><array>
-  <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
-  <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>0</integer></dict>
-</array>
-<key>RunAtLoad</key><true/>
-<key>StandardOutPath</key><string>{wf_dir}/dist/hb-stdout.log</string>
-<key>StandardErrorPath</key><string>{wf_dir}/dist/hb-stderr.log</string>
-<key>EnvironmentVariables</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
-</dict>
-</plist>'''
-    pl.write_text(plist_xml)
-    subprocess.run(["launchctl", "unload", str(pl)], capture_output=True)
-    r = subprocess.run(["launchctl", "load", str(pl)], capture_output=True, text=True)
-    if r.returncode == 0:
-        print(f"  OK {label} at 9 AM + 7 PM")
-    else:
-        print(f"  FAIL: {r.stderr}")
+    plist_dir = Path.home() / 'Library' / 'LaunchAgents'
+    plist_dir.mkdir(parents=True, exist_ok=True)
+    base_args = [str(python_path), '-m', 'grocery_flywheel.cli',
+                 '--state', str(state_file), 'monitor']
+
+    def _plist_xml(label, hour, extra_args):
+        argv = base_args + extra_args
+        arg_lines = '\n'.join(f'  <string>{a}</string>' for a in argv)
+        header = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        header += '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '
+        header += '"http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n'
+        header += '<plist version="1.0">\n<dict>\n'
+        header += f'<key>Label</key><string>{label}</string>\n'
+        header += '<key>ProgramArguments</key><array>\n'
+        header += arg_lines + '\n</array>\n'
+        header += f'<key>WorkingDirectory</key><string>{wf_dir}</string>\n'
+        header += f'<key>StartCalendarInterval</key><dict>'
+        header += f'<key>Hour</key><integer>{hour}</integer>'
+        header += '<key>Minute</key><integer>0</integer></dict>\n'
+        header += '<key>RunAtLoad</key><true/>\n'
+        header += '<key>EnvironmentVariables</key><dict>\n'
+        header += f'<key>PYTHONPATH</key><string>{wf_dir}/src</string>\n'
+        header += '<key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>\n'
+        header += '</dict>\n</dict>\n</plist>\n'
+        return header
+
+    def _write_plist(label, hour, extra_args):
+        xml = _plist_xml(label, hour, extra_args)
+        pl = plist_dir / f'{label}.plist'
+        pl.write_text(xml)
+        subprocess.run(['launchctl', 'unload', str(pl)], capture_output=True)
+        r = subprocess.run(['launchctl', 'load', str(pl)], capture_output=True, text=True)
+        return r.returncode == 0, r.stderr
+
+    m_ok, m_err = _write_plist('com.grocery-flywheel.morning', 9, ['--briefing'])
+    e_ok, e_err = _write_plist('com.grocery-flywheel.evening', 19, ['--quiet'])
+
+    if m_ok: print('  OK installed: com.grocery-flywheel.morning (9 AM, briefing)')
+    else: print(f'  FAIL morning: {m_err}')
+    if e_ok: print('  OK installed: com.grocery-flywheel.evening (7 PM, quiet monitor)')
+    else: print(f'  FAIL evening: {e_err}')
 
 
 def cmd_uninstall(args) -> None:
-    pl = Path.home() / "Library" / "LaunchAgents" / "com.grocery-flywheel.heartbeat.plist"
-    if pl.exists():
-        subprocess.run(["launchctl", "unload", str(pl)], capture_output=True)
-        pl.unlink()
-        print("  OK uninstalled")
-    else:
-        print("  Not installed.")
-
-
-def cmd_help(args) -> None:
-    print(__doc__)
-
-
-def _notify(title: str, msg: str) -> None:
-    try:
-        import shlex
-        safe_msg = msg.replace('"', '\\"')
-        subprocess.run(
-            ["osascript", "-e", f'display notification "{safe_msg}" with title "{title}"'],
-            capture_output=True, timeout=5
-        )
-    except Exception:
-        pass
-
-
-# ── main ──────────────────────────────────────────────────────────────────────
-
-def main() -> None:
-    p = argparse.ArgumentParser(prog="grocery-flywheel")
-    p.add_argument("--state", type=Path)
-    s = p.add_subparsers(dest="command")
-    s.add_parser("init")
-    s.add_parser("status")
-    s.add_parser("help")
-    c = s.add_parser("checkin"); c.add_argument("--quick", "-q")
-    s.add_parser("order")
-    s.add_parser("history")
-    s.add_parser("preferences")
-    d = s.add_parser("dashboard")
-    d.add_argument("--output", "-o", type=Path)
-    d.add_argument("--no-open", action="store_true")
-    m = s.add_parser("monitor")
-    m.add_argument("--quiet", "-q", action="store_true")
-    m.add_argument("--output", "-o", type=Path)
-    s.add_parser("install")
-    s.add_parser("uninstall")
-
-    cmds = {
-        "init": cmd_init,
-        "status": cmd_status,
-        "checkin": cmd_checkin,
-        "order": cmd_order,
-        "history": cmd_history,
-        "preferences": cmd_preferences,
-        "dashboard": cmd_dashboard,
-        "monitor": cmd_monitor,
-        "install": cmd_install,
-        "uninstall": cmd_uninstall,
-        "help": cmd_help,
-    }
-    ns = p.parse_args()
-    fn = cmds.get(ns.command)
-    if fn:
-        fn(ns)
-    else:
-        p.print_help()
-
-
-if __name__ == "__main__":
-    main()
+    plist_dir = Path.home() / 'Library' / 'LaunchAgents'
+    for label in ('com.grocery-flywheel.morning', 'com.grocery-flywheel.evening'):
+        pl = plist_dir / f'{label}.plist'
+        if pl.exists():
+            subprocess.run(['launchctl', 'unload', str(pl)], capture_output=True)
+            pl.unlink()
+            print(f'  OK removed: {label}')
+        else:
+            print(f'  Not installed: {label}')
 
