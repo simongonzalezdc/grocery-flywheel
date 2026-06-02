@@ -1,0 +1,12 @@
+# Grocery Flywheel
+
+> Local-first grocery & household replenishment that cuts decision fatigue and turns purchase history into smarter carts.
+
+## What it is
+A local-first replenishment engine: observe inventory, capture usage signals, preserve preferences, and recommend the next restock with an approval boundary.
+
+## Install / use
+Python; clone and install per the repo's pyproject.
+
+## Links
+- Repository: https://github.com/simongonzalezdc/grocery-flywheel
