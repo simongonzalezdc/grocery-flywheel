@@ -13,9 +13,9 @@ Grocery Flywheel starts as a local-first private workflow. It stores state in lo
 ## Consequences
 
 - The MVP can ship without a hosted backend.
-- The user's private purchase history stays local unless deliberately pushed to a private repo.
+- The user's private purchase history stays local unless deliberately pushed to a private fork or private deployment.
 - Browser or store integrations must preserve an explicit approval boundary.
-- Collaboration is still possible through a private repository.
+- Collaboration is still possible through private forks, private deployments, or sanitized public examples.
 
 ## Alternatives Considered
 

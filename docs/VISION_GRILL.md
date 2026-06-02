@@ -90,5 +90,5 @@ Recommended answer: first private tool, then consulting/productized workflow, th
 - First data source.
 - Primary product surface.
 - Sourcing research stage boundaries.
-- Whether private source snapshots stay in repo long-term.
+- How private source snapshots stay outside the public repo while preserving product traceability.
 - Whether the dashboard is static HTML, local app, or hosted app.

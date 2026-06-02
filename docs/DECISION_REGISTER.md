@@ -77,7 +77,7 @@ This register maps the user's answer dump onto the earlier product questions. Wh
 | --- | --- | --- | --- |
 | P2-33 | Scope timing | Build for the user first, but aim immediately at other personal household users/testers. | Resolved |
 | P2-34 | Business shape | Likely open-source toolkit plus paid hosted app and/or implementation services. Keep options open. | Inferred |
-| P2-35 | Public/private split | Eventually public core plus private examples is plausible. Current repo stays private until explicit permission. | Resolved |
+| P2-35 | Public/private split | Public core plus sanitized examples belongs in this repo. Purchase history, household data, retailer sessions, and private examples stay local or in private forks only. | Resolved |
 | P2-36 | First paid use case | Household grocery savings is first. Dietary restrictions optimization is a strong adjacent paid/safety path, with allergy-safe cart scanning as a subset. | Resolved |
 
 ## P2 Trust, Safety, UX

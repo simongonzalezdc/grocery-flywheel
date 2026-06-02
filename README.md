@@ -4,7 +4,7 @@ Local-first grocery-store and household replenishment for lowering decision fati
 
 Grocery is the first module, but grocery does not mean food only. It includes everything a grocery store or household restock trip can cover: food, coffee, cleaning supplies, paper goods, toiletries, pet supplies, basic pharmacy, and other recurring consumables. The broader product pattern is a replenishment flywheel: observe inventory, capture tiny usage signals, preserve preference corrections, and recommend the next restock with an approval boundary.
 
-This repo was productized from a private brain-dump workflow. The original source notes are copied under `source-material/private-brain-dump-snapshot/` for traceability. The product surface lives in `src/`, `docs/`, and `examples/`.
+This repo was productized from a private workflow, but the public repository intentionally contains only the productized surface: `src/`, `docs/`, and sanitized examples. Private source notes, account history, household details, sessions, and other personal material are not part of this repository.
 
 ## Product Bet
 
@@ -52,7 +52,6 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 - `DESIGN.md` - design source of truth.
 - `docs/VISION_GRILL.md` - interview/grilling doc for landing the full vision.
 - `docs/adr/0001-local-first-private-workflow.md` - initial architecture decision.
-- `source-material/private-brain-dump-snapshot/` - copied private source material.
 
 ## Current Status
 
