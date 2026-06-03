@@ -48,3 +48,5 @@ The core insight is that past purchase history contains enough signal to estimat
 - [Design source of truth](DESIGN.md)
 - [AI/agent navigation (llms.txt)](llms.txt)
 - [License: MIT](LICENSE)
+- **KyaniteLabs:** [kyanitelabs.tech](https://kyanitelabs.tech)
+- **Sibling projects:** [Print-OS](https://github.com/simongonzalezdc/Print-OS) · [GameStory-Lab](https://github.com/simongonzalezdc/GameStory-Lab) · [voice-to-sculpture-app](https://github.com/simongonzalezdc/voice-to-scultpure-app) · [CyberWitches](https://github.com/simongonzalezdc/CyberWitches) · [HealthAdvocate](https://github.com/simongonzalezdc/healthadvocate)
