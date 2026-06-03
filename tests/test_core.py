@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from grocery_flywheel.core import analyze_state, item_consumed_fraction
+from grocery_flywheel.mcp_server import handle_message, handle_tool_call
 from grocery_flywheel.retailer_adapter import (
     best_import_profiles,
     capability_matrix,
@@ -82,3 +83,21 @@ def test_retailer_profile_rejects_order_submission_for_mvp():
     }
 
     assert "order_submit must stay false for MVP adapter profiles" in validate_retailer_profile(profile)
+
+
+def test_mcp_server_analyzes_sample_state():
+    result = handle_tool_call(
+        "analyze_replenishment_state",
+        {"state_path": str(ROOT / "examples" / "sample_state.json")},
+    )
+
+    assert result["acquisition_channel"] == "retailer_history_import"
+    assert result["estimated_days_remaining"] is not None
+
+
+def test_mcp_server_lists_tools():
+    response = handle_message({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
+
+    assert response is not None
+    tools = response["result"]["tools"]
+    assert any(tool["name"] == "render_replenishment_dashboard" for tool in tools)

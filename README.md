@@ -19,6 +19,26 @@ python -m grocery_flywheel.cli examples/sample_state.json -o dist/dashboard.html
 
 Open `dist/dashboard.html` in a browser to see the generated dashboard. Run `pytest` to verify the test suite.
 
+## Agent Surfaces
+
+Grocery Flywheel exposes the same local-first workflow through three agent-friendly surfaces:
+
+- CLI: `grocery-flywheel examples/sample_state.json --output dist/sample-dashboard.html`
+- MCP: `grocery-flywheel-mcp` starts a stdio MCP server with tools for state analysis, dashboard rendering, and sourcing research summaries.
+- Skill: [`skills/grocery-flywheel/SKILL.md`](skills/grocery-flywheel/SKILL.md) tells compatible agents when to use the CLI, MCP server, and local approval boundary.
+
+Example MCP config:
+
+```json
+{
+  "mcpServers": {
+    "grocery-flywheel": {
+      "command": "grocery-flywheel-mcp"
+    }
+  }
+}
+```
+
 ## Usage
 
 ```bash

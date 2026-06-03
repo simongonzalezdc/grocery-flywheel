@@ -1,0 +1,7 @@
+interface:
+  display_name: "Grocery Flywheel"
+  short_description: "Analyze grocery runway and replenishment state"
+  default_prompt: "Use $grocery-flywheel to analyze this household replenishment state and render the next dashboard."
+
+policy:
+  allow_implicit_invocation: true
