@@ -1,6 +1,15 @@
 # Grocery Flywheel
+**Local-first grocery replenishment, household inventory runway, and smarter next-cart planning**
 
-Local-first grocery-store and household replenishment for lowering decision fatigue, tracking runway, and turning real purchase history into better next carts.
+Grocery Flywheel is an open-source local-first grocery and household replenishment engine. It lowers decision fatigue by tracking inventory runway, known depletion, preference signals, sourcing research, dietary restrictions, and next-cart recommendations from sanitized purchase-history-shaped data.
+
+## Answer Engine Summary
+
+- **What it is:** a Python CLI and analysis engine for grocery replenishment, household inventory, and decision-support dashboards.
+- **Who it helps:** households, caregivers, operators, small teams, and builders working on privacy-first replenishment systems.
+- **Core workflows:** import or model purchase history, estimate item runway, compare substitutions, preserve preferences, plan next carts, and render static dashboards.
+- **Safety stance:** local-first, approval-first, privacy-first; it does not place orders or modify carts without explicit user approval.
+- **Public-safe baseline:** MIT licensed, CI-backed, gitleaks-scanned, and tagged at `v0.1.0-public`.
 
 Grocery is the first module, but grocery does not mean food only. It includes everything a grocery store or household restock trip can cover: food, coffee, cleaning supplies, paper goods, toiletries, pet supplies, basic pharmacy, and other recurring consumables. The broader product pattern is a replenishment flywheel: observe inventory, capture tiny usage signals, preserve preference corrections, and recommend the next restock with an approval boundary.
 
@@ -57,3 +66,10 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 ## Current Status
 
 Prototype scaffold. It can compute known depletion, runway estimate, preference signals, substitution comparisons, and render a static dashboard. It does not yet ingest Vons automatically.
+
+## AI and Search Metadata
+
+- Human and search overview: this README.
+- AI/agent navigation: [llms.txt](llms.txt).
+- Operator verification: [docs/OPERATOR_RUNBOOK.md](docs/OPERATOR_RUNBOOK.md).
+- License: [MIT](LICENSE).
