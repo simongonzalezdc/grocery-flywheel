@@ -49,6 +49,7 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 - `docs/SOURCING_RESEARCH_STAGE.md` - cross-store and online sourcing logic.
 - `docs/RETAILER_ADAPTERS.md` - reusable retailer connector architecture.
 - `docs/PRODUCT_DESIGN_RESEARCH_2026.md` - May 2026 product-design research synthesis.
+- `docs/OPERATOR_RUNBOOK.md` - public-safe run, verification, visual-check, and release paths.
 - `DESIGN.md` - design source of truth.
 - `docs/VISION_GRILL.md` - interview/grilling doc for landing the full vision.
 - `docs/adr/0001-local-first-private-workflow.md` - initial architecture decision.
