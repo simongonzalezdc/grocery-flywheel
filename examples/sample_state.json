@@ -104,7 +104,7 @@
       "spend": 13.84,
       "units_total": 2,
       "units_remaining": 1,
-      "notes": "First brick fully finished; second brick opened on June 6.",
+      "notes": "First brick fully finished; second brick opened on June 6. June follow-up: second brick is freshly opened, no depletion reported yet.",
       "source": "Vons baseline",
       "pricing_status": "priced"
     },
@@ -171,7 +171,7 @@
       "spend": 0,
       "units_total": 4,
       "units_remaining": 4,
-      "notes": "Costco top-up added June 6 pulse; exact price not captured.",
+      "notes": "Costco top-up added June 6 pulse; exact price not captured. Unopened as of follow-up pulse.",
       "source": "Costco top-up",
       "pricing_status": "unknown"
     },
@@ -183,7 +183,7 @@
       "spend": 0,
       "units_total": 4,
       "units_remaining": 4,
-      "notes": "Costco easy-food top-up added after original bridge foods depleted; exact price not captured.",
+      "notes": "Costco easy-food top-up added after original bridge foods depleted; exact price not captured. Unopened as of follow-up pulse.",
       "source": "Costco top-up",
       "pricing_status": "unknown"
     },
@@ -193,8 +193,8 @@
       "category": "frozen_meal",
       "storage": "frozen",
       "spend": 0,
-      "remaining_fraction": 1,
-      "notes": "Costco easy-food top-up; exact count/price not captured.",
+      "remaining_fraction": 0.18,
+      "notes": "Costco easy-food top-up; exact count/price not captured. June follow-up: most chicken bakes eaten, ~2 left. Exact box size still unknown.",
       "source": "Costco top-up",
       "pricing_status": "unknown"
     },
@@ -205,7 +205,7 @@
       "storage": "frozen",
       "spend": 0,
       "remaining_fraction": 1,
-      "notes": "Exact SKU/count unknown; Simon described as Chick-fil-A duplicates/dupes; exact price not captured.",
+      "notes": "Exact SKU/count unknown; Simon clarified they are literal fillets (not nuggets or strips); exact price not captured. Unopened as of follow-up pulse.",
       "source": "Costco top-up",
       "pricing_status": "unknown"
     },
@@ -216,7 +216,7 @@
       "storage": "frozen",
       "spend": 0,
       "remaining_fraction": 1,
-      "notes": "Given by family on the side; exact count/price not captured.",
+      "notes": "Given by family on the side; exact count/price not captured. Unopened as of follow-up pulse.",
       "source": "family gift",
       "pricing_status": "gift"
     },
@@ -252,6 +252,17 @@
       "notes": "Added June 6 pulse; price/source not captured; useful for sweet/flavor unlocks.",
       "source": "unclear top-up",
       "pricing_status": "unknown"
+    },
+    {
+      "name": "Dry pasta (untracked SKU)",
+      "role": "pantry_base",
+      "category": "dry_good",
+      "storage": "shelf",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "June follow-up: dry pasta is untouched. Specific SKU/price not captured yet.",
+      "source": "unclear top-up",
+      "pricing_status": "unknown"
     }
   ],
   "pulses": [
@@ -272,8 +283,8 @@
     },
     {
       "date": "2026-06-06",
-      "text": "June 6 pulse: original May 20 run has lasted 17 days. First Bustelo brick fully finished; second opened now. Original tofu finished; Costco added 4 tofu, 4 pizzas, chicken bakes, Chick-fil-A-style dupes; family gave nuggets. 20 lb Calrose rice opened and about halfway. Garbanzos cooked/eaten; lentils cooked and being eaten. Pasta untouched. Drinks, waffles, cereal, milk, and juice gone. Costco added toilet paper and paper towels. Brown sugar half-size bag added.",
-      "note": "June 6 pulse: original May 20 run has lasted 17 days. First Bustelo brick fully finished; second opened now. Original tofu finished; Costco added 4 tofu, 4 pizzas, chicken bakes, Chick-fil-A-style dupes; family gave nuggets. 20 lb Calrose rice opened and about halfway. Garbanzos cooked/eaten; lentils cooked and being eaten. Pasta untouched. Drinks, waffles, cereal, milk, and juice gone. Costco added toilet paper and paper towels. Brown sugar half-size bag added."
+      "text": "June follow-up pulse: Chick-fil-A-style dupes are literal fillets (not nuggets or strips). Most Costco chicken bakes eaten, ~2 left (exact box size still unknown). Costco tofu, Costco pizza, Costco dupes, and gifted nuggets are all still unopened. Dry pasta is untouched (separate from pasta sauce/pesto). Second Bustelo brick is freshly opened, no depletion reported yet.",
+      "note": "June follow-up pulse: Chick-fil-A-style dupes are literal fillets (not nuggets or strips). Most Costco chicken bakes eaten, ~2 left (exact box size still unknown). Costco tofu, Costco pizza, Costco dupes, and gifted nuggets are all still unopened. Dry pasta is untouched (separate from pasta sauce/pesto). Second Bustelo brick is freshly opened, no depletion reported yet."
     }
   ],
   "preferences": [
@@ -372,8 +383,8 @@
     }
   ],
   "operating_summary": {
-    "headline": "May 20 baseline beat break-even; Costco restored the easy-food stabilizer while rice, tofu, and legumes are working.",
-    "next_action": "Next pulse: count Costco pizzas/tofu/chicken bakes/dupes/nuggets, check whether the second Bustelo brick is below half, and decide whether breakfast/drinks need replacement.",
-    "caveat": "Runway is baseline-only: unpriced top-ups excluded until Costco receipt/counts are captured."
+    "headline": "Pantry/cooking lane is now the working system: rice, tofu (Costco), chicken bakes, and dry legumes are active. Coffee lane is steady on the second Bustelo brick.",
+    "next_action": "Next pulse: estimate how many chicken bakes were originally in the box (so remaining ~2 maps to a real fraction), check the second Bustelo brick level, and decide whether to start the Costco tofu, pizza, dupes, or gifted nuggets before the easy-food window narrows.",
+    "caveat": "Runway is baseline-only: Costco top-ups are unpriced and their per-unit numbers are not in the burn calculation. Dry pasta, brown sugar, and Chick-fil-A-style dupes have unknown SKUs/prices."
   }
 }

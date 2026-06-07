@@ -44,8 +44,8 @@ def test_rendered_dashboard_surfaces_current_read_and_unpriced_topups():
     html = render_dashboard(analyze_state(state))
 
     assert "Current Read" in html
-    assert "Costco restored the easy-food stabilizer" in html
-    assert "unpriced top-ups excluded" in html
+    assert "Pantry/cooking lane is now the working system" in html
+    assert "Costco top-ups are unpriced" in html
     assert "Source" in html
     assert "Costco top-up" in html
     assert "family gift" in html
