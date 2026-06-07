@@ -1,11 +1,13 @@
 {
-  "as_of": "2026-05-24",
+  "as_of": "2026-06-06",
   "inventory_surface": {
     "type": "personal_grocery",
     "label": "Home groceries"
   },
   "acquisition_channel": "retailer_history_import",
-  "retailer_profiles": ["generic.browser_retailer"],
+  "retailer_profiles": [
+    "generic.browser_retailer"
+  ],
   "dietary_profiles": [
     {
       "profile_id": "household-default",
@@ -21,7 +23,7 @@
     }
   ],
   "order": {
-    "store": "Example Grocery",
+    "store": "Vons baseline + Costco/gift top-up pulse",
     "date": "2026-05-20",
     "total": 117.18
   },
@@ -34,7 +36,9 @@
       "spend": 6.42,
       "units_total": 8,
       "units_remaining": 0,
-      "notes": "Immediate food. Expected to deplete first."
+      "notes": "Immediate food. Expected to deplete first.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Homestyle waffles",
@@ -42,8 +46,10 @@
       "category": "frozen_breakfast",
       "storage": "frozen",
       "spend": 5.43,
-      "remaining_fraction": 0.78,
-      "notes": "Low-friction breakfast."
+      "remaining_fraction": 0,
+      "notes": "Gone by June 6. Breakfast bridge fully depleted.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Rising crust pizza",
@@ -52,7 +58,9 @@
       "storage": "frozen",
       "spend": 4.94,
       "remaining_fraction": 0,
-      "notes": "Morale food, one per run."
+      "notes": "Morale food, one per run.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Extra firm tofu",
@@ -61,8 +69,10 @@
       "storage": "fridge",
       "spend": 5.91,
       "units_total": 3,
-      "units_remaining": 2.5,
-      "notes": "Cooking phase started."
+      "units_remaining": 0,
+      "notes": "Original tofu fully finished by June 6; tofu remains a working protein.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Chocolate protein milk",
@@ -70,8 +80,10 @@
       "category": "ready_drink",
       "storage": "fridge",
       "spend": 6.49,
-      "remaining_fraction": 0.67,
-      "notes": "Required ready protein drink."
+      "remaining_fraction": 0,
+      "notes": "Drink lane gone by June 6.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Grapefruit juice",
@@ -79,8 +91,10 @@
       "category": "ready_drink",
       "storage": "fridge",
       "spend": 3.47,
-      "remaining_fraction": 0.9,
-      "notes": "Interesting non-water drink."
+      "remaining_fraction": 0,
+      "notes": "Drink lane gone by June 6.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Cafe Bustelo bricks",
@@ -89,8 +103,10 @@
       "storage": "shelf",
       "spend": 13.84,
       "units_total": 2,
-      "units_remaining": 1.9,
-      "notes": "One opened, one sealed."
+      "units_remaining": 1,
+      "notes": "First brick fully finished; second brick opened on June 6.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Calrose rice 20 lb",
@@ -98,8 +114,10 @@
       "category": "dry_good",
       "storage": "shelf",
       "spend": 19.8,
-      "remaining_fraction": 1,
-      "notes": "Bulk runway extender."
+      "remaining_fraction": 0.5,
+      "notes": "20 lb Calrose opened and about halfway by June 6; pantry base is active.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Dry lentils",
@@ -107,8 +125,10 @@
       "category": "dry_good",
       "storage": "shelf",
       "spend": 2.97,
-      "remaining_fraction": 1,
-      "notes": "Fast legume, no soak."
+      "remaining_fraction": 0.5,
+      "notes": "All lentils cooked; currently being eaten. Remaining fraction is a rough placeholder until next pulse.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Dry garbanzo beans",
@@ -116,8 +136,10 @@
       "category": "dry_good",
       "storage": "shelf",
       "spend": 1.98,
-      "remaining_fraction": 1,
-      "notes": "Preferred staple."
+      "remaining_fraction": 0,
+      "notes": "Cooked and fully eaten by June 6. Garbanzos are confirmed active staple.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Pasta sauce and pesto",
@@ -126,7 +148,9 @@
       "storage": "shelf",
       "spend": 7.02,
       "remaining_fraction": 1,
-      "notes": "Friction reducer for pantry meals."
+      "notes": "Still untouched as of June 6.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
     },
     {
       "name": "Dish soap",
@@ -135,21 +159,121 @@
       "storage": "under_sink",
       "spend": 4.99,
       "remaining_fraction": 0.5,
-      "notes": "Non-food household consumable; stockout creates cleanup friction."
+      "notes": "Non-food household consumable; stockout creates cleanup friction.",
+      "source": "Vons baseline",
+      "pricing_status": "priced"
+    },
+    {
+      "name": "Costco tofu 4-pack",
+      "role": "protein",
+      "category": "refrigerated_protein",
+      "storage": "fridge",
+      "spend": 0,
+      "units_total": 4,
+      "units_remaining": 4,
+      "notes": "Costco top-up added June 6 pulse; exact price not captured.",
+      "source": "Costco top-up",
+      "pricing_status": "unknown"
+    },
+    {
+      "name": "Costco pizza 4-pack",
+      "role": "bridge_food",
+      "category": "frozen_meal",
+      "storage": "frozen",
+      "spend": 0,
+      "units_total": 4,
+      "units_remaining": 4,
+      "notes": "Costco easy-food top-up added after original bridge foods depleted; exact price not captured.",
+      "source": "Costco top-up",
+      "pricing_status": "unknown"
+    },
+    {
+      "name": "Costco chicken bakes box",
+      "role": "bridge_food",
+      "category": "frozen_meal",
+      "storage": "frozen",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "Costco easy-food top-up; exact count/price not captured.",
+      "source": "Costco top-up",
+      "pricing_status": "unknown"
+    },
+    {
+      "name": "Costco Chick-fil-A-style dupes box",
+      "role": "protein",
+      "category": "frozen_protein",
+      "storage": "frozen",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "Exact SKU/count unknown; Simon described as Chick-fil-A duplicates/dupes; exact price not captured.",
+      "source": "Costco top-up",
+      "pricing_status": "unknown"
+    },
+    {
+      "name": "Family-gifted nuggets box",
+      "role": "bridge_food",
+      "category": "frozen_protein",
+      "storage": "frozen",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "Given by family on the side; exact count/price not captured.",
+      "source": "family gift",
+      "pricing_status": "gift"
+    },
+    {
+      "name": "Costco toilet paper",
+      "role": "critical_household_essential",
+      "category": "paper_goods",
+      "storage": "household",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "Household top-up from Costco; exact price not captured.",
+      "source": "Costco top-up",
+      "pricing_status": "unknown"
+    },
+    {
+      "name": "Costco paper towels",
+      "role": "critical_household_essential",
+      "category": "paper_goods",
+      "storage": "household",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "Household top-up from Costco; exact price not captured.",
+      "source": "Costco top-up",
+      "pricing_status": "unknown"
+    },
+    {
+      "name": "Brown sugar half-size bag",
+      "role": "flavor_unlock",
+      "category": "baking_pantry",
+      "storage": "shelf",
+      "spend": 0,
+      "remaining_fraction": 1,
+      "notes": "Added June 6 pulse; price/source not captured; useful for sweet/flavor unlocks.",
+      "source": "unclear top-up",
+      "pricing_status": "unknown"
     }
   ],
   "pulses": [
     {
       "date": "2026-05-21",
-      "text": "2 burritos, 4 waffles, 1/8 cheese eaten; one coffee brick opened."
+      "text": "2 burritos, 4 waffles, 1/8 cheese eaten; one coffee brick opened.",
+      "note": "2 burritos, 4 waffles, 1/8 cheese eaten; one coffee brick opened."
     },
     {
       "date": "2026-05-23",
-      "text": "1 burrito left, pizza eaten, cereal and milk 2/3 full."
+      "text": "1 burrito left, pizza eaten, cereal and milk 2/3 full.",
+      "note": "1 burrito left, pizza eaten, cereal and milk 2/3 full."
     },
     {
       "date": "2026-05-24",
-      "text": "Burritos finished, tofu half eaten, dish soap about half full."
+      "text": "Burritos finished, tofu half eaten, dish soap about half full.",
+      "note": "Burritos finished, tofu half eaten, dish soap about half full."
+    },
+    {
+      "date": "2026-06-06",
+      "text": "June 6 pulse: original May 20 run has lasted 17 days. First Bustelo brick fully finished; second opened now. Original tofu finished; Costco added 4 tofu, 4 pizzas, chicken bakes, Chick-fil-A-style dupes; family gave nuggets. 20 lb Calrose rice opened and about halfway. Garbanzos cooked/eaten; lentils cooked and being eaten. Pasta untouched. Drinks, waffles, cereal, milk, and juice gone. Costco added toilet paper and paper towels. Brown sugar half-size bag added.",
+      "note": "June 6 pulse: original May 20 run has lasted 17 days. First Bustelo brick fully finished; second opened now. Original tofu finished; Costco added 4 tofu, 4 pizzas, chicken bakes, Chick-fil-A-style dupes; family gave nuggets. 20 lb Calrose rice opened and about halfway. Garbanzos cooked/eaten; lentils cooked and being eaten. Pasta untouched. Drinks, waffles, cereal, milk, and juice gone. Costco added toilet paper and paper towels. Brown sugar half-size bag added."
     }
   ],
   "preferences": [
@@ -167,6 +291,26 @@
       "key": "dry_legumes_ok",
       "signal": "Overnight soaking is viable.",
       "rule": "Prefer dry beans and lentils over cans unless emergency food is needed."
+    },
+    {
+      "key": "tofu_confirmed_protein",
+      "signal": "Original tofu was fully finished and a Costco 4-pack was bought.",
+      "rule": "Keep tofu as a real protein lane; it is not merely tolerated."
+    },
+    {
+      "key": "bulk_rice_active",
+      "signal": "20 lb Calrose rice was opened and about halfway by day 17.",
+      "rule": "Treat rice as an active successful pantry base, not dead inventory."
+    },
+    {
+      "key": "legumes_active",
+      "signal": "Garbanzos were cooked/eaten and lentils were cooked and are being eaten.",
+      "rule": "Dry legumes are not just acceptable; they are actually entering rotation."
+    },
+    {
+      "key": "easy_food_topup_needed_after_bridge_burn",
+      "signal": "Costco top-up emphasized pizza, chicken bakes, nuggets, and Chick-fil-A-style dupes after original easy foods disappeared.",
+      "rule": "Low-friction frozen/easy foods remain a necessary stabilizer even when pantry cooking is working."
     }
   ],
   "substitutions": [
@@ -198,7 +342,10 @@
           "source": "Online bulk pack",
           "unit_price": 0.596,
           "savings": "14%",
-          "constraints": ["bulk storage", "availability changes"],
+          "constraints": [
+            "bulk storage",
+            "availability changes"
+          ],
           "confidence": "medium",
           "checked_date": "2026-05-25"
         }
@@ -214,11 +361,19 @@
           "source": "Warehouse or online refill",
           "unit_price": 0.12,
           "savings": "37%",
-          "constraints": ["membership or shipping", "storage"],
+          "constraints": [
+            "membership or shipping",
+            "storage"
+          ],
           "confidence": "low",
           "checked_date": "2026-05-25"
         }
       ]
     }
-  ]
+  ],
+  "operating_summary": {
+    "headline": "May 20 baseline beat break-even; Costco restored the easy-food stabilizer while rice, tofu, and legumes are working.",
+    "next_action": "Next pulse: count Costco pizzas/tofu/chicken bakes/dupes/nuggets, check whether the second Bustelo brick is below half, and decide whether breakfast/drinks need replacement.",
+    "caveat": "Runway is baseline-only: unpriced top-ups excluded until Costco receipt/counts are captured."
+  }
 }

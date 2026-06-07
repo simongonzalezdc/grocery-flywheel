@@ -96,6 +96,10 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         <div class="metric">${float(order['total']):.2f}</div>
         <p class="muted">{analysis['days_elapsed']} elapsed day(s).</p>
       </article>
+      <article class="panel span-12">
+        <h2>Current Read</h2>
+        {render_operating_summary(analysis.get('operating_summary', {}))}
+      </article>
       <article class="panel span-6">
         <h2>Role Summary</h2>
         {render_role_table(analysis['role_summary'])}
@@ -144,11 +148,30 @@ def render_items(rows: list[dict[str, Any]]) -> str:
     body = "\n".join(
         f"<tr><td>{escape(row['name'])}</td><td>{escape(row['role'])}</td>"
         f"<td>{escape(row.get('category', ''))}</td>"
-        f"<td>${row['spend']:.2f}</td><td>{row['consumed_fraction'] * 100:.0f}%</td>"
+        f"<td>{escape(row.get('source', ''))}</td>"
+        f"<td>{render_spend(row)}</td><td>{row['consumed_fraction'] * 100:.0f}%</td>"
         f"<td>{escape(row['notes'])}</td></tr>"
         for row in rows
     )
-    return f"<table><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Spend</th><th>Consumed</th><th>Notes</th></tr></thead><tbody>{body}</tbody></table>"
+    return f"<table><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Source</th><th>Spend</th><th>Consumed</th><th>Notes</th></tr></thead><tbody>{body}</tbody></table>"
+
+
+def render_spend(row: dict[str, Any]) -> str:
+    pricing_status = row.get("pricing_status", "priced")
+    if pricing_status == "unknown" and float(row.get("spend", 0)) == 0:
+        return "unpriced"
+    if pricing_status == "gift" and float(row.get("spend", 0)) == 0:
+        return "gift"
+    return f"${float(row.get('spend', 0)):.2f}"
+
+
+def render_operating_summary(summary: dict[str, Any]) -> str:
+    if not summary:
+        return "<p class='muted'>No current read configured.</p>"
+    headline = escape(str(summary.get("headline", "")))
+    next_action = escape(str(summary.get("next_action", "")))
+    caveat = escape(str(summary.get("caveat", "")))
+    return f"<p><strong>{headline}</strong></p><p>{next_action}</p><p class='muted'>{caveat}</p>"
 
 
 def render_preferences(rows: list[dict[str, Any]]) -> str:

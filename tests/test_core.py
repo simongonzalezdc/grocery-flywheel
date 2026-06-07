@@ -36,6 +36,22 @@ def test_sample_state_produces_runway_and_preference_signal():
     assert any(pref["key"] == "avoid_diced_chicken" for pref in analysis["preferences"])
 
 
+
+def test_rendered_dashboard_surfaces_current_read_and_unpriced_topups():
+    from grocery_flywheel.render import render_dashboard
+
+    state = json.loads((ROOT / "examples" / "sample_state.json").read_text())
+    html = render_dashboard(analyze_state(state))
+
+    assert "Current Read" in html
+    assert "Costco restored the easy-food stabilizer" in html
+    assert "unpriced top-ups excluded" in html
+    assert "Source" in html
+    assert "Costco top-up" in html
+    assert "family gift" in html
+    assert "unpriced" in html
+
+
 def test_substitution_prefers_better_fit_even_when_unit_price_is_tied():
     state = json.loads((ROOT / "examples" / "sample_state.json").read_text())
     analysis = analyze_state(state)

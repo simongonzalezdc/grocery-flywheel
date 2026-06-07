@@ -201,3 +201,25 @@ When new data arrives:
 ## Next Scheduled Check
 
 Recurring thread check-in: every 3 days at 9:00 AM local time.
+
+### 2026-06-06 Pulse
+
+Source: user report on 2026-06-06.
+
+| Category | Reported State | Model Update |
+| --- | --- | --- |
+| Runway | May 20 run has lasted 17 days. | Break-even target (>14 days) is beaten; now measuring against 21-day good and 24+ day strong targets. |
+| Coffee | First Bustelo brick fully finished; second brick opened right now. | Coffee depletion clock is roughly one brick per 17 days, with second brick now active. |
+| Costco top-up | Added 4 tofu, 4 pizzas, chicken bakes, Chick-fil-A-style dupes, toilet paper, paper towels. | Costco is now part of the source mix; warehouse top-ups cover protein, bridge food, and household paper. Exact prices/counts still need capture. |
+| Gifted inventory | Family gave one box of nuggets. | Side-channel food should be counted as runway support even when it is not spend. |
+| Rice | 20 lb Calrose opened and about halfway. | Rice is active and successful, not reserve/dead pantry. |
+| Original tofu | Finished; more tofu bought at Costco. | Tofu is confirmed as a real protein lane. |
+| Garbanzos | Cooked and eaten. | Dry garbanzos are confirmed active staple. |
+| Lentils | Cooked; currently being eaten. | Lentils are active; exact remaining share should be checked next pulse. |
+| Pasta | Untouched. | Pasta remains backup, not active rotation. |
+| Drinks / breakfast | Waffles, cereal, milk/protein drink, and juice are gone. | Breakfast/drink bridge lanes depleted; future top-up question should separate drinks from food. |
+| Brown sugar | Half-size bag added. | Track as small flavor/baking pantry addition. |
+
+Interpretation: this is a successful phase change, not a failure. The original ready foods and drinks disappeared, but pantry activation actually happened: rice, garbanzos, lentils, and tofu entered rotation. Costco then acted as a low-friction stabilizer by restoring easy foods and household paper. The next dashboard should stop treating Vons as the only source and distinguish paid grocery orders, warehouse top-ups, and gifted inventory.
+
+Next missing data to ask for: Costco receipt/prices if available; exact chicken bake count; exact Chick-fil-A-dupe SKU/count; whether any Costco tofu/pizza/chicken/nuggets have already been opened; current dish soap/cheese/sauce status.

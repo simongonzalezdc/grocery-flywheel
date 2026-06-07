@@ -409,3 +409,57 @@ def cmd_uninstall(args) -> None:
         else:
             print(f'  Not installed: {label}')
 
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="grocery-flywheel")
+    parser.add_argument("--state", help="Path to grocery state JSON")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    init = sub.add_parser("init", help="Create a new state file")
+    init.set_defaults(func=cmd_init)
+
+    status = sub.add_parser("status", help="Print current grocery status")
+    status.set_defaults(func=cmd_status)
+
+    checkin = sub.add_parser("checkin", help="Record a depletion check-in")
+    checkin.add_argument("--quick", help="Non-interactive check-in note")
+    checkin.set_defaults(func=cmd_checkin)
+
+    order = sub.add_parser("order", help="Start a new order interactively")
+    order.set_defaults(func=cmd_order)
+
+    history = sub.add_parser("history", help="Show check-in and order history")
+    history.set_defaults(func=cmd_history)
+
+    preferences = sub.add_parser("preferences", help="Show learned preferences")
+    preferences.set_defaults(func=cmd_preferences)
+
+    dashboard = sub.add_parser("dashboard", help="Render dashboard HTML")
+    dashboard.add_argument("--output", default="dist/dashboard.html", help="Output HTML path")
+    dashboard.add_argument("--no-open", action="store_true", help="Do not open the dashboard after writing")
+    dashboard.set_defaults(func=cmd_dashboard)
+
+    monitor = sub.add_parser("monitor", help="Run monitor/briefing and refresh dashboard")
+    monitor.add_argument("--output", default="dist/dashboard.html", help="Output HTML path")
+    monitor.add_argument("--briefing", action="store_true", help="Interactive morning briefing")
+    monitor.add_argument("--quiet", action="store_true", help="Suppress non-alert output")
+    monitor.set_defaults(func=cmd_monitor)
+
+    install = sub.add_parser("install", help="Install LaunchAgent monitors")
+    install.set_defaults(func=cmd_install)
+
+    uninstall = sub.add_parser("uninstall", help="Uninstall LaunchAgent monitors")
+    uninstall.set_defaults(func=cmd_uninstall)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    args.func(args)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
