@@ -15,6 +15,7 @@ dev = ["pytest>=8"]
 [project.scripts]
 grocery-flywheel = "grocery_flywheel.cli:main"
 grocery-flywheel-mcp = "grocery_flywheel.mcp_server:main"
+grocery-flywheel-capture-visit = "grocery_flywheel.capture_visit:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

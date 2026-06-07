@@ -4,6 +4,8 @@ from collections import defaultdict
 from datetime import date
 from typing import Any
 
+from .cost_log import visits_summary
+from .easy_food import easy_food_summary
 from .freshness import summarize_freshness
 
 
@@ -97,6 +99,8 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
         "freshness": summarize_freshness(
             items, state.get("sourcing_research", []), today=as_of,
         ),
+        "easy_food": easy_food_summary(state, today=as_of),
+        "visits_summary": visits_summary(state),
         "preferences": state.get("preferences", []),
         "dietary_profiles": state.get("dietary_profiles", []),
         "substitutions": substitutions,

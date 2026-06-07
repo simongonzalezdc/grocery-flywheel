@@ -144,6 +144,19 @@
       "spend": 4.99,
       "remaining_fraction": 0.5,
       "notes": "Non-food household consumable; stockout creates cleanup friction."
+    },
+    {
+      "name": "Example top-up frozen meal",
+      "role": "bridge_food",
+      "category": "frozen_meal",
+      "storage": "frozen",
+      "spend": 0,
+      "units_total": 6,
+      "units_remaining": 6,
+      "added_on": "2026-05-22",
+      "consumed_fraction": 0,
+      "pricing_status": "unpriced",
+      "notes": "Example top-up for the easy-food panel demo."
     }
   ],
   "pulses": [
@@ -233,6 +246,17 @@
           "checked_date": "2026-05-25"
         }
       ]
+    }
+  ],
+  "visits": [
+    {
+      "id": "v-sample01",
+      "visit_type": "in_store",
+      "started_at": "2026-05-20T10:00",
+      "duration_min": 40,
+      "purchases": [],
+      "notes": "example visit for the dashboard demo",
+      "created_at": "2026-05-20T10:00"
     }
   ]
 }
