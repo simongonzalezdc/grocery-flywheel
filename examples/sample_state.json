@@ -38,7 +38,8 @@
       "units_remaining": 0,
       "notes": "Immediate food. Expected to deplete first.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Homestyle waffles",
@@ -49,7 +50,8 @@
       "remaining_fraction": 0,
       "notes": "Gone by June 6. Breakfast bridge fully depleted.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Rising crust pizza",
@@ -60,7 +62,8 @@
       "remaining_fraction": 0,
       "notes": "Morale food, one per run.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Extra firm tofu",
@@ -72,7 +75,8 @@
       "units_remaining": 0,
       "notes": "Original tofu fully finished by June 6; tofu remains a working protein.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Chocolate protein milk",
@@ -83,7 +87,8 @@
       "remaining_fraction": 0,
       "notes": "Drink lane gone by June 6.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Grapefruit juice",
@@ -94,7 +99,8 @@
       "remaining_fraction": 0,
       "notes": "Drink lane gone by June 6.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Cafe Bustelo bricks",
@@ -106,7 +112,8 @@
       "units_remaining": 1,
       "notes": "First brick fully finished; second brick opened on June 6. June follow-up: second brick is freshly opened, no depletion reported yet.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Calrose rice 20 lb",
@@ -117,7 +124,8 @@
       "remaining_fraction": 0.5,
       "notes": "20 lb Calrose opened and about halfway by June 6; pantry base is active.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Dry lentils",
@@ -128,7 +136,8 @@
       "remaining_fraction": 0.5,
       "notes": "All lentils cooked; currently being eaten. Remaining fraction is a rough placeholder until next pulse.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Dry garbanzo beans",
@@ -139,7 +148,8 @@
       "remaining_fraction": 0,
       "notes": "Cooked and fully eaten by June 6. Garbanzos are confirmed active staple.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Pasta sauce and pesto",
@@ -150,7 +160,8 @@
       "remaining_fraction": 1,
       "notes": "Still untouched as of June 6.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Dish soap",
@@ -161,7 +172,8 @@
       "remaining_fraction": 0.5,
       "notes": "Non-food household consumable; stockout creates cleanup friction.",
       "source": "Vons baseline",
-      "pricing_status": "priced"
+      "pricing_status": "priced",
+      "last_price_check": "2026-06-05"
     },
     {
       "name": "Costco tofu 4-pack",
@@ -173,7 +185,9 @@
       "units_remaining": 4,
       "notes": "Costco top-up added June 6 pulse; exact price not captured. Unopened as of follow-up pulse.",
       "source": "Costco top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": "2026-06-01",
+      "added_on": "2026-06-06"
     },
     {
       "name": "Costco pizza 4-pack",
@@ -185,7 +199,9 @@
       "units_remaining": 4,
       "notes": "Costco easy-food top-up added after original bridge foods depleted; exact price not captured. Unopened as of follow-up pulse.",
       "source": "Costco top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": "2026-06-01",
+      "added_on": "2026-06-06"
     },
     {
       "name": "Costco chicken bakes box",
@@ -196,7 +212,9 @@
       "remaining_fraction": 0.18,
       "notes": "Costco easy-food top-up; exact count/price not captured. June follow-up: most chicken bakes eaten, ~2 left. Exact box size still unknown.",
       "source": "Costco top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": "2026-06-01",
+      "added_on": "2026-06-06"
     },
     {
       "name": "Costco Chick-fil-A-style dupes box",
@@ -207,7 +225,9 @@
       "remaining_fraction": 1,
       "notes": "Exact SKU/count unknown; Simon clarified they are literal fillets (not nuggets or strips); exact price not captured. Unopened as of follow-up pulse.",
       "source": "Costco top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": "2026-06-01",
+      "added_on": "2026-06-06"
     },
     {
       "name": "Family-gifted nuggets box",
@@ -218,7 +238,9 @@
       "remaining_fraction": 1,
       "notes": "Given by family on the side; exact count/price not captured. Unopened as of follow-up pulse.",
       "source": "family gift",
-      "pricing_status": "gift"
+      "pricing_status": "gift",
+      "last_price_check": null,
+      "added_on": "2026-06-06"
     },
     {
       "name": "Costco toilet paper",
@@ -229,7 +251,9 @@
       "remaining_fraction": 1,
       "notes": "Household top-up from Costco; exact price not captured.",
       "source": "Costco top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": "2026-06-01",
+      "added_on": "2026-06-06"
     },
     {
       "name": "Costco paper towels",
@@ -240,7 +264,9 @@
       "remaining_fraction": 1,
       "notes": "Household top-up from Costco; exact price not captured.",
       "source": "Costco top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": "2026-06-01",
+      "added_on": "2026-06-06"
     },
     {
       "name": "Brown sugar half-size bag",
@@ -251,7 +277,9 @@
       "remaining_fraction": 1,
       "notes": "Added June 6 pulse; price/source not captured; useful for sweet/flavor unlocks.",
       "source": "unclear top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": null,
+      "added_on": "2026-06-06"
     },
     {
       "name": "Dry pasta (untracked SKU)",
@@ -262,7 +290,9 @@
       "remaining_fraction": 1,
       "notes": "June follow-up: dry pasta is untouched. Specific SKU/price not captured yet.",
       "source": "unclear top-up",
-      "pricing_status": "unknown"
+      "pricing_status": "unknown",
+      "last_price_check": null,
+      "added_on": "2026-06-06"
     }
   ],
   "pulses": [
@@ -358,7 +388,7 @@
             "availability changes"
           ],
           "confidence": "medium",
-          "checked_date": "2026-05-25"
+          "checked_date": "2026-05-20"
         }
       ]
     },
@@ -386,5 +416,16 @@
     "headline": "Pantry/cooking lane is now the working system: rice, tofu (Costco), chicken bakes, and dry legumes are active. Coffee lane is steady on the second Bustelo brick.",
     "next_action": "Next pulse: estimate how many chicken bakes were originally in the box (so remaining ~2 maps to a real fraction), check the second Bustelo brick level, and decide whether to start the Costco tofu, pizza, dupes, or gifted nuggets before the easy-food window narrows.",
     "caveat": "Runway is baseline-only: Costco top-ups are unpriced and their per-unit numbers are not in the burn calculation. Dry pasta, brown sugar, and Chick-fil-A-style dupes have unknown SKUs/prices."
-  }
+  },
+  "visits": [
+    {
+      "id": "c3034957",
+      "date": "2026-06-06",
+      "type": "costco",
+      "duration_min": 45,
+      "amortized_cost": 3.0,
+      "notes": "",
+      "purchases": []
+    }
+  ]
 }

@@ -58,6 +58,9 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
                 "consumed_fraction": consumed_fraction,
                 "consumed_value": consumed,
                 "notes": item.get("notes", ""),
+                "last_price_check": item.get("last_price_check"),
+                "added_on": item.get("added_on"),
+                "consumed_fraction_or_remaining": consumed_fraction,
             }
         )
 

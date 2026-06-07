@@ -100,6 +100,14 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         <h2>Current Read</h2>
         {render_operating_summary(analysis.get('operating_summary', {}))}
       </article>
+      <article class="panel span-12">
+        <h2>Data freshness</h2>
+        {render_freshness(freshness_summary(analysis))}
+      </article>
+      <article class="panel span-12">
+        <h2>Easy food (rotate before delivery)</h2>
+        {easy_food_panel(analysis)}
+      </article>
       <article class="panel span-6">
         <h2>Role Summary</h2>
         {render_role_table(analysis['role_summary'])}
@@ -238,3 +246,44 @@ def render_pulses(rows: list[dict[str, Any]]) -> str:
 def render_bar(fraction: float) -> str:
     pct = max(0, min(100, round(float(fraction) * 100)))
     return f"<div class='bar' aria-label='{pct}% consumed'><span style='width:{pct}%'></span></div>"
+
+
+def freshness_summary(analysis):
+    from .freshness import item_freshness, sourcing_freshness
+    from datetime import date
+    today = date.fromisoformat(analysis["as_of"])
+    item_fresh = [item_freshness(i, today=today) for i in analysis.get("items", [])]
+    src_fresh = [sourcing_freshness(r, today=today) for r in analysis.get("sourcing_research", [])]
+    stale_items = [f for f in item_fresh if f["pricing_stale"]]
+    fresh_items = [f for f in item_fresh if not f["pricing_stale"]]
+    stale_src = [s for s in src_fresh if s["stale"]]
+    return {
+        "stale_count": len(stale_items),
+        "fresh_count": len(fresh_items),
+        "stale_source_count": len(stale_src),
+        "stale_items": stale_items[:6],
+        "stale_sources": stale_src[:6],
+    }
+
+
+def render_freshness(summary):
+    if summary["stale_count"] == 0 and summary["stale_source_count"] == 0:
+        return f"<p class='muted'>{summary['fresh_count']} priced recently, no stale sourcing.</p>"
+    bits = [f"<p class='muted'>{summary['fresh_count']} priced recently, {summary['stale_count']} unpriced or stale.</p>"]
+    if summary["stale_count"]:
+        names = ", ".join(
+            f"{i['name']} ({i['age_label']}, {i['reason']})"
+            for i in summary["stale_items"]
+        )
+        bits.append(f"<p><strong>{summary['stale_count']} unpriced or stale items:</strong> {escape(names)}</p>")
+    if summary["stale_source_count"]:
+        names = ", ".join(
+            f"{s['item']} ({s['age_label']})" for s in summary["stale_sources"]
+        )
+        bits.append(f"<p><strong>{summary['stale_source_count']} stale sourcing rows:</strong> {escape(names)}</p>")
+    return "".join(bits)
+
+
+def easy_food_panel(analysis):
+    from .easy_food import easy_food_summary, render_easy_food
+    return render_easy_food(easy_food_summary(analysis))

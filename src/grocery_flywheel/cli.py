@@ -17,6 +17,7 @@ from .state import (
     save_state,
 )
 from .core import analyze_state
+from .cost_log import add_visit, add_purchase, visits_summary, VISIT_TYPES
 
 
 def _guess_storage(category: str, name: str) -> str:
@@ -410,6 +411,39 @@ def cmd_uninstall(args) -> None:
             print(f'  Not installed: {label}')
 
 
+def cmd_capture_visit(args) -> None:
+    """Interactive capture of a shopping visit: type, duration, amortized cost, purchases."""
+    state = load(args)
+    from datetime import date as _date
+    visit = add_visit(
+        state,
+        date=_date.today().isoformat(),
+        visit_type=args.visit_type,
+        duration_min=args.duration_min,
+        amortized_cost=args.amortized_cost or 0.0,
+        notes=args.notes or "",
+    )
+    save(args, state)
+    print(f"  OK visit {visit['id']} ({visit['type']}, {visit['duration_min']} min)")
+    if args.quick:
+        return
+    while True:
+        raw = input("Add a purchase? (blank to finish)\n> ").strip()
+        if not raw:
+            break
+        try:
+            name, price = raw.rsplit(" ", 1)
+            price = float(price)
+        except ValueError:
+            print("  Format: 'item name PRICE' (e.g., 'Costco tofu 8.99')")
+            continue
+        add_purchase(state, visit_id=visit["id"], name=name, price=price)
+        save(args, state)
+        print(f"  + {name} (${price:.2f})")
+    s = visits_summary(state)
+    print(f"  Cumulative: {s['visit_count']} visits, ${s['total_spend']:.2f} spend, {s['total_duration_min']} min")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="grocery-flywheel")
     parser.add_argument("--state", help="Path to grocery state JSON")
@@ -450,6 +484,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     uninstall = sub.add_parser("uninstall", help="Uninstall LaunchAgent monitors")
     uninstall.set_defaults(func=cmd_uninstall)
+
+    capture = sub.add_parser("capture-visit", help="Record a shopping visit: type, time, cost, purchases")
+    capture.add_argument("--visit-type", required=True, choices=sorted(VISIT_TYPES), help="Type of shopping visit")
+    capture.add_argument("--duration-min", required=True, type=int, help="Approximate visit duration in minutes")
+    capture.add_argument("--amortized-cost", type=float, default=0.0, help="Amortized cost (gas, membership, etc.)")
+    capture.add_argument("--notes", default="", help="Optional note about the visit")
+    capture.add_argument("--quick", action="store_true", help="Skip interactive purchase entry")
+    capture.set_defaults(func=cmd_capture_visit)
 
     return parser
 
