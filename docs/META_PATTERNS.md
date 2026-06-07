@@ -70,6 +70,7 @@ Reusable adapter primitives:
 - substitutions
 - cart draft
 - provenance
+- freshness
 
 ## 9. Approval-First Action Boundary
 

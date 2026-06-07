@@ -109,6 +109,10 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         {render_dietary_profiles(analysis['dietary_profiles'])}
       </article>
       <article class="panel span-12">
+        <h2>Data Freshness</h2>
+        {render_freshness(analysis.get('freshness'))}
+      </article>
+      <article class="panel span-12">
         <h2>Items</h2>
         {render_items(analysis['items'])}
       </article>
@@ -215,3 +219,33 @@ def render_pulses(rows: list[dict[str, Any]]) -> str:
 def render_bar(fraction: float) -> str:
     pct = max(0, min(100, round(float(fraction) * 100)))
     return f"<div class='bar' aria-label='{pct}% consumed'><span style='width:{pct}%'></span></div>"
+
+
+def render_freshness(summary: dict[str, Any] | None) -> str:
+    """Render a small panel that shows how confident we are in item prices
+    and sourcing research.
+
+    The point is to make the user notice when data is going stale so they can
+    refresh it, not to enforce a policy. Pricing and sourcing already
+    document provenance as a first-class concept
+    (see ``docs/SOURCING_RESEARCH_STAGE.md``); this panel is the visible
+    surface of that.
+    """
+    if not summary:
+        return "<p class='muted'>No freshness data.</p>"
+    fresh = summary.get("fresh_count", 0)
+    stale = summary.get("stale_count", 0)
+    parts = [f"<p>{fresh} priced recently, {stale} unpriced or stale.</p>"]
+    flagged = [
+        f"{escape(r['name'])} ({escape(r['age_label'])}, {escape(r['reason'])})"
+        for r in summary.get("items", []) if r["pricing_stale"]
+    ]
+    if flagged:
+        parts.append("<p><strong>Flagged items:</strong> " + ", ".join(flagged) + "</p>")
+    stale_sourcing = [
+        f"{escape(r['item'])} ({escape(r['age_label'])})"
+        for r in summary.get("stale_sourcing", [])
+    ]
+    if stale_sourcing:
+        parts.append("<p><strong>Stale sourcing research:</strong> " + ", ".join(stale_sourcing) + "</p>")
+    return "".join(parts)

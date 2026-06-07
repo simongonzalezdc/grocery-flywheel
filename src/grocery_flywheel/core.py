@@ -4,6 +4,8 @@ from collections import defaultdict
 from datetime import date
 from typing import Any
 
+from .freshness import summarize_freshness
+
 
 def item_consumed_fraction(item: dict[str, Any]) -> float:
     """Return the best-known consumed fraction for an item."""
@@ -56,6 +58,9 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
                 "consumed_fraction": consumed_fraction,
                 "consumed_value": consumed,
                 "notes": item.get("notes", ""),
+                "pricing_status": item.get("pricing_status"),
+                "last_price_check": item.get("last_price_check"),
+                "added_on": item.get("added_on"),
             }
         )
 
@@ -89,6 +94,9 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
         "estimated_total_days": estimated_total_days,
         "estimated_days_remaining": estimated_days_remaining,
         "role_summary": summarize_roles(role_spend, role_consumed),
+        "freshness": summarize_freshness(
+            items, state.get("sourcing_research", []), today=as_of,
+        ),
         "preferences": state.get("preferences", []),
         "dietary_profiles": state.get("dietary_profiles", []),
         "substitutions": substitutions,

@@ -47,6 +47,18 @@ Use `units_total` and `units_remaining` when countable. Use `remaining_fraction`
 
 Use `category` to distinguish food and non-food inventory inside the same run. Examples: `frozen_meal`, `dry_good`, `coffee`, `cleaning_supply`, `paper_good`, `toiletry`, `pet_supply`, `pharmacy_basic`, `operator_supply`.
 
+### Optional Pricing Fields
+
+The pricing-status field is additive and lets the dashboard surface how confident we are in a row's price. The dashboard does not require these fields; items without them are treated as `priced` with no captured check date, which the freshness panel flags as stale so the user can refresh.
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `pricing_status` | string | One of `priced`, `unpriced`, `estimated`, `gift`. The dashboard shows a freshness badge for each. |
+| `last_price_check` | ISO date (`YYYY-MM-DD`) | When the price was last confirmed. Items missing this field show as `no check date` in the Data Freshness panel. |
+| `added_on` | ISO date | When the item entered the run. The freshness panel uses this as a fallback if `last_price_check` is missing. |
+
+`estimated` is intentionally rendered as stale even when the check date is today: the freshness panel's job is to make low-confidence data visible until a real receipt or store page replaces it.
+
 ## Inventory Surface
 
 ```json
