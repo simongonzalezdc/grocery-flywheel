@@ -27,7 +27,11 @@ The primary setup path is retailer history import because past purchases are the
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
-python -m grocery_flywheel.cli examples/sample_state.json --output dist/sample-dashboard.html
+grocery-flywheel adapters validate examples/retailer_profiles.json
+grocery-flywheel run examples/imports/example-history.json \
+  --profiles examples/retailer_profiles.json \
+  --objective balanced_roi \
+  --output dist/sample-dashboard.html
 pytest
 ```
 
@@ -35,7 +39,8 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 
 ## Repo Map
 
-- `src/grocery_flywheel/` - small standard-library CLI and analysis engine.
+- `src/grocery_flywheel/` - standard-library CLI, importer, contract, analysis, and renderer engine.
+- `examples/imports/` - sanitized purchase-history fixtures for end-to-end runs.
 - `examples/sample_state.json` - sanitized example state based on the original workflow shape.
 - `docs/PRD.md` - product requirements and MVP boundary.
 - `docs/DECISION_REGISTER.md` - answered questions, inferred decisions, and best-practice defaults.
@@ -56,4 +61,8 @@ Open `dist/sample-dashboard.html` in a browser to see the generated dashboard.
 
 ## Current Status
 
-Prototype scaffold. It can compute known depletion, runway estimate, preference signals, substitution comparisons, and render a static dashboard. It does not yet ingest Vons automatically.
+MVP implementation in progress. It can validate adapter profiles, import normalized
+JSON/CSV purchase history, analyze savings/sourcing with selectable objectives,
+evaluate dietary restrictions, generate approval-gated internal cart plans, and
+render a static mobile-responsive command center. It does not store retailer
+passwords, mutate external carts, or submit checkout.

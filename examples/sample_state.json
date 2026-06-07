@@ -5,7 +5,9 @@
     "label": "Home groceries"
   },
   "acquisition_channel": "retailer_history_import",
-  "retailer_profiles": ["generic.browser_retailer"],
+  "retailer_profiles": [
+    "generic.browser_retailer"
+  ],
   "dietary_profiles": [
     {
       "profile_id": "household-default",
@@ -21,6 +23,7 @@
     }
   ],
   "order": {
+    "schema_version": "2026-05-26.mvp1",
     "store": "Example Grocery",
     "date": "2026-05-20",
     "total": 117.18
@@ -34,7 +37,17 @@
       "spend": 6.42,
       "units_total": 8,
       "units_remaining": 0,
-      "notes": "Immediate food. Expected to deplete first."
+      "notes": "Immediate food. Expected to deplete first.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-1",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Homestyle waffles",
@@ -43,7 +56,17 @@
       "storage": "frozen",
       "spend": 5.43,
       "remaining_fraction": 0.78,
-      "notes": "Low-friction breakfast."
+      "notes": "Low-friction breakfast.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-2",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Rising crust pizza",
@@ -52,7 +75,17 @@
       "storage": "frozen",
       "spend": 4.94,
       "remaining_fraction": 0,
-      "notes": "Morale food, one per run."
+      "notes": "Morale food, one per run.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-3",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Extra firm tofu",
@@ -62,7 +95,17 @@
       "spend": 5.91,
       "units_total": 3,
       "units_remaining": 2.5,
-      "notes": "Cooking phase started."
+      "notes": "Cooking phase started.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-4",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Chocolate protein milk",
@@ -71,7 +114,17 @@
       "storage": "fridge",
       "spend": 6.49,
       "remaining_fraction": 0.67,
-      "notes": "Required ready protein drink."
+      "notes": "Required ready protein drink.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-5",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Grapefruit juice",
@@ -80,7 +133,17 @@
       "storage": "fridge",
       "spend": 3.47,
       "remaining_fraction": 0.9,
-      "notes": "Interesting non-water drink."
+      "notes": "Interesting non-water drink.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-6",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Cafe Bustelo bricks",
@@ -90,7 +153,17 @@
       "spend": 13.84,
       "units_total": 2,
       "units_remaining": 1.9,
-      "notes": "One opened, one sealed."
+      "notes": "One opened, one sealed.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-7",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Calrose rice 20 lb",
@@ -99,7 +172,17 @@
       "storage": "shelf",
       "spend": 19.8,
       "remaining_fraction": 1,
-      "notes": "Bulk runway extender."
+      "notes": "Bulk runway extender.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-8",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Dry lentils",
@@ -108,7 +191,17 @@
       "storage": "shelf",
       "spend": 2.97,
       "remaining_fraction": 1,
-      "notes": "Fast legume, no soak."
+      "notes": "Fast legume, no soak.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-9",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Dry garbanzo beans",
@@ -117,7 +210,17 @@
       "storage": "shelf",
       "spend": 1.98,
       "remaining_fraction": 1,
-      "notes": "Preferred staple."
+      "notes": "Preferred staple.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-10",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Pasta sauce and pesto",
@@ -126,7 +229,17 @@
       "storage": "shelf",
       "spend": 7.02,
       "remaining_fraction": 1,
-      "notes": "Friction reducer for pantry meals."
+      "notes": "Friction reducer for pantry meals.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-11",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     },
     {
       "name": "Dish soap",
@@ -135,7 +248,17 @@
       "storage": "under_sink",
       "spend": 4.99,
       "remaining_fraction": 0.5,
-      "notes": "Non-food household consumable; stockout creates cleanup friction."
+      "notes": "Non-food household consumable; stockout creates cleanup friction.",
+      "schema_version": "2026-05-26.mvp1",
+      "privacy_class": "sensitive_purchase_history",
+      "confidence": "medium",
+      "source_provenance": {
+        "source": "sample_state",
+        "source_row_id": "sample-12",
+        "raw_size": ""
+      },
+      "product_evidence": [],
+      "quantity": 1
     }
   ],
   "pulses": [
@@ -198,7 +321,10 @@
           "source": "Online bulk pack",
           "unit_price": 0.596,
           "savings": "14%",
-          "constraints": ["bulk storage", "availability changes"],
+          "constraints": [
+            "bulk storage",
+            "availability changes"
+          ],
           "confidence": "medium",
           "checked_date": "2026-05-25"
         }
@@ -214,11 +340,39 @@
           "source": "Warehouse or online refill",
           "unit_price": 0.12,
           "savings": "37%",
-          "constraints": ["membership or shipping", "storage"],
+          "constraints": [
+            "membership or shipping",
+            "storage"
+          ],
           "confidence": "low",
           "checked_date": "2026-05-25"
         }
       ]
     }
-  ]
+  ],
+  "schema_version": "2026-05-26.mvp1",
+  "privacy": {
+    "purchase_history": "sensitive_purchase_history",
+    "household_inventory": "sensitive_household_inventory",
+    "dietary_profiles": "sensitive_dietary_profile",
+    "dietary_evaluations": "sensitive_dietary_profile",
+    "corrections": "sensitive_correction_telemetry",
+    "draft_edit_events": "sensitive_correction_telemetry",
+    "retailer_session": "sensitive_retailer_session",
+    "cart_plan": "sensitive_cart_plan",
+    "run_sheet": "sensitive_cart_plan"
+  },
+  "consent": {
+    "correction_telemetry": "local_only",
+    "hosted_sync": false,
+    "retailer_session_storage": "none",
+    "password_storage": "forbidden"
+  },
+  "purchase_history": {
+    "schema_version": "2026-05-26.mvp1",
+    "privacy_class": "sensitive_purchase_history",
+    "source": "sample_state",
+    "imported_at": "2026-05-24",
+    "confidence": "medium"
+  }
 }

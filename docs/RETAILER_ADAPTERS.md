@@ -97,7 +97,7 @@ Out of MVP scope. If ever supported, it requires explicit final user approval an
     "unit_price": true,
     "availability": true,
     "substitutions": true,
-    "cart_draft": false,
+    "cart_plan": false,
     "order_submit": false
   },
   "constraints": ["login_required", "location_specific_prices"],
@@ -107,6 +107,10 @@ Out of MVP scope. If ever supported, it requires explicit final user approval an
   }
 }
 ```
+
+Profiles are declarative capability records only. They must not store auth
+headers, sessions, cookies, passwords, tokens, API keys, or secret-looking
+values under neutral fields such as provenance.
 
 ## Canonical Order Item
 
@@ -158,4 +162,3 @@ Users and future agents should be able to add a new retailer by creating a profi
 This avoids hardcoding Vons, Walmart, Target, Costco, Amazon, and every local market as separate product decisions. Those are adapter instances. The product decision is the adapter contract.
 
 Vons can be the first real test fixture because we have evidence. It is not the architecture.
-

@@ -24,9 +24,23 @@ This is the default trust posture for Grocery Flywheel as of May 2026. It is pro
 | Household inventory | High | Local-first, minimize sharing |
 | Dietary profile | High | Explicit opt-in, never used for ads |
 | Allergy or safety-critical dietary profile | Very high | Explicit opt-in, strong warnings, never used for ads |
-| Cart draft | Medium/high | User-visible, approval-gated |
+| Internal cart plan | Medium/high | User-visible, approval-gated |
+| External cart draft | Very high | Excluded from MVP; later ADR required |
 | Correction telemetry | Medium | Consent-based, delete/export with account |
 | Aggregated product analytics | Lower | De-identify where possible, document clearly |
+
+## MVP Implementation Boundary
+
+- `src/grocery_flywheel/privacy.py` defines privacy classes and local-first consent defaults.
+- `src/grocery_flywheel/contracts.py` rejects `external_cart_draft` in canonical MVP state.
+- Correction telemetry defaults to `local_only`; hosted sync is opt-in only.
+- Retailer adapter profiles must not contain passwords, tokens, session cookies, or API keys.
+- `order_submit` must remain false for MVP profiles.
+- Safety-critical dietary recommendations fail closed: unknown products and
+  substitution candidates need candidate-specific evidence before they can be
+  treated as safe.
+- Persisted correction events, draft edit events, cart plans, run sheets, and
+  dietary evaluations carry schema and privacy metadata.
 
 ## Retention Defaults
 
@@ -47,6 +61,18 @@ This is the default trust posture for Grocery Flywheel as of May 2026. It is pro
 - Prefer official APIs/export/OAuth where available.
 - Use browser-assisted import only as a user-initiated flow.
 - Do not bypass retailer access controls or anti-bot defenses.
+
+## Hosted Beta Gate
+
+The local MVP can complete without a hosted deployment. Outside testers require:
+
+- export flow
+- delete flow
+- encryption at rest or hosting-provider equivalent
+- retention criteria
+- session clearing
+- secrets and log hygiene
+- no password storage
 
 ## Privacy Sources
 

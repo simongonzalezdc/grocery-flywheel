@@ -4,4 +4,6 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 dist/
-
+*.egg-info/
+.omx/state/
+.omx/tmux-hook.json

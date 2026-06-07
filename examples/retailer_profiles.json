@@ -13,7 +13,7 @@
       "unit_price": true,
       "availability": true,
       "substitutions": true,
-      "cart_draft": true,
+      "cart_plan": true,
       "order_submit": false
     },
     "constraints": ["login_required", "location_specific_prices"],
@@ -36,7 +36,7 @@
       "unit_price": false,
       "availability": false,
       "substitutions": false,
-      "cart_draft": false,
+      "cart_plan": false,
       "order_submit": false
     },
     "constraints": ["receipt_or_manual_required"],
@@ -59,7 +59,7 @@
       "unit_price": true,
       "availability": true,
       "substitutions": true,
-      "cart_draft": false,
+      "cart_plan": false,
       "order_submit": false
     },
     "constraints": ["membership_or_shipping_possible", "bulk_storage_required"],
@@ -69,4 +69,3 @@
     }
   }
 ]
-
