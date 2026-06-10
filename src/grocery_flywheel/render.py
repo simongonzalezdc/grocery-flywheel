@@ -112,6 +112,14 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         <h2>Data Freshness</h2>
         {render_freshness(analysis.get('freshness'))}
       </article>
+      <article class="panel span-6">
+        <h2>Easy Food</h2>
+        {render_easy_food(analysis.get('easy_food', {}))}
+      </article>
+      <article class="panel span-6">
+        <h2>Trip Overhead</h2>
+        {render_visits(analysis.get('visits_summary', {}))}
+      </article>
       <article class="panel span-12">
         <h2>Items</h2>
         {render_items(analysis['items'])}
@@ -248,4 +256,42 @@ def render_freshness(summary: dict[str, Any] | None) -> str:
     ]
     if stale_sourcing:
         parts.append("<p><strong>Stale sourcing research:</strong> " + ", ".join(stale_sourcing) + "</p>")
+    return "".join(parts)
+
+
+def render_easy_food(summary: dict[str, Any] | None) -> str:
+    """Render the easy-food rotation panel as HTML."""
+    from .easy_food import render_easy_food as _render
+    return _render(summary or {})
+
+
+def render_visits(summary: dict[str, Any] | None) -> str:
+    """Render the visit cost panel as HTML.
+
+    The summary is expected to be the dict returned by
+    ``cost_log.visits_summary``. If absent (e.g. older states without a
+    visits array), show a placeholder.
+    """
+    if not summary:
+        return "<p class='muted'>No visits recorded yet. Use <code>capture-visit</code> to log a trip.</p>"
+    count = summary.get("visit_count", 0)
+    if count == 0:
+        return "<p class='muted'>No visits recorded yet.</p>"
+    total_min = summary.get("total_minutes", 0)
+    by_type = summary.get("by_type", {}) or {}
+    by_type_min = summary.get("by_type_minutes", {}) or {}
+    amortized = summary.get("amortized_cost_total", 0.0)
+    parts = [
+        f"<p><strong>{count}</strong> visit(s), <strong>{total_min}</strong> minutes total.</p>",
+    ]
+    if by_type:
+        items = ", ".join(
+            f"{escape(t)}: {by_type[t]} ({by_type_min.get(t, 0)} min)"
+            for t in sorted(by_type)
+        )
+        parts.append(f"<p class='muted'>By type — {items}.</p>")
+    if amortized:
+        parts.append(f"<p>Amortized time cost: <strong>${amortized:.2f}</strong></p>")
+    else:
+        parts.append("<p class='muted'>Set an hourly value in the state to see amortized cost.</p>")
     return "".join(parts)

@@ -23,7 +23,8 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
   "dietary_profiles": [],
   "substitutions": [],
   "sourcing_research": [],
-  "retailer_profiles": []
+  "retailer_profiles": [],
+  "visits": []
 }
 ```
 
@@ -186,3 +187,29 @@ Retailer profiles describe what a store adapter can do. See `docs/RETAILER_ADAPT
   }
 }
 ```
+
+## Visit
+
+The optional `visits` array records trip-level overhead. A visit is a
+single trip to a store or a single delivery received. The dashboard
+shows a "Trip Overhead" panel so the user can notice when a trip is
+becoming a hidden time cost.
+
+```json
+{
+  "id": "v-abc12345",
+  "visit_type": "in_store",
+  "started_at": "2026-06-07T10:00",
+  "duration_min": 45,
+  "purchases": [],
+  "notes": "",
+  "created_at": "2026-06-07T10:01"
+}
+```
+
+`visit_type` must be one of `in_store`, `pickup`, or `delivery`. The
+`grocery-flywheel-capture-visit` CLI appends to the `visits` array and
+assigns a fresh `id` and `created_at` automatically. The
+`amortized_cost_total` in the dashboard is `duration_min / 60 *
+hourly_value`; the user sets their own hourly value in state, and a
+zero or absent value disables the calculation.
