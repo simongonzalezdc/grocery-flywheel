@@ -23,7 +23,8 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
   "dietary_profiles": [],
   "substitutions": [],
   "sourcing_research": [],
-  "retailer_profiles": []
+  "retailer_profiles": [],
+  "visits": []
 }
 ```
 
@@ -46,6 +47,18 @@ The prototype uses a JSON state file. It is intentionally plain so imports can b
 Use `units_total` and `units_remaining` when countable. Use `remaining_fraction` when the user reports a rough fullness signal such as `2/3 full`.
 
 Use `category` to distinguish food and non-food inventory inside the same run. Examples: `frozen_meal`, `dry_good`, `coffee`, `cleaning_supply`, `paper_good`, `toiletry`, `pet_supply`, `pharmacy_basic`, `operator_supply`.
+
+### Optional Pricing Fields
+
+The pricing-status field is additive and lets the dashboard surface how confident we are in a row's price. The dashboard does not require these fields; items without them are treated as `priced` with no captured check date, which the freshness panel flags as stale so the user can refresh.
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `pricing_status` | string | One of `priced`, `unpriced`, `estimated`, `gift`. The dashboard shows a freshness badge for each. |
+| `last_price_check` | ISO date (`YYYY-MM-DD`) | When the price was last confirmed. Items missing this field show as `no check date` in the Data Freshness panel. |
+| `added_on` | ISO date | When the item entered the run. The freshness panel uses this as a fallback if `last_price_check` is missing. |
+
+`estimated` is intentionally rendered as stale even when the check date is today: the freshness panel's job is to make low-confidence data visible until a real receipt or store page replaces it.
 
 ## Inventory Surface
 
@@ -174,3 +187,29 @@ Retailer profiles describe what a store adapter can do. See `docs/RETAILER_ADAPT
   }
 }
 ```
+
+## Visit
+
+The optional `visits` array records trip-level overhead. A visit is a
+single trip to a store or a single delivery received. The dashboard
+shows a "Trip Overhead" panel so the user can notice when a trip is
+becoming a hidden time cost.
+
+```json
+{
+  "id": "v-abc12345",
+  "visit_type": "in_store",
+  "started_at": "2026-06-07T10:00",
+  "duration_min": 45,
+  "purchases": [],
+  "notes": "",
+  "created_at": "2026-06-07T10:01"
+}
+```
+
+`visit_type` must be one of `in_store`, `pickup`, or `delivery`. The
+`grocery-flywheel-capture-visit` CLI appends to the `visits` array and
+assigns a fresh `id` and `created_at` automatically. The
+`amortized_cost_total` in the dashboard is `duration_min / 60 *
+hourly_value`; the user sets their own hourly value in state, and a
+zero or absent value disables the calculation.

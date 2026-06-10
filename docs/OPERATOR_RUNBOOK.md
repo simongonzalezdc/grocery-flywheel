@@ -46,6 +46,9 @@ Open `http://127.0.0.1:8765/sample-dashboard.html` and confirm:
 - role summary renders
 - sourcing research section renders
 - dietary restrictions section renders
+- data freshness section renders
+- easy food section renders
+- trip overhead section renders
 - browser console has no errors
 
 ## Verification Gate

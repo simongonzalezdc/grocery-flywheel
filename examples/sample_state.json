@@ -5,7 +5,9 @@
     "label": "Home groceries"
   },
   "acquisition_channel": "retailer_history_import",
-  "retailer_profiles": ["generic.browser_retailer"],
+  "retailer_profiles": [
+    "generic.browser_retailer"
+  ],
   "dietary_profiles": [
     {
       "profile_id": "household-default",
@@ -34,7 +36,9 @@
       "spend": 6.42,
       "units_total": 8,
       "units_remaining": 0,
-      "notes": "Immediate food. Expected to deplete first."
+      "notes": "Immediate food. Expected to deplete first.",
+      "pricing_status": "priced",
+      "last_price_check": "2026-05-23"
     },
     {
       "name": "Homestyle waffles",
@@ -80,7 +84,9 @@
       "storage": "fridge",
       "spend": 3.47,
       "remaining_fraction": 0.9,
-      "notes": "Interesting non-water drink."
+      "notes": "Interesting non-water drink.",
+      "pricing_status": "unpriced",
+      "added_on": "2026-05-20"
     },
     {
       "name": "Cafe Bustelo bricks",
@@ -90,7 +96,9 @@
       "spend": 13.84,
       "units_total": 2,
       "units_remaining": 1.9,
-      "notes": "One opened, one sealed."
+      "notes": "One opened, one sealed.",
+      "pricing_status": "estimated",
+      "last_price_check": "2026-05-24"
     },
     {
       "name": "Calrose rice 20 lb",
@@ -136,6 +144,19 @@
       "spend": 4.99,
       "remaining_fraction": 0.5,
       "notes": "Non-food household consumable; stockout creates cleanup friction."
+    },
+    {
+      "name": "Example top-up frozen meal",
+      "role": "bridge_food",
+      "category": "frozen_meal",
+      "storage": "frozen",
+      "spend": 0,
+      "units_total": 6,
+      "units_remaining": 6,
+      "added_on": "2026-05-22",
+      "consumed_fraction": 0,
+      "pricing_status": "unpriced",
+      "notes": "Example top-up for the easy-food panel demo."
     }
   ],
   "pulses": [
@@ -198,7 +219,10 @@
           "source": "Online bulk pack",
           "unit_price": 0.596,
           "savings": "14%",
-          "constraints": ["bulk storage", "availability changes"],
+          "constraints": [
+            "bulk storage",
+            "availability changes"
+          ],
           "confidence": "medium",
           "checked_date": "2026-05-25"
         }
@@ -214,11 +238,25 @@
           "source": "Warehouse or online refill",
           "unit_price": 0.12,
           "savings": "37%",
-          "constraints": ["membership or shipping", "storage"],
+          "constraints": [
+            "membership or shipping",
+            "storage"
+          ],
           "confidence": "low",
           "checked_date": "2026-05-25"
         }
       ]
+    }
+  ],
+  "visits": [
+    {
+      "id": "v-sample01",
+      "visit_type": "in_store",
+      "started_at": "2026-05-20T10:00",
+      "duration_min": 40,
+      "purchases": [],
+      "notes": "example visit for the dashboard demo",
+      "created_at": "2026-05-20T10:00"
     }
   ]
 }
