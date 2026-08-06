@@ -1,5 +1,7 @@
 # Grocery Flywheel
 **Local-first grocery replenishment, household inventory runway, and smarter next-cart planning**
+**TL;DR:** Grocery Flywheel — grocery operations / flywheel product tooling. Best for operators building grocery flywheel systems.
+
 
 Grocery Flywheel is an open-source local-first grocery and household replenishment engine. It lowers decision fatigue by tracking inventory runway, known depletion, preference signals, sourcing research, dietary restrictions, and next-cart recommendations from sanitized purchase-history-shaped data.
 
@@ -73,3 +75,81 @@ Prototype scaffold. It can compute known depletion, runway estimate, preference 
 - AI/agent navigation: [llms.txt](llms.txt).
 - Operator verification: [docs/OPERATOR_RUNBOOK.md](docs/OPERATOR_RUNBOOK.md).
 - License: [MIT](LICENSE).
+
+
+- GitHub: https://github.com/simongonzalezdc/grocery-flywheel
+
+<!-- s-plus-geo:start -->
+
+## What is Grocery Flywheel?
+
+**Grocery Flywheel** is a **grocery operations / flywheel product tooling** that helps **operators building grocery flywheel systems** **model and run grocery flywheel loops**.
+
+| | |
+| --- | --- |
+| **Product** | Grocery Flywheel |
+| **Category** | grocery operations / flywheel product tooling |
+| **Best for** | operators building grocery flywheel systems |
+| **Not** | a grocery delivery marketplace app store listing alone |
+| **Source** | [GitHub](https://github.com/simongonzalezdc/grocery-flywheel) · [Forgejo](https://git.kyanitelabs.tech/simon/grocery-flywheel) |
+| **Keywords** | grocery flywheel, grocery operations tooling |
+
+## Who it's for
+
+- Primary: operators building grocery flywheel systems
+- Use when you need to model and run grocery flywheel loops
+- Skip if you need a grocery delivery marketplace app store listing alone
+
+## FAQ
+
+### What is Grocery Flywheel?
+
+Grocery Flywheel is a grocery operations / flywheel product tooling. It helps operators building grocery flywheel systems model and run grocery flywheel loops.
+
+### Who should use Grocery Flywheel?
+
+operators building grocery flywheel systems.
+
+### How is Grocery Flywheel different?
+
+Flywheel ops tooling for grocery systems.
+
+### Is Grocery Flywheel production software?
+
+Treat the README status and release tags as source of truth for maturity. Validate against your own requirements before production use.
+
+## Status
+
+- Maintained as of 2026 on the default branch
+- Prefer release tags when pinning dependencies
+- Report issues on the canonical remote listed above
+
+## Agent surface
+
+- Coding agents: read this README first, then repo docs/`AGENTS.md` if present
+- Prefer machine-readable briefs (`llms.txt`) when the repo ships one
+- MCP or skill entrypoints are documented in-repo when applicable
+
+## Contributing
+
+Issues and PRs welcome on the canonical remote. Keep public docs free of secrets and machine-local paths.
+
+## License
+
+See [LICENSE](LICENSE) in this repository (or package metadata if license is package-only).
+
+
+## Table of contents
+
+- [What is it?](#what-is-grocery-flywheel)
+- [FAQ](#faq)
+- [Status](#status)
+
+
+![status](https://img.shields.io/badge/status-active-success)
+![docs](https://img.shields.io/badge/docs-S%2B_SEO%2FGEO-blue)
+
+
+![Project diagram placeholder](https://img.shields.io/badge/visual-see_docs-lightgrey.svg)
+
+<!-- s-plus-geo:end -->
