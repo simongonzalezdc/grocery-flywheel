@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .core import analyze_state
 from .render import render_dashboard
@@ -15,9 +15,9 @@ def _load_state(args: dict[str, Any]) -> dict[str, Any]:
     state_json = args.get("state_json")
     state_path = args.get("state_path")
     if state_json:
-        return json.loads(str(state_json))
+        return cast(dict[str, Any], json.loads(str(state_json)))
     if state_path:
-        return json.loads(Path(str(state_path)).read_text())
+        return cast(dict[str, Any], json.loads(Path(str(state_path)).read_text()))
     raise ValueError("Provide state_json or state_path.")
 
 
@@ -53,9 +53,11 @@ def summarize_sourcing_research(args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-TOOLS = {
+ToolSpec = dict[str, Any]
+
+TOOLS: dict[str, ToolSpec] = {
     "analyze_replenishment_state": {
-        "description": "Analyze a Grocery Flywheel state JSON object or file path.",
+        "description": "Analyze a Grocery Flywheel replenishment state document and return its structured analysis (items, gaps, sourcing research). Returns a state analysis dict. Use when the agent needs the replenishment picture before rendering or summarizing. Pass state_json (inline state) or state_path (path to a state file) from user input or a previous step.",
         "handler": analyze_replenishment_state,
         "inputSchema": {
             "type": "object",
@@ -66,7 +68,7 @@ TOOLS = {
         },
     },
     "render_replenishment_dashboard": {
-        "description": "Render the local Grocery Flywheel HTML dashboard from state JSON.",
+        "description": "Render the Grocery Flywheel replenishment dashboard as a self-contained HTML file on disk. Returns a dict with output_path (the written file) and items (analyzed item count). Use when the agent must produce a viewable dashboard artifact. Pass output_path (the HTML target) plus state_json or state_path from a prior analyze_replenishment_state result or user input.",
         "handler": render_replenishment_dashboard,
         "inputSchema": {
             "type": "object",
@@ -79,7 +81,7 @@ TOOLS = {
         },
     },
     "summarize_sourcing_research": {
-        "description": "Extract sourcing research questions and decision boundaries from state JSON.",
+        "description": "Extract sourcing research questions and decision boundaries from a replenishment state document. Returns a dict with count and items (item, current_source, research_question, decision_boundary). Use when the agent must summarize open sourcing decisions without the full analysis. Pass state_json or state_path from a prior analyze_replenishment_state result or user input.",
         "handler": summarize_sourcing_research,
         "inputSchema": {
             "type": "object",
@@ -95,7 +97,8 @@ TOOLS = {
 def handle_tool_call(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
     if name not in TOOLS:
         raise ValueError(f"Unknown tool: {name}")
-    return TOOLS[name]["handler"](arguments or {})
+    handler = TOOLS[name]["handler"]
+    return cast(dict[str, Any], handler(arguments or {}))
 
 
 def _tool_list() -> list[dict[str, Any]]:
@@ -105,7 +108,7 @@ def _tool_list() -> list[dict[str, Any]]:
             "description": spec["description"],
             "inputSchema": spec["inputSchema"],
         }
-        for name, spec in TOOLS.items()
+        for name, spec in sorted(TOOLS.items())
     ]
 
 
@@ -134,7 +137,13 @@ def handle_message(message: dict[str, Any]) -> dict[str, Any] | None:
             },
         )
     if method == "tools/list":
-        return _response(message_id, {"tools": _tool_list()})
+        return _response(
+            message_id,
+            {
+                "tools": _tool_list(),
+                "_meta": {"ttlMs": 3600000, "cacheScope": "public"},
+            },
+        )
     if method == "tools/call":
         try:
             result = handle_tool_call(params.get("name", ""), params.get("arguments") or {})
@@ -144,6 +153,8 @@ def handle_message(message: dict[str, Any]) -> dict[str, Any] | None:
             )
         except ValueError as exc:
             return _error(message_id, -32602, str(exc))
+        except Exception as exc:  # noqa: BLE001
+            return _error(message_id, -32603, f"Internal error: {exc}")
     return _error(message_id, -32601, f"Unsupported method: {method}")
 
 
@@ -155,6 +166,8 @@ def main() -> None:
             reply = handle_message(json.loads(line))
         except json.JSONDecodeError as exc:
             reply = _error(None, -32700, f"Invalid JSON: {exc}")
+        except Exception as exc:  # noqa: BLE001
+            reply = _error(None, -32603, f"Internal error: {exc}")
         if reply is not None:
             sys.stdout.write(json.dumps(reply) + "\n")
             sys.stdout.flush()
