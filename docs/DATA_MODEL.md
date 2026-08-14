@@ -211,5 +211,6 @@ becoming a hidden time cost.
 `grocery-flywheel-capture-visit` CLI appends to the `visits` array and
 assigns a fresh `id` and `created_at` automatically. The
 `amortized_cost_total` in the dashboard is `duration_min / 60 *
-hourly_value`; the user sets their own hourly value in state, and a
-zero or absent value disables the calculation.
+hourly_value`; the user sets their own hourly value via the optional
+top-level `hourly_value` field (a number, dollars per hour), and a zero
+or absent value disables the calculation.

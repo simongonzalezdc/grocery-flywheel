@@ -90,9 +90,14 @@ def easy_food_summary(
         rows.append({
             "name": item.get("name", ""),
             "role": role,
+            "age_days": age,
             "age_label": "today" if age == 0 else f"{age}d ago",
         })
-    rows.sort(key=lambda r: r["age_label"])
+    # Oldest first: the oldest top-up is the closest to leaving the window
+    # (and to expiring), so it is the most urgent to rotate. Sorting on the
+    # numeric age — the old sort on the label string ordered "10d ago"
+    # before "2d ago" lexicographically.
+    rows.sort(key=lambda r: r["age_days"], reverse=True)
     return {"count": len(rows), "items": rows}
 
 

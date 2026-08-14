@@ -96,7 +96,9 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
             items, state.get("sourcing_research", []), today=as_of,
         ),
         "easy_food": easy_food_summary(state, today=as_of),
-        "visits_summary": visits_summary(state),
+        "visits_summary": visits_summary(
+            state, hourly_value=state.get("hourly_value")
+        ),
         "preferences": state.get("preferences", []),
         "dietary_profiles": state.get("dietary_profiles", []),
         "substitutions": substitutions,
