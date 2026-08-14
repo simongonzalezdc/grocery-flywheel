@@ -27,7 +27,6 @@ This is the visible surface of two Meta Patterns:
 from __future__ import annotations
 
 from datetime import date
-from html import escape
 from typing import Any
 
 from .model import age_in_days, consumed_fraction
@@ -102,16 +101,6 @@ def easy_food_summary(
 
 
 def render_easy_food(summary: dict[str, Any]) -> str:
-    """Render the easy-food summary as an HTML panel body."""
-    if not summary or summary.get("count", 0) == 0:
-        return "<p class='muted'>No unopened top-ups in the easy-food window.</p>"
-    items = summary["items"]
-    parts = [f"<p><strong>{summary['count']} unopened top-up(s):</strong></p><ul>"]
-    for row in items:
-        parts.append(
-            f"<li><strong>{escape(str(row['name']))}</strong> "
-            f"({escape(str(row['role']))}, {escape(str(row['age_label']))}) — "
-            f"rotate into a meal before the next top-up duplicates it.</li>"
-        )
-    parts.append("</ul>")
-    return "".join(parts)
+    """Back-compat shim — the HTML lives in the rendering package now."""
+    from .rendering.panels import _easy_food
+    return _easy_food({"easy_food": summary or {}})

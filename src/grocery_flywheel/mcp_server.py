@@ -78,6 +78,25 @@ def evaluate_dietary(args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def plan_next_cart(args: dict[str, Any]) -> dict[str, Any]:
+    from .draft import generate_cart_plan
+
+    analysis = analyze_state(_load_state(args), objective=args.get("objective"))
+    plan = generate_cart_plan(analysis, mode=str(args.get("mode", "pickup")))
+    # Structural approval boundary: this server plans, a human decides.
+    # There is no checkout surface, and there never will be one here.
+    assert plan["checkout_available"] is False
+    assert plan["approval_required"] is True
+    assert all(item["approval_state"] == "needs_human_approval" for item in plan["items"])
+    return {
+        "mode": plan["mode"],
+        "approval_required": plan["approval_required"],
+        "checkout_available": plan["checkout_available"],
+        "item_count": len(plan["items"]),
+        "items": plan["items"],
+    }
+
+
 ToolSpec = dict[str, Any]
 
 TOOLS: dict[str, ToolSpec] = {
@@ -125,6 +144,19 @@ TOOLS: dict[str, ToolSpec] = {
                 "state_path": {"type": "string"},
                 "state_json": {"type": "string"},
                 "objective": {"type": "string"},
+            },
+        },
+    },
+    "plan_next_cart": {
+        "description": "Generate an internal next-cart plan from a replenishment state: restock candidates from observed depletion plus sourcing moves, each marked needs_human_approval. The result is a plan for a human to act on — checkout_available is always false and the server asserts it; this tool never places orders or touches a retailer cart. Optionally pass objective and mode (pickup, delivery, in_person). Use when the agent must propose the next cart for user review.",
+        "handler": plan_next_cart,
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "state_path": {"type": "string"},
+                "state_json": {"type": "string"},
+                "objective": {"type": "string"},
+                "mode": {"type": "string", "enum": ["pickup", "delivery", "in_person"]},
             },
         },
     },

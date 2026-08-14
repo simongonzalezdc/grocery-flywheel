@@ -7,6 +7,7 @@ from typing import Any
 from .corrections import derived_preferences
 from .cost_log import visits_summary
 from .dietary import evaluate_dietary_profiles, has_critical_dietary_profile
+from .draft import generate_cart_plan, generate_run_sheet
 from .easy_food import easy_food_summary
 from .freshness import summarize_freshness
 from .model import clamp as _clamp
@@ -128,7 +129,7 @@ def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[s
             ),
         )
 
-    return {
+    analysis = {
         "order": order,
         "as_of": state["as_of"],
         "objective": objective,
@@ -155,6 +156,34 @@ def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[s
         "substitutions": substitutions,
         "sourcing_research": sourcing_research,
         "pulses": state.get("pulses", []),
+        "consent": state.get("consent", {}),
+        "shopping_mode": state.get("shopping_mode", "pickup"),
+    }
+    analysis["first_wow"] = first_wow(analysis)
+    analysis["cart_plan"] = generate_cart_plan(
+        analysis, mode=analysis["shopping_mode"]
+    )
+    analysis["run_sheet"] = generate_run_sheet(analysis)
+    return analysis
+
+
+def first_wow(analysis: dict[str, Any]) -> dict[str, Any]:
+    sourcing = analysis.get("sourcing_research", [])
+    total_savings = 0.0
+    best_label = "No sourcing move yet"
+    if sourcing:
+        best = sourcing[0]
+        alt = (best.get("alternatives") or [{}])[0]
+        total_savings += float(alt.get("savings_amount", 0) or 0)
+        best_label = f"{best['item']} at {alt.get('source', 'alternate source')}"
+    for row in analysis.get("substitutions", []):
+        total_savings += max(0.0, float(row.get("savings_amount", 0) or 0))
+    return {
+        "estimated_unit_savings": round(total_savings, 2),
+        "best_sourcing_move": best_label,
+        "headline": "Savings and sourcing options are ready for review"
+        if total_savings > 0
+        else "Runway and sourcing baseline are ready",
     }
 
 
