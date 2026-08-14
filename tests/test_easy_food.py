@@ -9,7 +9,7 @@ top-up duplicates the stock.
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 
 from grocery_flywheel.easy_food import easy_food_summary, render_easy_food
 
