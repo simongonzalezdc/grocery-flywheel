@@ -5,9 +5,7 @@
     "label": "Home groceries"
   },
   "acquisition_channel": "retailer_history_import",
-  "retailer_profiles": [
-    "generic.browser_retailer"
-  ],
+  "hourly_value": 25,
   "dietary_profiles": [
     {
       "profile_id": "household-default",
