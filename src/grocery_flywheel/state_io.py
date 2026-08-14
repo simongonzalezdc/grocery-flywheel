@@ -17,6 +17,15 @@ def load_state(path: str | Path) -> dict[str, Any]:
     return json.loads(Path(path).read_text())
 
 
+def write_state(state: dict[str, Any], path: str | Path) -> Path:
+    """Write a state file. Callers are expected to have validated (fail-closed
+    at write) — this function is the mechanical half only."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(state, indent=2) + "\n")
+    return target
+
+
 def render_to_file(html: str, output_path: str | Path) -> Path:
     """Write a rendered artifact, creating parent directories.
 
