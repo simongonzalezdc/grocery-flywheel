@@ -40,13 +40,15 @@ def _run_import(argv: list[str]) -> None:
     normalized.add_argument("payload", type=Path)
     normalized.add_argument("--profile-id", default=None)
     normalized.add_argument("--as-of", default=None, help="Override the as_of date (ISO).")
+    normalized.add_argument("--output", "-o", type=Path, required=True,
+                            help="Canonical state JSON to write.")
 
     csv = sub.add_parser("csv", help="Import a CSV export.")
     csv.add_argument("payload", type=Path)
     csv.add_argument("--profile-id", default=None)
+    csv.add_argument("--output", "-o", type=Path, required=True,
+                     help="Canonical state JSON to write.")
 
-    parser.add_argument("--output", "-o", type=Path, required=True,
-                        help="Canonical state JSON to write.")
     args = parser.parse_args(argv)
 
     if args.kind == "normalized":
