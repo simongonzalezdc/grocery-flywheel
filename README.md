@@ -11,7 +11,7 @@ Grocery Flywheel is an open-source local-first grocery and household replenishme
 - **Who it helps:** households, caregivers, operators, small teams, and builders working on privacy-first replenishment systems.
 - **Core workflows:** import or model purchase history, estimate item runway, compare substitutions, preserve preferences, plan next carts, and render static dashboards.
 - **Safety stance:** local-first, approval-first, privacy-first; it does not place orders or modify carts without explicit user approval.
-- **Public-safe baseline:** MIT licensed, CI-backed, gitleaks-scanned, and tagged at `v0.1.0-public`.
+- **Public-safe baseline:** MIT licensed, CI-backed, and tagged at `v0.1.0-public`.
 
 Grocery is the first module, but grocery does not mean food only. It includes everything a grocery store or household restock trip can cover: food, coffee, cleaning supplies, paper goods, toiletries, pet supplies, basic pharmacy, and other recurring consumables. The broader product pattern is a replenishment flywheel: observe inventory, capture tiny usage signals, preserve preference corrections, and recommend the next restock with an approval boundary.
 

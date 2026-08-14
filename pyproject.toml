@@ -20,6 +20,13 @@ grocery-flywheel-capture-visit = "grocery_flywheel.capture_visit:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.ruff.lint]
+# Explicit selection: ruff's implicit default rule set changed in newer
+# releases (0.16+ flags I/DTZ/UP/PL out of the box), which made `ruff check .`
+# depend on the installed ruff version. Pin the classic default set so CI is
+# deterministic. Widen deliberately, not by linter upgrade.
+select = ["E4", "E7", "E9", "F"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
