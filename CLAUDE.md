@@ -14,10 +14,6 @@ Local-first grocery replenishment engine and household inventory runway calculat
 <!-- EMPOWER_ORCHESTRATOR:START -->
 ## Empower the Orchestrator
 
-This repository follows the Empower Orchestrator law. If a top-level agent sees a repeatable task or recurring failure, it should consider the smallest durable improvement after stating the four-question blast-radius check: scale, severity, reversibility, and predictability.
-
-Workers and subagents stay inside assigned scope and provide verification evidence before completion claims.
-
-Full recipe: `docs/agent-law/empower-orchestrator.md`.
+One copy of the law exists: [docs/agent-law/empower-orchestrator.md](docs/agent-law/empower-orchestrator.md). State the four-question blast-radius check (scale, severity, reversibility, predictability) before durable changes.
 <!-- EMPOWER_ORCHESTRATOR:END -->
 

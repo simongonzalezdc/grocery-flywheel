@@ -1,8 +1,11 @@
 {
   "mcpServers": {
     "grocery-flywheel": {
-      "command": "python",
-      "args": ["-m", "grocery_flywheel.mcp_server"]
+      "command": "python3",
+      "args": [
+        "-m",
+        "grocery_flywheel.mcp_server"
+      ]
     }
   }
 }

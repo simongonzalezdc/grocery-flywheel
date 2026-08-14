@@ -18,3 +18,5 @@ id_ed25519
 # Local agent workspace
 .omx/
 .scratch/
+.worktrees/
+.playwright-mcp/
