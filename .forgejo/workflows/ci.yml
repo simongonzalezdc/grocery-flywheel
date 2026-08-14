@@ -29,10 +29,10 @@ jobs:
         run: |
           ARCH=$(uname -m)
           case "$ARCH" in
-            x86_64) GL_ARCH=amd64 ;;
-            aarch64|arm64) GL_ARCH=arm64 ;;
+            x86_64) GL_ASSET=gitleaks_8.24.3_linux_x64 ;;
+            aarch64|arm64) GL_ASSET=gitleaks_8.24.3_linux_arm64 ;;
             *) echo "unsupported arch $ARCH"; exit 1 ;;
           esac
-          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_${GL_ARCH}.tar.gz" | tar -xz -C /usr/local/bin gitleaks
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/${GL_ASSET}.tar.gz" | tar -xz -C /usr/local/bin gitleaks
           gitleaks version
           gitleaks detect --source . --no-git --redact --verbose
