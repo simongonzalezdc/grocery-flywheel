@@ -19,7 +19,7 @@ def _run(lines: list[str]) -> list[dict]:
     stdin = io.StringIO("".join(line + "\n" for line in lines))
     stdout = io.StringIO()
     serve(stdin, stdout)
-    return [json.loads(l) for l in stdout.getvalue().splitlines()]
+    return [json.loads(line) for line in stdout.getvalue().splitlines()]
 
 
 def test_initialize_reports_single_sourced_version():
