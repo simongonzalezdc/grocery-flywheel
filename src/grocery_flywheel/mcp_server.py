@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 from typing import Any, cast
 
+from . import __version__
 from .core import analyze_state
 from .render import render_dashboard
+from .state_io import load_state, render_to_file
 
+# The MCP protocol revision this server speaks. Deliberately NOT tied to
+# the package version: it tracks the protocol spec date, not releases.
 PROTOCOL_VERSION = "2024-11-05"
 
 
@@ -17,7 +20,7 @@ def _load_state(args: dict[str, Any]) -> dict[str, Any]:
     if state_json:
         return cast(dict[str, Any], json.loads(str(state_json)))
     if state_path:
-        return cast(dict[str, Any], json.loads(Path(str(state_path)).read_text()))
+        return load_state(str(state_path))
     raise ValueError("Provide state_json or state_path.")
 
 
@@ -30,9 +33,7 @@ def render_replenishment_dashboard(args: dict[str, Any]) -> dict[str, Any]:
     if not output_path:
         raise ValueError("Provide output_path.")
     analysis = analyze_state(_load_state(args))
-    target = Path(str(output_path))
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(render_dashboard(analysis))
+    target = render_to_file(render_dashboard(analysis), str(output_path))
     return {"output_path": str(target), "items": len(analysis["items"])}
 
 
@@ -133,7 +134,7 @@ def handle_message(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": PROTOCOL_VERSION,
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "grocery-flywheel", "version": "0.1.0"},
+                "serverInfo": {"name": "grocery-flywheel", "version": __version__},
             },
         )
     if method == "tools/list":
@@ -158,8 +159,13 @@ def handle_message(message: dict[str, Any]) -> dict[str, Any] | None:
     return _error(message_id, -32601, f"Unsupported method: {method}")
 
 
-def main() -> None:
-    for line in sys.stdin:
+def serve(stdin: Any, stdout: Any) -> None:
+    """Run the line-delimited JSON-RPC loop over the given streams.
+
+    Split from ``main`` so tests can drive the protocol with StringIO
+    instead of the real stdin/stdout.
+    """
+    for line in stdin:
         if not line.strip():
             continue
         try:
@@ -169,8 +175,12 @@ def main() -> None:
         except Exception as exc:  # noqa: BLE001
             reply = _error(None, -32603, f"Internal error: {exc}")
         if reply is not None:
-            sys.stdout.write(json.dumps(reply) + "\n")
-            sys.stdout.flush()
+            stdout.write(json.dumps(reply) + "\n")
+            stdout.flush()
+
+
+def main() -> None:
+    serve(sys.stdin, sys.stdout)
 
 
 if __name__ == "__main__":

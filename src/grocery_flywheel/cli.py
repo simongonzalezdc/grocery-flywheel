@@ -1,24 +1,23 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 from .core import analyze_state
 from .render import render_dashboard
+from .state_io import load_state, render_to_file
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Render a Grocery Flywheel dashboard.")
     parser.add_argument("state", type=Path, help="Path to replenishment state JSON.")
     parser.add_argument("--output", "-o", type=Path, required=True, help="HTML output path.")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
-    state = json.loads(args.state.read_text())
+    state = load_state(args.state)
     analysis = analyze_state(state)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(render_dashboard(analysis))
-    print(f"wrote {args.output}")
+    target = render_to_file(render_dashboard(analysis), args.output)
+    print(f"wrote {target}")
 
 
 if __name__ == "__main__":

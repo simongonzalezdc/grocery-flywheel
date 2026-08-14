@@ -1,6 +1,7 @@
-"""Grocery Flywheel prototype package."""
+"""Grocery Flywheel — local-first household replenishment engine."""
 
 from .core import analyze_state
 
-__all__ = ["analyze_state"]
+__version__ = "0.1.0"
 
+__all__ = ["analyze_state", "__version__"]
