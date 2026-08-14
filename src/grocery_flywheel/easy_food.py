@@ -57,7 +57,7 @@ def _is_baseline(item: dict[str, Any]) -> bool:
     The signal is the presence of ``added_on``: a top-up is any item with
     a recorded entry date. Baseline items do not have one. This is
     deliberately a presence test, not a value test, so a user can store
-    whatever string they want in ``source`` (e.g. ``Vons baseline``) and
+    whatever string they want in ``source`` (e.g. ``store baseline``) and
     the easy-food matcher still works.
     """
     return "added_on" not in item

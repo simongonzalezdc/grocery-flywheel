@@ -214,3 +214,36 @@ assigns a fresh `id` and `created_at` automatically. The
 hourly_value`; the user sets their own hourly value via the optional
 top-level `hourly_value` field (a number, dollars per hour), and a zero
 or absent value disables the calculation.
+
+## Canonical Contract (write-side, shipped 2026-08-14)
+
+Importers and writers produce **canonical states**: every object stamped with
+`schema_version` (current: `2026-08-14.mvp2`), privacy classes on sensitive
+collections, consent object with local-first defaults, per-item provenance and
+confidence, and optional `product_evidence` (ingredients / allergen statements /
+certifications, each with type+source+checked_date). Validation
+(`grocery_flywheel.model.contract.validate_canonical_state`) is **fail-closed at
+write/import only** — the CLI refuses to write an invalid canonical state
+(exit 2) — while reading stays lenient so every vintage below keeps rendering.
+
+Item rows merge both lineages: depletion in any encoding (remaining_fraction /
+units / consumed_fraction), freshness fields (`pricing_status`,
+`last_price_check`, `added_on` — presence of `added_on` means top-up, absence
+means baseline; it is omitted, never null), plus quantity, size, unit_price,
+confidence, `source_provenance`, and `product_evidence`.
+
+New top-level collections: `corrections` (durable signals, consent-gated),
+`draft_edit_events`, `cart_plan` / `run_sheet` (always `needs_human_approval`,
+`checkout_available: false`), `privacy` (field → class map), `consent`,
+`purchase_history` provenance, `storage`, `preferences_config`, `objective`.
+
+## Schema vintages (D4: permanent coexistence)
+
+| Vintage | Meaning |
+|---|---|
+| *(absent)* | Original hand-authored states — fully supported, lenient read, no sunset |
+| `2026-05-26.mvp1` | The 2026-05 WIP contract — read leniently; no writer produces it today |
+| `2026-08-14.mvp2` | Current canonical contract — the only version writers emit |
+
+No forced migrations, ever (decision D4, 2026-08-14). A state that renders
+today renders in every future release.

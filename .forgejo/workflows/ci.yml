@@ -23,3 +23,5 @@ jobs:
             pip install --break-system-packages pytest
             pytest
           fi
+      - name: Docs link check
+        run: python3 scripts/check_docs_links.py

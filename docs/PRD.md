@@ -1,5 +1,8 @@
 # Product Requirements
 
+> Status 2026-08-14: the MVP surface described here is shipped — analysis, import, dietary evaluation, objectives, corrections, MCP server, dark dashboard. See the README section "What it actually does today" for honest per-feature status.
+
+
 ## Product
 
 Grocery Flywheel is a local-first assistant workflow for neurodivergent-friendly grocery-store and household replenishment. It learns from real orders, in-person store inputs, small depletion check-ins, and explicit user corrections to produce high-ROI next-cart recommendations.

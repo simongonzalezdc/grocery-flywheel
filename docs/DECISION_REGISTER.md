@@ -48,7 +48,7 @@ This register maps the user's answer dump onto the earlier product questions. Wh
 | P1-18 | Shareable adapters | Adapter manifests can become shareable. Credentials, sessions, user history, and fragile personal selectors stay private. | Defaulted |
 | P1-19 | Adapter contents | Store normalized schema plus capability metadata. Browser selectors/steps may exist in versioned adapter modules, isolated from user data. | Defaulted |
 | P1-20 | Blocked/changing retailers | Degrade gracefully to export/email/receipt/manual. Do not bypass anti-bot or terms barriers. Show adapter health and confidence. | Defaulted |
-| P1-21 | Vons data role | Vons can be a private test fixture because evidence exists. It is not the architecture. | Resolved |
+| P1-21 | Vons data role | A regional supermarket can be a private test fixture. It is not the architecture. | Resolved |
 
 ## P1 Data And Intelligence
 
@@ -99,3 +99,19 @@ These do not block the next prototype, but they should be revisited after seeing
 3. Dietary restrictions module depth: label scanner only, cart-level blocker, or household profile system.
 4. In-person shopping mode: checklist, aisle route, or store-agnostic run sheet.
 5. How much automation users trust before they want to inspect every step.
+
+## 2026-08-14 — v0.2.0 Redesign (consensus via ralplan; VISION_GRILL answers absorbed here)
+
+| ID | Decision | Status |
+|---|---|---|
+| R-1 | Phased 6-PR redesign with WIP library harvest and CI-truth-first sequencing; big-bang and docs-first rejected | Resolved |
+| R-2 | CI blocks: no `\|\| true` guards; lint rule set pinned explicitly (E4/E7/E9/F) so linter upgrades can't silently change CI semantics | Resolved |
+| R-3 | One home per domain fact: model/ package owns depletion+date math; rendering/ owns all HTML; state_io owns file IO | Resolved |
+| R-4 | Objective-awareness is opt-in (explicit flag or state field); legacy states keep byte-identical output | Resolved |
+| R-5 | Schema vintages coexist permanently (D4): unversioned, 2026-05-26.mvp1, 2026-08-14.mvp2 — lenient read forever, fail-closed write/import | Resolved |
+| D1 | Dashboard aesthetic: dark command-center leads; main's panels rebuilt inside it | Resolved |
+| D2 | design-preview.html kept, linked from docs/design.md as the future-surface companion | Resolved |
+| D3 | Quick start is pipx-first (`pipx install git+...`), venv fallback documented | Resolved |
+| D4 | Permanent schema-vintage coexistence; no sunset, no forced migration | Resolved |
+
+Docs collapse 2026-08-14: VISION_GRILL → this register + PRD; RETAILER_ADAPTERS + ONBOARDING + SOURCING_RESEARCH_STAGE → adapters.md; META_PATTERNS + EXPANSION_USE_CASES → patterns.md; DESIGN + PRODUCT_DESIGN_RESEARCH_2026 → design.md.
