@@ -7,26 +7,22 @@ from typing import Any
 from .cost_log import visits_summary
 from .easy_food import easy_food_summary
 from .freshness import summarize_freshness
+from .model import clamp as _clamp
+from .model import consumed_fraction
 
 
 def item_consumed_fraction(item: dict[str, Any]) -> float:
-    """Return the best-known consumed fraction for an item."""
-    if "remaining_fraction" in item and item["remaining_fraction"] is not None:
-        return clamp(1.0 - float(item["remaining_fraction"]))
+    """Return the best-known consumed fraction for an item.
 
-    total = item.get("units_total")
-    remaining = item.get("units_remaining")
-    if total not in (None, 0) and remaining is not None:
-        return clamp((float(total) - float(remaining)) / float(total))
-
-    if "consumed_fraction" in item and item["consumed_fraction"] is not None:
-        return clamp(float(item["consumed_fraction"]))
-
-    return 0.0
+    Delegates to :func:`grocery_flywheel.model.consumed_fraction` — the
+    single implementation every panel shares.
+    """
+    return consumed_fraction(item)
 
 
 def clamp(value: float) -> float:
-    return max(0.0, min(1.0, value))
+    """Back-compat re-export of the model package's clamp (single home)."""
+    return _clamp(value)
 
 
 def analyze_state(state: dict[str, Any]) -> dict[str, Any]:

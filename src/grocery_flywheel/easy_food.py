@@ -26,9 +26,11 @@ This is the visible surface of two Meta Patterns:
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 from html import escape
 from typing import Any
+
+from .model import age_in_days, consumed_fraction
 
 EASY_FOOD_ROLES = {"bridge_food", "protein"}
 EASY_FOOD_WINDOW_DAYS = 30
@@ -36,27 +38,18 @@ EASY_FOOD_MAX_CONSUMED = 0.10  # treat anything <= 10% as effectively unopened
 
 
 def _age_days(added_on: Any, today: date) -> int | None:
-    if not added_on or not isinstance(added_on, str):
-        return None
-    try:
-        return (today - date.fromisoformat(added_on)).days
-    except ValueError:
-        # Try full ISO datetime
-        try:
-            return (today - datetime.fromisoformat(added_on).date()).days
-        except ValueError:
-            return None
+    """Back-compat shim: age math lives in the model package now."""
+    return age_in_days(added_on, today=today)
 
 
 def _consumed_fraction(item: dict[str, Any]) -> float:
-    """Return the best-known consumed fraction for a top-up item."""
-    if "consumed_fraction" in item and item["consumed_fraction"] is not None:
-        return float(item["consumed_fraction"])
-    total = item.get("units_total")
-    remaining = item.get("units_remaining")
-    if total not in (None, 0) and remaining is not None:
-        return max(0.0, min(1.0, (float(total) - float(remaining)) / float(total)))
-    return 0.0
+    """Back-compat shim: depletion math lives in the model package now.
+
+    The model's precedence treats ``remaining_fraction`` as the strongest
+    signal, so a top-up recorded as mostly depleted via remaining_fraction
+    correctly fails this panel's unopened filter.
+    """
+    return consumed_fraction(item)
 
 
 def _is_baseline(item: dict[str, Any]) -> bool:

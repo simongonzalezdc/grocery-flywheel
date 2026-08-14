@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "grocery-flywheel"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Local-first grocery runway and decision-fatigue workflow"
 requires-python = ">=3.11"
 dependencies = []
@@ -19,6 +19,9 @@ grocery-flywheel-capture-visit = "grocery_flywheel.capture_visit:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "grocery_flywheel.__version__" }
 
 [tool.ruff.lint]
 # Explicit selection: ruff's implicit default rule set changed in newer

@@ -20,6 +20,8 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Callable, Iterable
 
+from .model import age_in_days as _model_age_in_days
+
 # A field older than this is considered stale. The user is the source of
 # truth on this number; 7 days is the default but the dashboard could expose
 # it later as a setting.
@@ -31,17 +33,12 @@ KNOWN_PRICING_STATUSES = {"priced", "unpriced", "estimated", "gift"}
 
 
 def age_in_days(checked: Any, *, today: date) -> int | None:
-    """Return the number of days between ``checked`` and ``today``.
+    """Back-compat shim: date math lives in the model package now.
 
-    Returns ``None`` if ``checked`` is missing, not a string, or not a valid
-    ISO date. The dashboard uses ``None`` to mean "no check date recorded".
+    Accepts plain dates and full datetimes (the model unifies the two
+    tolerances the freshness and easy-food paths used to have).
     """
-    if not checked or not isinstance(checked, str):
-        return None
-    try:
-        return (today - date.fromisoformat(checked)).days
-    except ValueError:
-        return None
+    return _model_age_in_days(checked, today=today)
 
 
 def is_stale(age_days: int | None) -> bool:

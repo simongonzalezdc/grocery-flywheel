@@ -29,6 +29,8 @@ from dataclasses import dataclass, field, asdict
 from datetime import date, datetime
 from typing import Any
 
+from .model import parse_day
+
 VALID_VISIT_TYPES = {"in_store", "pickup", "delivery"}
 
 
@@ -106,9 +108,8 @@ def _within_window(visit: dict[str, Any], *, today: date, window_days: int) -> b
     started_at = visit.get("started_at")
     if not started_at:
         return False
-    try:
-        visit_date = datetime.fromisoformat(started_at).date()
-    except ValueError:
+    visit_date = parse_day(started_at)
+    if visit_date is None:
         return False
     delta = (today - visit_date).days
     return 0 <= delta <= window_days
