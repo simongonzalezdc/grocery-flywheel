@@ -10,7 +10,7 @@ item is or what its price means. The dashboard passes a callable that knows
 how to extract a check date from a given object.
 
 Pricing provenance is already documented in
-``docs/SOURCING_RESEARCH_STAGE.md`` and ``docs/RETAILER_ADAPTERS.md`` as a
+``docs/adapters.md`` as a
 first-class concept. This module adds a presentation layer for it on the
 items and sourcing research that the dashboard already renders.
 """

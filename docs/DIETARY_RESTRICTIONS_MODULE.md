@@ -1,5 +1,7 @@
 # Dietary Restrictions Module
 
+> Status 2026-08-14: **shipped** as `dietary.py` — evidence-gated, fail-closed, wired into analysis and the `evaluate_dietary` MCP tool. This doc is the safety model; the code is the truth.
+
 The dietary restrictions module is a high-value optimization path. Allergies are the safety-critical subset, not the whole category.
 
 ## Product Goal

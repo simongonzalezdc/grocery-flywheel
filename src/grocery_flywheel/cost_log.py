@@ -17,7 +17,7 @@ The model is intentionally minimal:
   or leave it at zero to disable.
 
 This is the visible surface of the friction concept from
-``docs/META_PATTERNS.md`` section 4: "A cheaper item can lose if it
+``docs/patterns.md`` pattern 4 (Friction Budget): "A cheaper item can lose if it
 requires too much cooking, prep, storage, cleanup, or coordination." A
 visit log lets the user notice when a trip is becoming a hidden cost.
 """

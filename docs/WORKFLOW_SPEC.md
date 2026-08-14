@@ -73,19 +73,19 @@ The system can map this into structured state later. The user should not have to
 
 ## Sourcing Research Stage
 
-See `docs/SOURCING_RESEARCH_STAGE.md`.
+See `docs/adapters.md` (sourcing research section).
 
 This stage asks: "Is this item worth buying somewhere else?"
 
 Candidate sources can include the current grocery store, another grocery store, a warehouse club, Target/Walmart-style retailer, online retailer, ethnic market, restaurant supply store, office supplier, or specialty store.
 
-## Current Known Preference Rules
+## Preference Rules Live In The State
 
-- Bustelo is the moka-pot default unless a better price-quality source is confirmed.
-- Dried beans, garbanzos, and lentils are welcome.
-- Diced microwave chicken is rejected; prefer strips, fillets, or whole pieces.
-- Bridge foods get eaten first, then cooking starts. This is expected behavior.
+Preference rules are user data, not spec text: durable corrections recorded with
+`grocery-flywheel corrections add` become derived preferences that override
+price-only logic (see `docs/DATA_MODEL.md` and `docs/patterns.md` pattern 5).
+The spec deliberately carries no one household's actual rules.
 
 ## Generalization Rule
 
-When adding a feature, ask whether it is grocery-specific or a replenishment flywheel primitive. Keep grocery-specific language in module docs and promote reusable mechanics into `META_PATTERNS.md`.
+When adding a feature, ask whether it is grocery-specific or a replenishment flywheel primitive. Keep grocery-specific language in module docs and promote reusable mechanics into `docs/patterns.md`.

@@ -87,7 +87,7 @@
       "added_on": "2026-05-20"
     },
     {
-      "name": "Cafe Bustelo bricks",
+      "name": "Espresso bricks",
       "role": "coffee",
       "category": "coffee",
       "storage": "shelf",
@@ -190,7 +190,7 @@
   ],
   "substitutions": [
     {
-      "current": "Tyson diced chicken",
+      "current": "Diced chicken",
       "candidate": "Tyson grilled strips",
       "current_unit_price": 0.45,
       "candidate_unit_price": 0.454,
@@ -198,8 +198,8 @@
       "read": "Same price tier, better form factor."
     },
     {
-      "current": "Cafe Bustelo from grocery store",
-      "candidate": "Cafe Bustelo bulk or alternate retailer",
+      "current": "Espresso from grocery store",
+      "candidate": "Espresso bulk or alternate retailer",
       "current_unit_price": 0.692,
       "candidate_unit_price": 0.596,
       "fit": "better_if_storage_ok",
@@ -208,7 +208,7 @@
   ],
   "sourcing_research": [
     {
-      "item": "Cafe Bustelo bricks",
+      "item": "Espresso bricks",
       "current_source": "Example Grocery",
       "current_unit_price": 0.692,
       "recommendation": "Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.",
