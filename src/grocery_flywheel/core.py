@@ -4,11 +4,15 @@ from collections import defaultdict
 from datetime import date
 from typing import Any
 
+from .corrections import derived_preferences
 from .cost_log import visits_summary
+from .dietary import evaluate_dietary_profiles, has_critical_dietary_profile
 from .easy_food import easy_food_summary
 from .freshness import summarize_freshness
 from .model import clamp as _clamp
 from .model import consumed_fraction
+from .optimization import objective_label, rank_candidates, validate_objective
+from .sourcing import build_sourcing_research
 
 
 def item_consumed_fraction(item: dict[str, Any]) -> float:
@@ -25,7 +29,19 @@ def clamp(value: float) -> float:
     return _clamp(value)
 
 
-def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
+def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[str, Any]:
+    """Analyze a replenishment state (lenient read — no contract enforcement).
+
+    Objective-awareness is opt-in: pass ``objective`` or set
+    ``state["objective"]`` to rank substitutions by that objective and
+    auto-generate sourcing research when missing. Without it, legacy
+    behavior is preserved bit-for-bit (substitution_score ordering,
+    sourcing passthrough) so old states keep rendering identically.
+    """
+    objective = objective or state.get("objective")
+    if objective is not None:
+        objective = validate_objective(objective)
+
     order = state["order"]
     items = state.get("items", [])
     order_total = float(order["total"])
@@ -41,8 +57,8 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
     for item in items:
         spend = float(item.get("spend", 0))
         role = str(item.get("role", "unknown"))
-        consumed_fraction = item_consumed_fraction(item)
-        consumed = spend * consumed_fraction
+        item_consumed = consumed_fraction(item)
+        consumed = spend * item_consumed
         consumed_value += consumed
         role_spend[role] += spend
         role_consumed[role] += consumed
@@ -53,12 +69,18 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
                 "category": item.get("category", ""),
                 "storage": item.get("storage", ""),
                 "spend": spend,
-                "consumed_fraction": consumed_fraction,
+                "unit_price": item.get("unit_price"),
+                "quantity": item.get("quantity", 1),
+                "confidence": item.get("confidence", "medium"),
+                "privacy_class": item.get("privacy_class", "sensitive_purchase_history"),
+                "product_evidence": item.get("product_evidence", []),
+                "consumed_fraction": item_consumed,
                 "consumed_value": consumed,
                 "notes": item.get("notes", ""),
                 "pricing_status": item.get("pricing_status"),
                 "last_price_check": item.get("last_price_check"),
                 "added_on": item.get("added_on"),
+                "schema_version": item.get("schema_version"),
             }
         )
 
@@ -74,15 +96,43 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
         else None
     )
 
-    substitutions = sorted(
-        state.get("substitutions", []),
-        key=lambda row: substitution_score(row),
-        reverse=True,
-    )
+    dietary_profiles = state.get("dietary_profiles", [])
+    dietary_evaluations = evaluate_dietary_profiles(item_rows, dietary_profiles)
+    dietary_status_by_item = item_dietary_statuses(dietary_evaluations)
+    for item in item_rows:
+        item["dietary_status"] = dietary_status_by_item.get(item["name"], "safe")
+
+    if objective is not None:
+        substitutions = rank_substitutions(
+            state.get("substitutions", []),
+            objective,
+            dietary_status_by_item=dietary_status_by_item,
+            dietary_profiles=dietary_profiles,
+        )
+    else:
+        substitutions = sorted(
+            state.get("substitutions", []),
+            key=lambda row: substitution_score(row),
+            reverse=True,
+        )
+
+    sourcing_research = state.get("sourcing_research", [])
+    if objective is not None and not sourcing_research:
+        sourcing_research = build_sourcing_research(
+            item_rows,
+            objective=objective,
+            checked_date=state["as_of"],
+            storage_available=state.get("storage", {}).get("bulk_available", True),
+            subscriptions_opt_in=state.get("preferences_config", {}).get(
+                "subscriptions_opt_in", False
+            ),
+        )
 
     return {
         "order": order,
         "as_of": state["as_of"],
+        "objective": objective,
+        "objective_label": objective_label(objective) if objective else None,
         "inventory_surface": state.get("inventory_surface", {}),
         "acquisition_channel": state.get("acquisition_channel", "unknown"),
         "days_elapsed": days_elapsed,
@@ -99,10 +149,11 @@ def analyze_state(state: dict[str, Any]) -> dict[str, Any]:
         "visits_summary": visits_summary(
             state, hourly_value=state.get("hourly_value")
         ),
-        "preferences": state.get("preferences", []),
-        "dietary_profiles": state.get("dietary_profiles", []),
+        "preferences": derived_preferences(state),
+        "dietary_profiles": dietary_profiles,
+        "dietary_evaluations": dietary_evaluations,
         "substitutions": substitutions,
-        "sourcing_research": state.get("sourcing_research", []),
+        "sourcing_research": sourcing_research,
         "pulses": state.get("pulses", []),
     }
 
@@ -119,6 +170,120 @@ def substitution_score(row: dict[str, Any]) -> float:
     candidate = float(row.get("candidate_unit_price", 0) or 0)
     unit_delta = current - candidate
     return fit_bonus + unit_delta
+
+
+def item_dietary_statuses(evaluations: list[dict[str, Any]]) -> dict[str, str]:
+    severity = {"safe": 0, "warn": 1, "needs_review": 2, "blocked": 3}
+    statuses: dict[str, str] = {}
+    for row in evaluations:
+        item = row["item"]
+        result = row.get("result", "safe")
+        if severity.get(result, 0) > severity.get(statuses.get(item, "safe"), 0):
+            statuses[item] = result
+    return statuses
+
+
+def rank_substitutions(
+    rows: list[dict[str, Any]],
+    objective: str,
+    *,
+    dietary_status_by_item: dict[str, str] | None = None,
+    dietary_profiles: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    dietary_status_by_item = dietary_status_by_item or {}
+    dietary_profiles = dietary_profiles or []
+    critical_dietary = has_critical_dietary_profile(dietary_profiles)
+    candidates = []
+    for row in rows:
+        current = float(row.get("current_unit_price", 0) or 0)
+        candidate = float(row.get("candidate_unit_price", 0) or 0)
+        savings_amount = current - candidate
+        savings_pct = (savings_amount / current) * 100 if current else 0
+        candidate_evidence = list(row.get("candidate_product_evidence") or row.get("product_evidence") or [])
+        dietary_status = substitution_dietary_status(
+            row,
+            dietary_status_by_item=dietary_status_by_item,
+            dietary_profiles=dietary_profiles,
+            critical_dietary=critical_dietary,
+            candidate_evidence=candidate_evidence,
+        )
+        enriched = dict(row)
+        enriched.update(
+            {
+                "savings_amount": round(savings_amount, 4),
+                "savings_pct": round(savings_pct, 2),
+                "trip_friction": row.get("trip_friction", 0.2),
+                "quality_score": substitution_quality_score(str(row.get("fit", ""))),
+                "decision_friction": row.get("decision_friction", 0.3),
+                "confidence": row.get("confidence", "medium"),
+                "dietary_status": dietary_status,
+                "evidence_status": substitution_evidence_status(
+                    dietary_status=dietary_status,
+                    candidate_evidence=candidate_evidence,
+                    critical_dietary=critical_dietary,
+                ),
+            }
+        )
+        candidates.append(enriched)
+    ranked = rank_candidates(candidates, objective) if candidates else []
+    return sorted(
+        ranked,
+        key=lambda row: (row["optimization_score"], substitution_score(row)),
+        reverse=True,
+    )
+
+
+def substitution_dietary_status(
+    row: dict[str, Any],
+    *,
+    dietary_status_by_item: dict[str, str],
+    dietary_profiles: list[dict[str, Any]],
+    critical_dietary: bool,
+    candidate_evidence: list[dict[str, Any]],
+) -> str:
+    candidate_name = str(row.get("candidate", ""))
+    explicit_status = row.get("candidate_dietary_status") or row.get("dietary_status")
+    if candidate_name in dietary_status_by_item:
+        return dietary_status_by_item[candidate_name]
+    if critical_dietary:
+        if candidate_evidence:
+            candidate_item = {
+                "name": candidate_name,
+                "schema_version": row.get("schema_version"),
+                "product_evidence": candidate_evidence,
+            }
+            evaluations = evaluate_dietary_profiles([candidate_item], dietary_profiles)
+            return item_dietary_statuses(evaluations).get(candidate_name, "needs_review")
+        if explicit_status in {"blocked", "needs_review", "warn"}:
+            return str(explicit_status)
+        return "needs_review"
+    return (
+        str(explicit_status)
+        if explicit_status
+        else dietary_status_by_item.get(row.get("current", ""), "safe")
+    )
+
+
+def substitution_evidence_status(
+    *,
+    dietary_status: str,
+    candidate_evidence: list[dict[str, Any]],
+    critical_dietary: bool,
+) -> str:
+    if candidate_evidence:
+        return "candidate_evidence_current" if dietary_status == "safe" else "candidate_evidence_reviewed"
+    if critical_dietary:
+        return "missing_candidate_evidence"
+    return "not_required"
+
+
+def substitution_quality_score(fit: str) -> float:
+    return {
+        "better": 10.0,
+        "same": 4.0,
+        "better_if_storage_ok": 1.5,
+        "worse": 0.0,
+    }.get(fit, 1.0)
 
 
 def summarize_roles(

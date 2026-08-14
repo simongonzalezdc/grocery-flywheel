@@ -54,6 +54,30 @@ def summarize_sourcing_research(args: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def evaluate_dietary(args: dict[str, Any]) -> dict[str, Any]:
+    analysis = analyze_state(_load_state(args), objective=args.get("objective"))
+    evaluations = analysis.get("dietary_evaluations", [])
+    by_result: dict[str, int] = {}
+    for row in evaluations:
+        by_result[row["result"]] = by_result.get(row["result"], 0) + 1
+    return {
+        "objective": analysis.get("objective"),
+        "counts_by_result": by_result,
+        "evaluations": [
+            {
+                "item": row["item"],
+                "profile_id": row["profile_id"],
+                "restriction": row["restriction"],
+                "result": row["result"],
+                "safety_tier": row["safety_tier"],
+                "evidence_status": row["evidence_status"],
+                "reason": row["reason"],
+            }
+            for row in evaluations
+        ],
+    }
+
+
 ToolSpec = dict[str, Any]
 
 TOOLS: dict[str, ToolSpec] = {
@@ -89,6 +113,18 @@ TOOLS: dict[str, ToolSpec] = {
             "properties": {
                 "state_path": {"type": "string"},
                 "state_json": {"type": "string"},
+            },
+        },
+    },
+    "evaluate_dietary": {
+        "description": "Evaluate every item against the state's dietary restriction profiles using evidence-gated, fail-closed safety logic (safety-critical restrictions without label evidence return needs_review, never safe). Returns counts_by_result and per-item evaluations (item, restriction, result, safety_tier, evidence_status, reason). Optionally pass objective (one of: lowest_cost, fewer_trips, balanced_roi, dietary_restrictions, allergy_safe, best_quality, lowest_decision_fatigue) to also apply objective-aware ranking. Use when the agent must check dietary safety or explain why an item was flagged.",
+        "handler": evaluate_dietary,
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "state_path": {"type": "string"},
+                "state_json": {"type": "string"},
+                "objective": {"type": "string"},
             },
         },
     },

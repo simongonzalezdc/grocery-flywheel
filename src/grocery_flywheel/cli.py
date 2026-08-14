@@ -14,17 +14,26 @@ from .state_io import load_state, render_to_file, write_state
 
 def main(argv: list[str] | None = None) -> None:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] == "import":
-        _run_import(argv[1:])
+    if argv and argv[0] in {"import", "corrections"}:
+        if argv[0] == "import":
+            _run_import(argv[1:])
+        else:
+            _run_corrections(argv[1:])
         return
 
     parser = argparse.ArgumentParser(description="Render a Grocery Flywheel dashboard.")
     parser.add_argument("state", type=Path, help="Path to replenishment state JSON.")
     parser.add_argument("--output", "-o", type=Path, required=True, help="HTML output path.")
+    parser.add_argument(
+        "--objective", default=None,
+        choices=["lowest_cost", "fewer_trips", "balanced_roi", "dietary_restrictions",
+                 "allergy_safe", "best_quality", "lowest_decision_fatigue"],
+        help="Rank substitutions and sourcing by this objective (opt-in; default keeps legacy ordering).",
+    )
     args = parser.parse_args(argv)
 
     state = load_state(args.state)
-    analysis = analyze_state(state)
+    analysis = analyze_state(state, objective=args.objective)
     target = render_to_file(render_dashboard(analysis), args.output)
     print(f"wrote {target}")
 
@@ -68,6 +77,36 @@ def _run_import(argv: list[str]) -> None:
 
     write_state(state, args.output)
     print(f"wrote {args.output} ({len(state['items'])} items, schema {state['schema_version']})")
+
+
+def _run_corrections(argv: list[str]) -> None:
+    from .corrections import SIGNAL_RULES, record_correction
+    from .privacy import can_persist_correction_telemetry
+
+    parser = argparse.ArgumentParser(
+        prog="grocery-flywheel corrections",
+        description="Record a durable correction signal into a state file.",
+    )
+    sub = parser.add_subparsers(dest="kind", required=True)
+    add = sub.add_parser("add", help="Append a correction event.")
+    add.add_argument("state", type=Path)
+    add.add_argument("--item", required=True)
+    add.add_argument("--signal", required=True, choices=sorted(SIGNAL_RULES))
+    add.add_argument("--note", default="")
+    args = parser.parse_args(argv)
+
+    state = load_state(args.state)
+    if not can_persist_correction_telemetry(state.get("consent")):
+        print(
+            "refusing to persist a correction: consent.correction_telemetry must be "
+            "local_only or hosted_opt_in (local-first default is set on canonical "
+            "states; legacy states need a consent object)",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    record_correction(state, item=args.item, signal=args.signal, note=args.note)
+    write_state(state, args.state)
+    print(f"recorded {args.signal} on {args.item!r} into {args.state}")
 
 
 if __name__ == "__main__":
