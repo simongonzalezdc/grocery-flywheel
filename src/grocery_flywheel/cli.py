@@ -32,6 +32,13 @@ def main(argv: list[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
 
+    if args.output.resolve() == args.state.resolve():
+        print(
+            f"refusing to write HTML over the state file itself: {args.state}",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+
     state = load_state(args.state)
     analysis = analyze_state(state, objective=args.objective)
     target = render_to_file(render_dashboard(analysis), args.output)

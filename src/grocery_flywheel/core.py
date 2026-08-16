@@ -98,7 +98,9 @@ def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[s
     )
 
     dietary_profiles = state.get("dietary_profiles", [])
-    dietary_evaluations = evaluate_dietary_profiles(item_rows, dietary_profiles)
+    dietary_evaluations = evaluate_dietary_profiles(
+        item_rows, dietary_profiles, today=as_of
+    )
     dietary_status_by_item = item_dietary_statuses(dietary_evaluations)
     for item in item_rows:
         item["dietary_status"] = dietary_status_by_item.get(item["name"], "safe")
@@ -130,6 +132,7 @@ def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[s
         )
 
     analysis = {
+        "schema_version": state.get("schema_version"),
         "order": order,
         "as_of": state["as_of"],
         "objective": objective,
@@ -171,11 +174,14 @@ def first_wow(analysis: dict[str, Any]) -> dict[str, Any]:
     sourcing = analysis.get("sourcing_research", [])
     total_savings = 0.0
     best_label = "No sourcing move yet"
-    if sourcing:
-        best = sourcing[0]
-        alt = (best.get("alternatives") or [{}])[0]
-        total_savings += float(alt.get("savings_amount", 0) or 0)
-        best_label = f"{best['item']} at {alt.get('source', 'alternate source')}"
+    best_savings = -1.0
+    for row in sourcing:
+        alt = (row.get("alternatives") or [{}])[0]
+        row_savings = float(alt.get("savings_amount", 0) or 0)
+        total_savings += row_savings
+        if row_savings > best_savings:
+            best_savings = row_savings
+            best_label = f"{row['item']} at {alt.get('source', 'alternate source')}"
     for row in analysis.get("substitutions", []):
         total_savings += max(0.0, float(row.get("savings_amount", 0) or 0))
     return {
@@ -255,10 +261,15 @@ def rank_substitutions(
         )
         candidates.append(enriched)
     ranked = rank_candidates(candidates, objective) if candidates else []
-    return sorted(
-        ranked,
-        key=lambda row: (row["optimization_score"], substitution_score(row)),
-        reverse=True,
+    # Dietary-blocked candidates can never rank first, whatever the
+    # objective weights — a blocked item at the top of a cost- or
+    # trip-optimized list reads as a recommendation. Keep them visible
+    # (the panel badges them) but demote them below every non-blocked row.
+    not_blocked = [row for row in ranked if row.get("dietary_status") != "blocked"]
+    blocked = [row for row in ranked if row.get("dietary_status") == "blocked"]
+    order_key = lambda row: (row["optimization_score"], substitution_score(row))  # noqa: E731
+    return sorted(not_blocked, key=order_key, reverse=True) + sorted(
+        blocked, key=order_key, reverse=True
     )
 
 

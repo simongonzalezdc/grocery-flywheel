@@ -82,14 +82,20 @@ def normalize_evidence(rows: list[dict[str, Any]] | None) -> list[dict[str, Any]
 
 
 def normalize_item(row: dict[str, Any], *, source: str) -> dict[str, Any]:
-    quantity = float(row.get("quantity", 1) or 1)
-    spend = row.get("spend", row.get("total_price"))
+    def _value(key: str) -> Any:
+        # Hand-edited exports often carry "" for "not set"; treat it as
+        # absent instead of letting float("") crash with a confusing error.
+        value = row.get(key)
+        return None if value == "" else value
+
+    quantity = float(_value("quantity") or 1)
+    spend = _value("spend") if _value("spend") is not None else _value("total_price")
     if spend is None:
-        unit_price = float(row.get("unit_price", 0) or 0)
+        unit_price = float(_value("unit_price") or 0)
         spend = unit_price * quantity
     spend = round(float(spend), 2)
-    size = parse_size(row.get("size") or row.get("size_raw"))
-    unit_price = row.get("unit_price")
+    size = parse_size(_value("size") or _value("size_raw"))
+    unit_price = _value("unit_price")
     if unit_price is None:
         unit_price = compute_unit_price(spend, size, quantity)
     confidence = "high" if size.get("confidence") == "high" else "low"
@@ -116,9 +122,9 @@ def normalize_item(row: dict[str, Any], *, source: str) -> dict[str, Any]:
                 "raw_size": row.get("size") or row.get("size_raw", ""),
             },
             product_evidence=normalize_evidence(row.get("product_evidence")),
-            pricing_status=row.get("pricing_status"),
-            last_price_check=row.get("last_price_check"),
-            added_on=row.get("added_on"),
+            pricing_status=_value("pricing_status"),
+            last_price_check=_value("last_price_check"),
+            added_on=_value("added_on"),
         )
     ) | {"product_identity": to_dict(identity), "notes": row.get("notes", "")}
 
@@ -128,6 +134,16 @@ def normalize_item(row: dict[str, Any], *, source: str) -> dict[str, Any]:
     for field_name in ("added_on", "last_price_check", "pricing_status"):
         if item.get(field_name) is None:
             item.pop(field_name, None)
+
+    # Depletion and household context travel with the item: an import that
+    # knows how much is left should not silently forget it.
+    for field_name in (
+        "remaining_fraction", "units_total", "units_remaining", "consumed_fraction",
+        "storage", "recurring",
+    ):
+        value = _value(field_name)
+        if value is not None:
+            item[field_name] = value
     return item
 
 

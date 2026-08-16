@@ -85,9 +85,13 @@ def plan_next_cart(args: dict[str, Any]) -> dict[str, Any]:
     plan = generate_cart_plan(analysis, mode=str(args.get("mode", "pickup")))
     # Structural approval boundary: this server plans, a human decides.
     # There is no checkout surface, and there never will be one here.
-    assert plan["checkout_available"] is False
-    assert plan["approval_required"] is True
-    assert all(item["approval_state"] == "needs_human_approval" for item in plan["items"])
+    # RuntimeError (not assert) so the guarantee survives python -O.
+    if plan.get("checkout_available") is not False:
+        raise RuntimeError("approval boundary violated: checkout_available must be false")
+    if plan.get("approval_required") is not True:
+        raise RuntimeError("approval boundary violated: approval_required must be true")
+    if any(item.get("approval_state") != "needs_human_approval" for item in plan["items"]):
+        raise RuntimeError("approval boundary violated: every item needs human approval")
     return {
         "mode": plan["mode"],
         "approval_required": plan["approval_required"],
@@ -166,6 +170,8 @@ TOOLS: dict[str, ToolSpec] = {
 def handle_tool_call(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
     if name not in TOOLS:
         raise ValueError(f"Unknown tool: {name}")
+    if arguments is not None and not isinstance(arguments, dict):
+        raise ValueError("arguments must be an object")
     handler = TOOLS[name]["handler"]
     return cast(dict[str, Any], handler(arguments or {}))
 
@@ -192,10 +198,19 @@ def _error(message_id: Any, code: int, message: str) -> dict[str, Any]:
 def handle_message(message: dict[str, Any]) -> dict[str, Any] | None:
     method = message.get("method")
     message_id = message.get("id")
+    has_id = "id" in message
     params = message.get("params") or {}
 
-    if message_id is None:
+    # JSON-RPC 2.0: a notification is a request WITHOUT an id key. An
+    # explicit "id": null is (discouraged but) a request and gets a reply.
+    if not has_id:
         return None
+    if message.get("jsonrpc") not in (None, "2.0"):
+        return _error(message_id, -32600, f"Invalid jsonrpc version: {message.get('jsonrpc')!r}")
+    if not isinstance(message_id, (str, int, float)) and message_id is not None:
+        return _error(None, -32600, "id must be a string, number, or null")
+    if method is None:
+        return _error(message_id, -32600, "Missing method")
     if method == "initialize":
         return _response(
             message_id,
@@ -227,19 +242,38 @@ def handle_message(message: dict[str, Any]) -> dict[str, Any] | None:
     return _error(message_id, -32601, f"Unsupported method: {method}")
 
 
+# A single request line larger than this is rejected before parsing —
+# unbounded reads let a hostile client OOM the server (QA finding).
+MAX_LINE_BYTES = 16 * 1024 * 1024
+
+
 def serve(stdin: Any, stdout: Any) -> None:
     """Run the line-delimited JSON-RPC loop over the given streams.
 
     Split from ``main`` so tests can drive the protocol with StringIO
     instead of the real stdin/stdout.
     """
-    for line in stdin:
+    while True:
+        line = stdin.readline()
+        if not line:
+            break
         if not line.strip():
             continue
+        if len(line) > MAX_LINE_BYTES:
+            reply = _error(None, -32600, f"Request line exceeds {MAX_LINE_BYTES} bytes")
+            stdout.write(json.dumps(reply) + "\n")
+            stdout.flush()
+            continue
         try:
-            reply = handle_message(json.loads(line))
+            message = json.loads(line)
+            if not isinstance(message, dict):
+                reply = _error(None, -32600, "Invalid Request: expected a single object")
+            else:
+                reply = handle_message(message)
         except json.JSONDecodeError as exc:
             reply = _error(None, -32700, f"Invalid JSON: {exc}")
+        except RecursionError:
+            reply = _error(None, -32600, "Invalid Request: nesting too deep")
         except Exception as exc:  # noqa: BLE001
             reply = _error(None, -32603, f"Internal error: {exc}")
         if reply is not None:
