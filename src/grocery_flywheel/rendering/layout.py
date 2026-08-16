@@ -112,8 +112,14 @@ def header_line(analysis: dict) -> str:
     channel = analysis.get("acquisition_channel", "unknown")
     objective = analysis.get("objective_label")
     objective_note = f" Objective: {escape(str(objective))}." if objective else ""
+    warnings = analysis.get("data_warnings") or []
+    warning_html = (
+        "<p style='color: var(--gold)'>⚠ " + escape(" ".join(warnings)) + "</p>"
+        if warnings else ""
+    )
     return (
         f"<p>{escape(str(surface_label))} via {escape(str(channel))}. "
         f"{escape(order['store'])} run from {escape(order['date'])}, "
         f"analyzed as of {escape(analysis['as_of'])}.{objective_note}</p>"
+        f"{warning_html}"
     )

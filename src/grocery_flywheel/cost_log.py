@@ -77,7 +77,19 @@ def add_visit(
     automatically. ``purchases`` defaults to an empty list.
     """
     canonical_type = parse_visit_type(visit_type)
-    if duration_min is None or int(duration_min) < 0:
+    if not isinstance(started_at, str) or not started_at.strip():
+        raise ValueError("started_at is required and must be a non-empty ISO timestamp")
+    try:
+        datetime.fromisoformat(started_at)
+    except ValueError as exc:
+        raise ValueError(
+            f"started_at must be an ISO timestamp (e.g. 2026-06-07T10:00): {started_at!r}"
+        ) from exc
+    if isinstance(duration_min, bool) or not isinstance(duration_min, (int, float)):
+        raise ValueError("duration_min must be a non-negative integer")
+    if float(duration_min) != int(duration_min):
+        raise ValueError(f"duration_min must be whole minutes, got {duration_min!r}")
+    if int(duration_min) < 0:
         raise ValueError("duration_min must be a non-negative integer")
     visit = Visit(
         id=f"v-{uuid.uuid4().hex[:8]}",
@@ -115,6 +127,19 @@ def _within_window(visit: dict[str, Any], *, today: date, window_days: int) -> b
     return 0 <= delta <= window_days
 
 
+def _safe_duration(value: Any) -> int:
+    """Coerce a visit's duration to whole minutes without crashing.
+
+    Hand-edited states can carry garbage ("abc", None). The lenient read
+    path counts the visit but contributes 0 minutes rather than taking
+    the whole analysis down (QA finding).
+    """
+    try:
+        return max(0, int(float(value)))
+    except (TypeError, ValueError):
+        return 0
+
+
 def visits_summary(
     state: dict[str, Any],
     *,
@@ -139,7 +164,7 @@ def visits_summary(
     total_minutes = 0
     for v in visits:
         vt = v.get("visit_type", "unknown")
-        dur = int(v.get("duration_min", 0) or 0)
+        dur = _safe_duration(v.get("duration_min", 0))
         by_type[vt] = by_type.get(vt, 0) + 1
         by_type_minutes[vt] = by_type_minutes.get(vt, 0) + dur
         total_minutes += dur

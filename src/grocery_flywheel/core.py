@@ -48,6 +48,14 @@ def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[s
     order_total = float(order["total"])
     as_of = date.fromisoformat(state["as_of"])
     order_date = date.fromisoformat(order["date"])
+    # Surface data problems instead of silently clamping them away: a
+    # future-dated order used to disappear into max(1, ...).
+    data_warnings: list[str] = []
+    if as_of < order_date:
+        data_warnings.append(
+            f"order date {order['date']} is after as_of {state['as_of']}; "
+            "runway is unreliable until the dates are corrected"
+        )
     days_elapsed = max(1, (as_of - order_date).days)
 
     item_rows = []
@@ -137,6 +145,7 @@ def analyze_state(state: dict[str, Any], objective: str | None = None) -> dict[s
         "as_of": state["as_of"],
         "objective": objective,
         "objective_label": objective_label(objective) if objective else None,
+        "data_warnings": data_warnings,
         "inventory_surface": state.get("inventory_surface", {}),
         "acquisition_channel": state.get("acquisition_channel", "unknown"),
         "days_elapsed": days_elapsed,

@@ -15,7 +15,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import asdict, dataclass, field
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from ..privacy import (
@@ -315,6 +315,21 @@ def validate_canonical_state(state: Any) -> list[str]:
             for index, row in enumerate(adapter_matrix):
                 if not isinstance(row, dict):
                     errors.append(f"adapter_matrix[{index}] must be an object")
+    errors.extend(validate_visits(state.get("visits")))
+    retailer_profiles = state.get("retailer_profiles")
+    if retailer_profiles is not None:
+        if not isinstance(retailer_profiles, list):
+            errors.append("retailer_profiles must be a list of profile ids")
+        else:
+            for index, entry in enumerate(retailer_profiles):
+                if not isinstance(entry, str) or not entry:
+                    errors.append(f"retailer_profiles[{index}] must be a non-empty string")
+    hourly_value = state.get("hourly_value")
+    if hourly_value is not None:
+        if not is_number(hourly_value):
+            errors.append("hourly_value must be numeric")
+        elif float(hourly_value) < 0:
+            errors.append("hourly_value must be non-negative")
     for field_name in ("storage", "preferences_config"):
         value = state.get(field_name)
         if value is not None and not isinstance(value, dict):
@@ -394,6 +409,19 @@ def validate_item_row(item: dict[str, Any], *, index: int) -> list[str]:
         value = item.get(field_name)
         if is_number(value) and float(value) < 0:
             errors.append(f"items[{index}].{field_name} must be non-negative")
+    for field_name in ("remaining_fraction", "consumed_fraction"):
+        value = item.get(field_name)
+        if is_number(value) and not 0.0 <= float(value) <= 1.0:
+            errors.append(f"items[{index}].{field_name} must be within [0, 1]")
+    total_units = item.get("units_total")
+    remaining_units = item.get("units_remaining")
+    if (
+        is_number(total_units) and is_number(remaining_units)
+        and float(remaining_units) > float(total_units)
+    ):
+        errors.append(
+            f"items[{index}].units_remaining cannot exceed units_total"
+        )
     # Freshness fields merged from the main lineage. ``added_on`` stays a
     # presence signal (absence = baseline item), so it must be omitted —
     # not set to null — on baseline items; a present-but-null key fails
@@ -510,6 +538,42 @@ def validate_product_evidence_rows(rows: Any, *, prefix: str) -> list[str]:
             errors.append(f"{prefix}[{evidence_index}].checked_date must be an ISO date")
         if evidence.get("schema_version") != SCHEMA_VERSION:
             errors.append(f"{prefix}[{evidence_index}] missing schema_version")
+    return errors
+
+
+def validate_visits(visits: Any) -> list[str]:
+    """Visits were previously unvalidated; broken rows only surfaced as
+    panel crashes. Keep the bar modest: shape, ISO timestamp, sane
+    duration (QA hardening 2026-08-16)."""
+    if visits is None:
+        return []
+    if not isinstance(visits, list):
+        return ["visits must be a list"]
+    errors: list[str] = []
+    for index, visit in enumerate(visits):
+        if not isinstance(visit, dict):
+            errors.append(f"visits[{index}] must be an object")
+            continue
+        visit_type = visit.get("visit_type")
+        if visit_type is not None and not isinstance(visit_type, str):
+            errors.append(f"visits[{index}].visit_type must be a string")
+        started_at = visit.get("started_at")
+        if started_at is not None:
+            if not isinstance(started_at, str):
+                errors.append(f"visits[{index}].started_at must be a string")
+            else:
+                try:
+                    datetime.fromisoformat(started_at)
+                except ValueError:
+                    errors.append(
+                        f"visits[{index}].started_at must be an ISO timestamp"
+                    )
+        duration = visit.get("duration_min")
+        if duration is not None:
+            if not is_number(duration):
+                errors.append(f"visits[{index}].duration_min must be numeric")
+            elif float(duration) < 0:
+                errors.append(f"visits[{index}].duration_min must be non-negative")
     return errors
 
 

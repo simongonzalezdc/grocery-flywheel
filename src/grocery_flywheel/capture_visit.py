@@ -13,10 +13,10 @@ back. No external side effects.
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 from .cost_log import VALID_VISIT_TYPES, add_visit
+from .state_io import load_state, write_state
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -45,7 +45,7 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    state = json.loads(args.state.read_text())
+    state = load_state(args.state)
     visit = add_visit(
         state,
         visit_type=args.type,
@@ -53,7 +53,9 @@ def main(argv: list[str] | None = None) -> None:
         duration_min=args.duration_min,
         notes=args.notes,
     )
-    args.state.write_text(json.dumps(state, indent=2))
+    # Atomic write via the shared IO home (also keeps the trailing
+    # newline consistent with every other state writer).
+    write_state(state, args.state)
     print(f"logged visit {visit['id']} ({visit['visit_type']}, {visit['duration_min']} min)")
 
 
