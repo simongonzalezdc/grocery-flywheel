@@ -136,7 +136,7 @@
           var log = [];
           function capture(signal) {
             var item = document.getElementById("correction-item").value;
-            log.push({"item": item, "signal": signal, "created_at": new Date().toISOString()});
+            log.push({"item": item, "signal": signal, "created_at": new Date().toISOString().slice(0, 10)});
             document.getElementById("correction-count").textContent = log.length + " captured";
           }
           document.getElementById("correction-download").addEventListener("click", function () {

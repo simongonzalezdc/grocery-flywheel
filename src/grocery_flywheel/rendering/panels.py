@@ -259,6 +259,25 @@ def _sourcing(a: dict[str, Any]) -> str:
             "<th>Savings</th><th>Read</th></tr></thead><tbody>" + "".join(body) + "</tbody></table></article>")
 
 
+def _script_json(value: Any) -> str:
+    """JSON that is safe to embed inside a <script> block.
+
+    json.dumps alone leaves ``</script>``, ``&``, and the Unicode line
+    separators intact, so data could close the script context and execute
+    attacker JS (the XSS the adversarial QA pass found). Escaping them as
+    JSON unicode escapes keeps the payload valid JS-in-JSON while making
+    breakout impossible.
+    """
+    return (
+        json.dumps(value)
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace(chr(0x2028), "\\u2028")
+        .replace(chr(0x2029), "\\u2029")
+    )
+
+
 def _corrections_capture(a: dict[str, Any]) -> str:
     consent = a.get("consent") or {}
     if consent.get("correction_telemetry") not in ("local_only", "hosted_opt_in"):
@@ -270,7 +289,7 @@ def _corrections_capture(a: dict[str, Any]) -> str:
         for s in ("never_again", "buy_elsewhere", "wrong_format", "too_expensive",
                   "good_default", "emergency_only")
     )
-    payload = json.dumps({"items": item_names})
+    payload = _script_json({"items": item_names})
     return f"""
       <article class="panel span-12" id="corrections">
         <h2>Correction Capture</h2>
@@ -283,7 +302,7 @@ def _corrections_capture(a: dict[str, Any]) -> str:
           var log = [];
           function capture(signal) {{
             var item = document.getElementById("correction-item").value;
-            log.push({{"item": item, "signal": signal, "created_at": new Date().toISOString()}});
+            log.push({{"item": item, "signal": signal, "created_at": new Date().toISOString().slice(0, 10)}});
             document.getElementById("correction-count").textContent = log.length + " captured";
           }}
           document.getElementById("correction-download").addEventListener("click", function () {{

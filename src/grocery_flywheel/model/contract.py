@@ -12,6 +12,7 @@ than write nulls.
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import asdict, dataclass, field
 from datetime import date
@@ -377,6 +378,8 @@ def validate_item_row(item: dict[str, Any], *, index: int) -> list[str]:
         errors.append(f"items[{index}] missing spend")
     elif not is_number(item["spend"]):
         errors.append(f"items[{index}].spend must be numeric")
+    elif float(item["spend"]) < 0:
+        errors.append(f"items[{index}].spend must be non-negative")
     for field_name in (
         "quantity",
         "unit_price",
@@ -387,11 +390,21 @@ def validate_item_row(item: dict[str, Any], *, index: int) -> list[str]:
     ):
         if item.get(field_name) is not None and not is_number(item[field_name]):
             errors.append(f"items[{index}].{field_name} must be numeric")
+    for field_name in ("quantity", "unit_price"):
+        value = item.get(field_name)
+        if is_number(value) and float(value) < 0:
+            errors.append(f"items[{index}].{field_name} must be non-negative")
     # Freshness fields merged from the main lineage. ``added_on`` stays a
     # presence signal (absence = baseline item), so it must be omitted —
-    # not set to null — on baseline items; None therefore fails loudly here.
+    # not set to null — on baseline items; a present-but-null key fails
+    # loudly here instead of silently passing.
     if item.get("pricing_status") is not None and not isinstance(item["pricing_status"], str):
         errors.append(f"items[{index}].pricing_status must be a string")
+    if "added_on" in item and item["added_on"] is None:
+        errors.append(
+            f"items[{index}].added_on must be omitted on baseline items, not null "
+            "(presence is the top-up signal)"
+        )
     for field_name in ("last_price_check", "added_on"):
         value = item.get(field_name)
         if value is not None:
@@ -530,7 +543,12 @@ def validate_sensitive_events(
 
 
 def is_number(value: Any) -> bool:
-    return not isinstance(value, bool) and isinstance(value, int | float)
+    # NaN and infinities are floats, and Python's json.loads accepts the
+    # bare literals — but they are not valid JSON numbers downstream
+    # (json.dumps would emit non-strict JSON) and they poison arithmetic.
+    if not isinstance(value, int | float) or isinstance(value, bool):
+        return False
+    return math.isfinite(value)
 
 
 def is_iso_date(value: str) -> bool:
