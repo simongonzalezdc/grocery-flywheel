@@ -20,3 +20,5 @@ id_ed25519
 .scratch/
 .worktrees/
 .playwright-mcp/
+.mimosa/
+.zcode/
