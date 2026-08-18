@@ -1,5 +1,7 @@
 # Empower Orchestrator Agent Law
 
+NOTE 2026-08-18: superseded-by-reference — the CEO constitution (empower-orchestrator SKILL.md header + COMPANY-OS.md meta-patterns P1-P7) is authoritative; this doc retains historical context only.
+
 This repo-local copy keeps the agent operating rule visible to Codex, Claude Code, GitHub reviewers, and CI.
 
 ## Rule
