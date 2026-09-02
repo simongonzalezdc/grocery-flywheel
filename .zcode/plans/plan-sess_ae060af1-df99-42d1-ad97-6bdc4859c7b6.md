@@ -22,7 +22,7 @@
 - **07 Harvest the hands: cart plan + dashboard reconciliation** (PR P2.3) — blocked by 05, 06, **D1**. Introduce analysis/ panel registry (ordered (name, compute, render) callables — no plugin machinery) + rendering/ layer HERE; both panel families in chosen aesthetic; consent-gated corrections capture; always `needs_human_approval`, `checkout_available=False` asserted by test; MCP `plan_next_cart`.
 - **08 Honest public face: README + docs collapse** (PR P3a) — blocked by 07, **D2**, **D3**. One positioning (personal, open-source, local-first); 30-second quick start with e2e-verified script; docs ~20→~11 via named merge map; scrub Vons/Bustelo/diced-chicken residue; document MCP + skills; link check.
 - **09 Trust plumbing** (PR P3b) — blocked by 01, parallel with 08. Gitleaks in BOTH CIs (fake-secret branch → red); delete empty renovate.json; agent-law single copy + pointer AGENTS/CLAUDE/PR-template + guard update; unify checkout pinning.
-- **10 Release v0.2.0 + fleet hygiene** (PR P4) — blocked by 08, 09, **D4**. Tag from single-sourced version; verify Forgejo/GitHub 0/0; delete stale branches/worktrees; apply mac-mini render_pulses fix + refresh its clone; codegraph sync; memory update.
+- **10 Release v0.2.0 + fleet hygiene** (PR P4) — blocked by 08, 09, **D4**. Tag from single-sourced version; verify Forgejo/GitHub 0/0; delete stale branches/worktrees; apply the render_pulses tolerance fix + refresh its clone; codegraph sync; memory update.
 
 **Decision tickets (HITL, no blockers — resolve early):** D1 dashboard aesthetic direction (prototype: main's static vs WIP dark command-center) · D2 design-preview.html keep/retire · D3 quick-start packaging (venv vs pipx-friendly) · D4 schema-vintage sunset policy.
 
