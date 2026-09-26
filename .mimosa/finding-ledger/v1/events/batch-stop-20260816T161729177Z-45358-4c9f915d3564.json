@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260816T161729177Z-45358-4c9f915d3564",
+  "runId": "20260816T161729177Z-45358-4c9f915d3564",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "baseline_partial",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline capture had enumeration or snapshot errors",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_script_embedding.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/rendering/panels.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/dietary.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/core.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/model/contract.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/mcp_server.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/cli.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/normalization.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_ultra_hardening.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline_partial: baseline capture had enumeration or snapshot errors",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_script_embedding.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/rendering/panels.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/dietary.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/core.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/model/contract.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/mcp_server.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/cli.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/normalization.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_ultra_hardening.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "b81e08864a8f0aa1447706dbf169139b50754d12",
+  "diffHash": "9f56a843333aacbe03961238ff121aed85ee596b70a6686dc1dcb8458dae8f4b",
+  "rulesVersion": "unavailable",
+  "sessionHash": "f7bb8d94e164b1fa64f325e07d5c95b750aa0fd3ccb5a48bda2080d4f3f9685f",
+  "reportRef": ".mimosa/reports/task-review-sess_ae060af1-df99-42d1-ad97-6bdc4859c7b6-20260816T161729177Z-45358-4c9f915d3564.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-08-16T16:17:29.408Z"
+}

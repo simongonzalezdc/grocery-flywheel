@@ -1,0 +1,427 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260816T162723972Z-76911-0214a3cab6a6",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/state_io.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/importers/csv_importer.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/cost_log.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/model/contract.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/core.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/rendering/layout.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "src/grocery_flywheel/capture_visit.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "tests/test_low_severity_hardening.py",
+      "reason": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 64,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 8
+    },
+    "change_tracking": {
+      "touched_observed": 8,
+      "touched_retained": 8,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 8,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 8,
+      "selected_files": 8,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 8,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 8,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "scanner_failed": 8,
+      "project_check_failed": 8
+    },
+    "reasons": [
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/state_io.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/importers/csv_importer.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/cost_log.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/model/contract.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/core.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/rendering/layout.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/capture_visit.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "tests/test_low_severity_hardening.py",
+        "detail": "spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/state_io.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/importers/csv_importer.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/cost_log.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/model/contract.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/core.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/rendering/layout.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "src/grocery_flywheel/capture_visit.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "tests/test_low_severity_hardening.py",
+        "detail": "scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-08-16T16:27:23.972Z",
+  "session_id": "sess_ae060af1-df99-42d1-ad97-6bdc4859c7b6",
+  "target": ".",
+  "revision": "bc7f2b29d088c9a11d34470eecb8dda2655877e9",
+  "rules_version": "unavailable",
+  "diff_hash": "1511cbef32d6550ba3a3f63552107ea75793486022e1a3c26fe2b3a9ffe46b28",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 8,
+    "changed_files": [
+      {
+        "file": "src/grocery_flywheel/capture_visit.py",
+        "ranges": [
+          {
+            "start": 19,
+            "end": 19
+          },
+          {
+            "start": 48,
+            "end": 48
+          },
+          {
+            "start": 56,
+            "end": 58
+          }
+        ],
+        "before_hash": "3fb39a92879584019837c88fa823bab7c055bb435944f9f553a93eae479e1e47",
+        "after_hash": "ee8b1d0bef1e2592abf8ff85d4bbf2f72a735203cd39ae8954399209e436733f"
+      },
+      {
+        "file": "src/grocery_flywheel/core.py",
+        "ranges": [
+          {
+            "start": 51,
+            "end": 58
+          },
+          {
+            "start": 148,
+            "end": 148
+          }
+        ],
+        "before_hash": "6c8112f19d726152e52904dd61d50978e389afbd65d7ad9fd44fc0c50bfd31f5",
+        "after_hash": "dd72759c1008ba198b662c68e64b90debb7e63d96f3a0a78dde246ab95b22fe0"
+      },
+      {
+        "file": "src/grocery_flywheel/cost_log.py",
+        "ranges": [
+          {
+            "start": 80,
+            "end": 92
+          },
+          {
+            "start": 130,
+            "end": 142
+          },
+          {
+            "start": 167,
+            "end": 167
+          }
+        ],
+        "before_hash": "7158a9795e0fcda06b113bb41c6d565b793594aee2bbabbf6fee5dad8c6fede5",
+        "after_hash": "7ac237871df33e8f80bd0f2aa1b458cd757c27811a634642d63d59e778d00572"
+      },
+      {
+        "file": "src/grocery_flywheel/importers/csv_importer.py",
+        "ranges": [
+          {
+            "start": 12,
+            "end": 16
+          },
+          {
+            "start": 20,
+            "end": 34
+          },
+          {
+            "start": 38,
+            "end": 38
+          }
+        ],
+        "before_hash": "b9ebcb35c43bf323dd5ebd7cd3c41f95038c9ff657f1caff568daee946b53b8b",
+        "after_hash": "1c79c44ed54b270605aeda63ee826f4c0abdaba434511f4b0a6810b64443a83e"
+      },
+      {
+        "file": "src/grocery_flywheel/model/contract.py",
+        "ranges": [
+          {
+            "start": 18,
+            "end": 18
+          },
+          {
+            "start": 318,
+            "end": 332
+          },
+          {
+            "start": 412,
+            "end": 424
+          },
+          {
+            "start": 544,
+            "end": 579
+          }
+        ],
+        "before_hash": "ed12e99afccb9bb4e240243cffeea31be182f3663757137844b0302c533359d9",
+        "after_hash": "9f177a28c9c69afe83355c45d7155eebe256192f2daed3ff8179157165a9c5a0"
+      },
+      {
+        "file": "src/grocery_flywheel/rendering/layout.py",
+        "ranges": [
+          {
+            "start": 115,
+            "end": 119
+          },
+          {
+            "start": 124,
+            "end": 124
+          }
+        ],
+        "before_hash": "5bf3649fd78dd20e19af2ff791422acc9025c54fddd4c801a25c8bab6b899e7d",
+        "after_hash": "ec57f22e566ed92b5502f70cc4aaf452825bc34dd3b07d50b4452fdb01a34ed3"
+      },
+      {
+        "file": "src/grocery_flywheel/state_io.py",
+        "ranges": [
+          {
+            "start": 5,
+            "end": 5
+          },
+          {
+            "start": 11,
+            "end": 12
+          },
+          {
+            "start": 22,
+            "end": 28
+          },
+          {
+            "start": 30,
+            "end": 42
+          },
+          {
+            "start": 46,
+            "end": 52
+          },
+          {
+            "start": 54,
+            "end": 54
+          },
+          {
+            "start": 58,
+            "end": 58
+          }
+        ],
+        "before_hash": "0526e808764270566d917db03844a2c24afc3c3ddd1f85a220e0285a26e5251b",
+        "after_hash": "02f20ffe6ba3a2598eaa136638ab0e01b0e5de029ded631a51bf8d31fcfd0700"
+      },
+      {
+        "file": "tests/test_low_severity_hardening.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 159
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "94bdf0e5bb10a1c1a8aadc1c3961e33302569059409b1a83add4380e0d4df17e"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-08-16T16:27:21.735Z",
+    "completed_at": "2026-08-16T16:27:23.972Z",
+    "duration_ms": 2237,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2237,
+    "peakMemoryBytes": 115474432,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_ae060af1-df99-42d1-ad97-6bdc4859c7b6-20260816T162723972Z-76911-0214a3cab6a6.json",
+    "latest_report": ".mimosa/reports/task-review-sess_ae060af1-df99-42d1-ad97-6bdc4859c7b6.json",
+    "history_summary": ".mimosa/history/run-20260816T162723972Z-76911-0214a3cab6a6.json"
+  }
+}

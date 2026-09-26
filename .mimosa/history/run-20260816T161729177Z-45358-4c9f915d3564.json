@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260816T161729177Z-45358-4c9f915d3564",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline:.: baseline_partial: baseline capture had enumeration or snapshot errors",
+    "scan:tests/test_script_embedding.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/rendering/panels.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/dietary.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/core.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/model/contract.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/mcp_server.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/cli.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/normalization.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:tests/test_ultra_hardening.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "b81e08864a8f0aa1447706dbf169139b50754d12",
+  "diffHash": "9f56a843333aacbe03961238ff121aed85ee596b70a6686dc1dcb8458dae8f4b",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-08-16T16:17:29.177Z",
+  "timing": {
+    "startedAt": "2026-08-16T16:17:26.923Z",
+    "completedAt": "2026-08-16T16:17:29.177Z",
+    "durationMs": 2254
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 1,
+    "bySeverity": {
+      "high": 1
+    },
+    "byStatus": {
+      "blocked": 1
+    }
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_partial": 1,
+      "scanner_failed": 9,
+      "project_check_failed": 10
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_ae060af1-df99-42d1-ad97-6bdc4859c7b6-20260816T161729177Z-45358-4c9f915d3564.json"
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260816T162723972Z-76911-0214a3cab6a6",
+  "runStatus": "inconclusive",
+  "errors": [
+    "scan:src/grocery_flywheel/state_io.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/importers/csv_importer.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/cost_log.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/model/contract.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/core.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/rendering/layout.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:src/grocery_flywheel/capture_visit.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT",
+    "scan:tests/test_low_severity_hardening.py: scanner_failed: spawnSync /opt/homebrew/Cellar/node/26.7.0/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "bc7f2b29d088c9a11d34470eecb8dda2655877e9",
+  "diffHash": "1511cbef32d6550ba3a3f63552107ea75793486022e1a3c26fe2b3a9ffe46b28",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-08-16T16:27:23.972Z",
+  "timing": {
+    "startedAt": "2026-08-16T16:27:21.735Z",
+    "completedAt": "2026-08-16T16:27:23.972Z",
+    "durationMs": 2237
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "scanner_failed": 8,
+      "project_check_failed": 8
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_ae060af1-df99-42d1-ad97-6bdc4859c7b6-20260816T162723972Z-76911-0214a3cab6a6.json"
+}
