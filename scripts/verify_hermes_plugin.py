@@ -30,6 +30,13 @@ def run(bundle, scratch, offline):
     from hermes_cli.plugins import PluginManager
     from tools.registry import registry
     from hermes_cli.plugin_command_dispatch import invoke_plugin_command
+    if offline:
+        def forbidden(*args, **kwargs):
+            raise AssertionError("Plugin attempted network/subprocess")
+        socket.socket.connect = forbidden
+        socket.create_connection = forbidden
+        socket.getaddrinfo = forbidden
+        subprocess.Popen = forbidden
     manager = PluginManager()
     manager.discover_and_load()
     require("grocery" not in manager._plugin_commands, "disabled before enable")
@@ -59,13 +66,6 @@ def run(bundle, scratch, offline):
         return invoke_plugin_command(handler, args, source="cli")
     sample = (target / "examples/sample_state.json").read_text()
     results = {}
-    if offline:
-        def forbidden(*args, **kwargs):
-            raise AssertionError("Plugin attempted network/subprocess")
-        socket.socket.connect = forbidden
-        socket.create_connection = forbidden
-        socket.getaddrinfo = forbidden
-        subprocess.Popen = forbidden
     require("No checkout" in slash("help") or "No checkout" in slash("help").capitalize(), "slash help")
     require(json.loads(slash("status"))["checkout_available"] is False, "slash status")
     require(json.loads(slash("sample"))["ok"], "slash sample")
