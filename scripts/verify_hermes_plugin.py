@@ -141,6 +141,20 @@ def run(bundle, scratch, offline):
     second.mkdir(mode=0o700)
     os.environ["HERMES_HOME"] = str(second)
     require(call("grocery_analyze", {"state_name": "sample.json"})["error"]["code"] == "STATE_NOT_FOUND", "profile isolation")
+    from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+    from concurrent.futures import ThreadPoolExecutor
+
+    def profile_call(profile):
+        token = set_hermes_home_override(profile)
+        try:
+            return call("grocery_analyze", {"state_name": "sample.json"})
+        finally:
+            reset_hermes_home_override(token)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        a, b = list(pool.map(profile_call, (home, second)))
+    require(a.get("ok") is True and b.get("error", {}).get("code") == "STATE_NOT_FOUND",
+            "same-host simultaneous context-local profile isolation")
     os.environ["HERMES_HOME"] = str(home)
     (home / "config.yaml").write_text('plugins:\n  disabled: [grocery-flywheel]\n')
     manager.discover_and_load(force=True)
