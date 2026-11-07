@@ -30,6 +30,10 @@ def run(bundle, scratch, offline):
     from hermes_cli.plugins import PluginManager
     from tools.registry import registry
     from hermes_cli.plugin_command_dispatch import invoke_plugin_command
+    from hermes_cli.version_info import get_version_info
+    identity = get_version_info()
+    require(identity.base_version != "unknown" and not identity.dirty,
+            "known clean runtime identity required")
     if offline:
         def forbidden(*args, **kwargs):
             raise AssertionError("Plugin attempted network/subprocess")
@@ -142,7 +146,10 @@ def run(bundle, scratch, offline):
     manager.discover_and_load(force=True)
     require("grocery" not in manager._plugin_commands, "disable removes command")
     require((state_dir / "sample.json").read_text() == sample, "disable preserves state")
-    return {"ok": True, "checks": CHECKS, "runtime_python": sys.version, "runtime_source": str(Path(__import__('hermes_cli').__file__).parent.parent),
+    return {"ok": True, "checks": CHECKS, "runtime_python": sys.version,
+            "runtime_version": identity.derived_version, "runtime_commit": identity.commit,
+            "runtime_dirty": identity.dirty,
+            "runtime_source": str(Path(__import__('hermes_cli').__file__).parent.parent),
             "results": results, "dashboard": str(scratch / "sample-dashboard.html")}
 
 

@@ -113,15 +113,14 @@ are ASCII basenames, not arbitrary files. Profile directories must be owner-priv
 closed. No automatic imports, scans, migration, deletion or hidden state cache.
 Python executes with host-user permissions: containment is not an OS sandbox.
 
-## Known host acceptance hold
+## Runtime identity prerequisite
 
-Clean Hermes v0.23.0 and the tested current source accept a manually installed
-manifest requiring `>=999.0.0`: enable and validator both exit0, then discovery
-loads it. The real lifecycle harness intentionally fails that negative check;
-passing tool/validator checks are **not** proof of install-time version enforcement.
-This upstream SDK disagreement remains open for Product/Platform and Security;
-no Hermes core workaround is included. The plugin checks required context methods
-before any registration, but that is not a substitute for the missing host gate.
+Acceptance must use a version-identifiable clean Hermes checkout or installed
+release. A bare source archive can report version `unknown`; Hermes permits
+unknown development versions, so such a run cannot prove `requires_hermes`
+enforcement. Both harnesses reject that ambiguous identity before testing.
+The tested clean Git checkouts correctly rejected an incompatible `>=999.0.0`
+manifest during enable; validator syntax checks alone are not that evidence.
 
 ## Verify and rollback
 

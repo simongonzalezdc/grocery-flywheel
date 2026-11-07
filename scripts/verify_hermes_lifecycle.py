@@ -13,6 +13,10 @@ import json
 from hermes_cli.plugins import PluginManager
 from hermes_cli.plugin_command_dispatch import invoke_plugin_command
 from tools.registry import registry
+from hermes_cli.version_info import get_version_info
+identity=get_version_info()
+if identity.base_version == 'unknown' or identity.dirty:
+ raise RuntimeError('Known clean Hermes runtime identity required')
 m=PluginManager();m.discover_and_load()
 names=sorted(x for x in registry._merged_tools(m.scope_key) if x.startswith('grocery_'))
 result={'tools':names,'slash':'grocery' in m._plugin_commands,'skill':m.find_plugin_skill('grocery-flywheel:grocery') is not None}
