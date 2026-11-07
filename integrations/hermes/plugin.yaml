@@ -1,0 +1,15 @@
+name: grocery-flywheel
+version: 0.1.0
+description: Local grocery analysis and human-review cart drafts; no checkout
+requires_hermes: ">=0.23.0"
+license: MIT
+provides_tools:
+  - grocery_analyze
+  - grocery_dietary
+  - grocery_sourcing
+  - grocery_plan
+  - grocery_dashboard
+provides_hooks: []
+capabilities: []
+requires_env: []
+python_dependencies: []
