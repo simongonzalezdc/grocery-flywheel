@@ -62,6 +62,16 @@ Honest status, as of this release:
 
 Tools: `analyze_replenishment_state`, `render_replenishment_dashboard`, `summarize_sourcing_research`, `evaluate_dietary`, `plan_next_cart`. JSON-RPC 2.0 over stdio, stateless. A packaged skill lives in [`skills/grocery-flywheel/SKILL.md`](skills/grocery-flywheel/SKILL.md).
 
+## Native Hermes plugin (local candidate)
+
+A bounded native adaptation lives in [`integrations/hermes/README.md`](integrations/hermes/README.md):
+five `grocery_*` tools, `/grocery`, and the namespaced `grocery-flywheel:grocery` skill.
+Build the self-contained bundle with `python3 scripts/build_hermes_plugin.py --output <new-dir>`;
+do **not** install the source integration directory alone. It reuses the unchanged engine,
+limits reads/writes to profile-owned grocery data, and never checks out or talks to a retailer.
+Hermes model calls and transcripts are a separate privacy boundary. Use sanitized data first.
+This is not a catalog listing, release, production installation or Security approval.
+
 ## Repo map
 
 - `src/grocery_flywheel/` — the engine. `model/` holds the state contract (lenient read-side types + fail-closed write-side contract); `rendering/` holds every HTML string behind a panel registry; importers, dietary, corrections, sourcing, optimization, and the MCP server are plain modules.
