@@ -1,0 +1,8 @@
+# Security-dismissed historical findings (Security seat, 2026-11-08, card t_5d060f30 run 928).
+# Synthetic stripe-access-token TEST FIXTURES (fabricated payment-source strings, entropy 4.06)
+# in commit 54e273f631248d2b08c913940c3dcc43ba392d49 (2026-06-07) on the pre-existing branch
+# autopilot-wip-2026-05-26 — OUTSIDE main/PR ancestry. Reviewed and dismissed in independent
+# Security review run 767; gitleaks sees them only via --all full-history scan. Fingerprint-scoped
+# baseline only: no rule, path or entropy exemptions. All current-tree and HEAD-ancestry scans stay clean.
+54e273f631248d2b08c913940c3dcc43ba392d49:tests/test_core.py:stripe-access-token:222
+54e273f631248d2b08c913940c3dcc43ba392d49:tests/test_cli.py:stripe-access-token:146
