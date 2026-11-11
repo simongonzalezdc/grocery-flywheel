@@ -2,7 +2,7 @@
 
 ![Grocery Flywheel](./grocery-flywheel-512.png)
 
-One raw, rough-broken chunk of green aventurine with a thick gold-brass coin set upright in a sawn slot on its top ridge, like a coin dropped into a piggy bank.
+One raw, rough-broken chunk of green aventurine with a thick gold-brass coin dropped edge-first into a long sawn slit along its top ridge. The coin stands parallel to the slit, like a coin going into a piggy bank (owner, 2026-11-10: turned 90° from the earlier face-on coin; pick r16 C).
 
 | File | Size | Use |
 |---|---|---|

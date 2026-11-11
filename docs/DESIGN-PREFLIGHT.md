@@ -21,20 +21,21 @@ Grocery Flywheel is a free, local-first grocery tool. It tracks what you bought 
 
 - Tarot Wheel of Fortune and Empress readings (explored, not picked).
 - A pentagram on the coin (reads as occult).
+- A face-on coin across a short slot (r11 C; the owner asked for it turned 90° to sit parallel to the slit).
 - All-over white glitter and a coin too small to read at 32 px.
 
 ## 4. Material reference
 
 Aventurine: sugary, massive quartzite, sage to mid green, with small silver-green fuchsite glints and occasional milky quartz patches. Not jade, not emerald glass.
 
-The landed render is `branding/grocery-flywheel.png`: One raw, rough-broken chunk of green aventurine with a thick gold-brass coin set upright in a sawn slot on its top ridge, like a coin dropped into a piggy bank.
+The landed render is `branding/grocery-flywheel.png`: One raw, rough-broken chunk of green aventurine with a thick gold-brass coin dropped edge-first into a long sawn slit along its top ridge, parallel to the slit like a coin going into a piggy bank (owner, 2026-11-10: turned 90°; r16 C).
 
 ## 5. Family law and form
 
 - The icon must read as an icon: one compact, bold silhouette that holds at 32 px and 16 px. No scene, pedestal, text, rays or glow.
 - The real mineral shows in broad regions.
 - Family palette: the crystal material itself, turquoise `#00FFE6` edges, magenta `#FF1A6E` and yellow `#FFD11A` catches, white speculars, dark inner planes, transparent background.
-- Form: A raw chunk with a coin about 30% of its width, upright in a slot.
+- Form: A raw chunk with a coin about 30% of its width, standing edge-on in a slit that runs along the ridge, as in a piggy bank.
 - Approval: the owner's eye-gate (2026-11-10). A concept SVG is never the icon; the mark is a pipeline render.
 
 ## 6. Typography
