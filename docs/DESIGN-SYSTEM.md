@@ -44,29 +44,42 @@ The engine returns `dietary_status` per item and `evidence_status` per
 evaluation. The dashboard derives its own per-item result map from
 `dietary_evaluations`; it never trusts an item's `dietary_status` on its own.
 
-- `{open}/{total} items unverified`, where *open* counts every item that is not
-  cleared: `blocked`, `needs_review`, `warn`, unknown, or **no evaluation at
-  all**. When any item is blocked the figure caption reads "items blocked or
-  unverified".
-- **"No item has been cleared as safe"** whenever any item is open — a warning
-  is never presented as a clearance.
-- **`Cleared` requires an explicit `safe` result with `evidence_status` =
-  `current`.** A missing status, an unknown status, or `safe` without current
-  evidence renders the neutral **"Not evaluated"** mark, never the sage success
-  token. The same rule applies in the ledger, action list and substitutions.
+- `{open}/{total}` with the caption **"items blocked or not cleared"** when any
+  item is blocked, otherwise "items unverified". *open* counts every item that is
+  not cleared: `blocked`, `needs_review`, `warn`, unknown, or **no evaluation at
+  all**.
+- An **exact counts line** directly under the headline: `X of N cleared · Y
+  blocked · Z need review · W warnings · V not evaluated`, omitting zero rows.
+  Mixed pages never make an absolute claim: the headline is
+  `X of N items are cleared; Y items are not cleared` (or the blocked sentence
+  when something is blocked), and **"No item has been cleared as safe"** appears
+  only when nothing is cleared.
+- **`Cleared` requires an explicit `safe` evaluation result with
+  `evidence_status` = `current`.** The item's own `dietary_status` is never a
+  clearance: `core` defaults a missing item field to `safe`, so a mark derived
+  from it fails open. A contradictory pair (item says `safe`, evaluation says
+  `blocked`/`needs_review`/`warn`) renders the evaluation's mark. The same rule
+  applies in the ledger, action list, substitutions and sourcing row.
 - the evidence gap: how many items have no `current` evidence;
 - the engine rule that would clear an item, and — when every evaluation is
   `warn` — that this profile warns on every item and clears none;
-- profile label and restriction (`value`, `safety_tier`, `behaviour`) in the
-  notes row, and the qualifier promoted to body size directly under the
-  verdict headline: **"Missing evidence is a data gap, not proof of a safety
-  failure."**
+- profile label and restriction (`value`, `safety_tier`, `behaviour`) in a
+  `.attention-context` disclosure, so the mobile first screen is the verdict and
+  the action, not two explanatory paragraphs; the qualifier stays visible at
+  body size directly under the verdict headline: **"Missing evidence is a data
+  gap, not proof of a safety failure."**
+- a **text severity token** in the section note (`Dietary evidence · warning
+  tier` / `· blocked`), so state does not rest on hue alone;
+- a **jump link** to `#today` on every page with cart items, so the action is
+  reachable within an 844 px mobile first screen even when the attention panel
+  is tall;
 - the five-state legend sits inside the evidence disclosure with the full
   evaluation table, so reference material does not push the action below the
   fold;
 - a `<details class="evidence">` table of **every** evaluation with item, result,
   evidence and the engine's own reason. Raw result/evidence keys stay in
-  `data-raw-*` attributes for machines; visible text uses the label maps.
+  `data-raw-*` attributes for machines; visible text uses the label maps. The
+  evidence drawer shows **every** entry in a label list — it does not truncate.
 
 Status colours: `blocked` and `needs_review` use `--brick`; `warn` uses
 `--ochre`; `safe` uses `--sage`; unknown/missing uses `--muted`. **`warn` must
@@ -109,11 +122,17 @@ source) displays as "your usual store".
 
 The cart review is an ordered list, one row per item: number, item, the engine's
 own `reason`, the humanized `action`, `source`, and a **Dietary** line with the
-item's mark and evidence label. No raw `action` or `approval_state` slug appears
+evaluation-derived mark and evidence label. Action and source carry visible
+`Action` / `Source` labels, and no raw `action` or `approval_state` slug appears
 in visible prose. Approval is stated once in words ("every item needs your
-approval"), together with `approval_required=true`, `checkout_available=false`,
-the four-bucket price caveat (`priced · stale · no price · estimated`) and the
-honest export note.
+approval before anything is bought."), together with `approval_required=true`,
+`checkout_available=false`, the four-bucket price caveat (`priced · stale · no
+price · estimated`) and the honest export note. On mobile the source line moves
+under the item instead of squeezing the reason into a narrow column.
+
+The sourcing panel labels its mark **"Dietary · this item, not the
+alternatives"** and its basis note says alternatives are not evaluated there.
+A missing amount renders **"not recorded"**; `_money` never fabricates `$0.00`.
 
 The downloaded draft is the real engine plan plus a `presentation` envelope:
 `schema`, `note`, and `dietary_context` (per-item result, `cleared`, evidence
@@ -166,9 +185,11 @@ The reconciliation below repeats the arithmetic in words.
   outlines and bar boundaries use `--edge-strong` (#8A7F6E → 3.49:1 on `--bg`,
   3.87:1 on `--panel`). Hairline rules stay decorative.
 - The `.muted` class is defined; `.wow` and other dead tokens are gone.
-- Disclosure titles are the panel's own `<h2>` promoted to the `<summary>`, and
-  the heading is removed from the body: one title per section, never a summary
-  plus a near-duplicate heading.
+- Disclosure titles are the panel's own `<h2>` promoted to the `<summary>`; the
+  body keeps a `.visually-hidden` copy of the heading for heading navigation, so
+  one title is visible and no second heading is drawn.
+- A jump link (`#today`) is present whenever cart items exist; at 390 px the
+  first action or its jump link must sit within an 844 px first screen.
 - A skip link targets the review section (not a `<main>` that still contains the
   masthead). A print stylesheet removes the paper background; collapsed
   sections are documented as printing their titles only.
@@ -198,12 +219,18 @@ used by every artifact.
   zero JS errors, no page or table overflow, labelled cells, visible focus,
   measured text contrast, **measured non-text contrast ≥3:1** for
   ruler/legend/bar, word-intact cells, a five-column ledger *when a ledger table
-  exists*, the empty ledger's own copy when it does not, and the one action
-  starting above the 900px fold at desktop width.
+  exists*, the empty ledger's own copy when it does not, the one action
+  starting above the 900px fold at desktop width, a visible `#today` jump link
+  on mobile, and no `.mark.ok` for an item whose evaluation is not
+  `safe`+`current`.
 - Long content is a standard fixture: a 2,000-character item name and a
   2,500-character note must not widen any table past its panel; a long note is
   disclosed, and the page gains no horizontal overflow.
 - `capture` mode in the browser verifier is evidence only and reports
-  `acceptance:false`; `baseline` is rejected. Only `normal` and `zoom` count.
+  `acceptance:false`. It writes **full-page** captures at 1440 and 390 plus
+  section captures (attention, today/action, runway, ledger, and the long
+  fixture's long row), and a `capture-manifest.json` binding the artifact's
+  sha256 and every PNG's sha256, so a capture cannot be separated from the bytes
+  it depicts. `baseline` is rejected. Only `normal` and `zoom` count as checks.
 - Golden dashboards are regenerated intentionally; a golden diff is a design
   change, never a test fix.

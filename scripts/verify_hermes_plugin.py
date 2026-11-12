@@ -177,6 +177,14 @@ def run(bundle, scratch, offline):
     require("data-raw-result='safe'" in mixed_html, "mixed fixture exercises the cleared path")
     require("data-raw-status='safe'" in mixed_html, "mixed ledger shows an explicit clearance")
     require("Not evaluated" in mixed_html, "mixed ledger marks unevaluated items neutral")
+    counts = mixed_html.split("class='attention-counts'")[1].split("</p>")[0]
+    require("cleared" in counts and "blocked" in counts,
+            "mixed fixture states exact cleared and blocked counts")
+    require(mixed_html.count("class='mark ok' data-raw-status") ==
+            mixed_html.count("class='mark ok' data-raw-status='safe' data-result='safe'"),
+            "every sage clearance mark is backed by a safe evaluation")
+    require("Dietary evidence &middot; blocked" in mixed_html,
+            "mixed fixture names its severity in text")
     long_html = (scratch / "long-dashboard.html").read_text()
     require("Read the note (2520 characters)" in long_html, "long note is disclosed, not clipped")
     require(all("<colgroup>" in table for table in long_html.split("<table>")[1:]),

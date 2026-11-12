@@ -80,7 +80,7 @@ def test_dietary_attention_renders_the_fail_closed_verdict():
         assert row['item'] in markup
         assert row['reason'] in markup
     # The masthead states the count; the panel owns the full verdict (no 3x repeat).
-    assert '13 of 13 items are unverified' in markup
+    assert '13 of 13 items are not cleared' in markup
     assert 'state-legend' in markup
 
 

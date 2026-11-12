@@ -71,9 +71,10 @@ def test_correction_capture_only_renders_under_consent():
 
 def test_evidence_drawer_only_for_items_with_evidence():
     canonical_html = render_dashboard(analyze_state(_canonical()))
-    assert "<details>" in canonical_html
+    assert "<details><summary>Ingredient label ·" in canonical_html
     legacy_html = render_dashboard(analyze_state(_legacy()))
-    assert legacy_html.count("<details>") == 0
+    assert "No label evidence" in legacy_html
+    assert "<details><summary>Ingredient label ·" not in legacy_html
 
 
 def test_pulses_tolerate_note_field():

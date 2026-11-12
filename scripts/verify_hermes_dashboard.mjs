@@ -3,6 +3,7 @@
 // modes: normal (assert four widths, contrast, keyboard, exports) | zoom (native
 // 400% browser zoom preference) | capture (screenshots only, never acceptance).
 import {spawn} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -11,6 +12,18 @@ if(!artifact||!output)throw Error('Usage: node scripts/verify_hermes_dashboard.m
 if(mode==='baseline')throw Error('baseline mode was retired: it is capture evidence, never acceptance. Use normal or zoom.');
 if(!['normal','zoom','capture'].includes(mode))throw Error('Unknown mode '+mode);
 const acceptance=mode!=='capture';
+const artifactBytes=await readFile(resolve(artifact));
+const artifactSha256=createHash('sha256').update(artifactBytes).digest('hex');
+const captureManifest={artifact:resolve(artifact),artifactSha256,mode,captures:[]};
+const captureSection=async(sessionCall,sessionEval,name,selector,width)=>{
+ const rect=await sessionEval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e)return null;e.scrollIntoView({block:'start'});const r=e.getBoundingClientRect();return {x:Math.max(0,Math.floor(r.left+scrollX)),y:Math.max(0,Math.floor(r.top+scrollY)),width:Math.min(Math.ceil(r.width),3000),height:Math.min(Math.ceil(r.height),12000)}})()`);
+ if(!rect||!rect.width||!rect.height)return;
+ const shot=await sessionCall('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:{...rect,scale:1}});
+ const buf=Buffer.from(shot.data,'base64');
+ const file=`section-${name}-${width}.png`;
+ await writeFile(resolve(output,file),buf);
+ captureManifest.captures.push({file,sha256:createHash('sha256').update(buf).digest('hex'),width,section:name});
+};
 await mkdir(output,{recursive:true});
 const profile=resolve(output,'chrome-profile');
 await mkdir(resolve(profile,'Default'),{recursive:true});
@@ -40,10 +53,20 @@ try{
   if(measure.injected)throw Error('Hostile fixture executed');
   if(acceptance&&measure.scrollWidth>measure.width)throw Error('Collapsed viewport overflow '+JSON.stringify(measure));
   if(mode==='zoom'&&measure.dpr<3.9)throw Error('Native browser zoom preference did not take effect: '+JSON.stringify(measure));
-  measure.fold=await evaluate(`(()=>{const a=document.querySelector('.today'),att=document.querySelector('.attention'),l=document.querySelector('.ledger'),fig=document.querySelector('.attention-figure');return {width:innerWidth,actionTop:a?Math.round(a.getBoundingClientRect().top+scrollY):null,attentionHeight:att?Math.round(att.getBoundingClientRect().height):null,ledgerTop:l?Math.round(l.getBoundingClientRect().top+scrollY):null,hasAttention:!!att,warnTier:!!att&&att.classList.contains('warn-tier'),figureColor:fig?getComputedStyle(fig).color:null}})()`);
+  measure.fold=await evaluate(`(()=>{const a=document.querySelector('.today'),att=document.querySelector('.attention'),l=document.querySelector('.ledger'),fig=document.querySelector('.attention-figure'),jump=document.querySelector('.jump-link'),counts=document.querySelector('.attention-counts'),note=document.querySelector('.section-note');const r=e=>e?Math.round(e.getBoundingClientRect().top+scrollY):null;return {width:innerWidth,actionTop:r(a),attentionTop:r(att),attentionHeight:att?Math.round(att.getBoundingClientRect().height):null,jumpTop:r(jump),jumpHref:jump?jump.getAttribute('href'):null,countsText:counts?counts.textContent.trim():null,severityNote:note?note.textContent.trim():null,figureExists:!!fig,ledgerTop:r(l),hasAttention:!!att,warnTier:!!att&&att.classList.contains('warn-tier'),figureColor:fig?getComputedStyle(fig).color:null}})()`);
   if(acceptance&&measure.width>=1280&&measure.fold.actionTop!==null&&measure.fold.actionTop>=900)throw Error('One action starts below the 900px fold on cold load: '+JSON.stringify(measure.fold));
   if(acceptance&&measure.fold.warnTier&&measure.fold.figureColor!=='rgb(138, 91, 18)')throw Error('Preference warning is not wearing the ochre tier: '+JSON.stringify(measure.fold));
   if(acceptance&&measure.fold.hasAttention&&!measure.fold.warnTier&&measure.fold.figureColor&&measure.fold.figureColor!=='rgb(163, 45, 34)')throw Error('Blocking evidence is not wearing the brick uniform: '+JSON.stringify(measure.fold));
+  if(acceptance&&measure.fold.figureExists&&!measure.fold.countsText)throw Error('Attention panel has no exact counts line: '+JSON.stringify(measure.fold));
+  if(acceptance&&measure.fold.figureExists&&!/tier|blocked|cleared/i.test(measure.fold.severityNote||''))throw Error('Dietary severity has no text token: '+JSON.stringify(measure.fold));
+  if(acceptance&&measure.fold.jumpHref){
+    if(measure.fold.jumpHref!=='#today')throw Error('Jump link does not target the action: '+JSON.stringify(measure.fold));
+    if(measure.fold.jumpTop>=844&&measure.fold.actionTop>=844)throw Error('No action or jump within the 844px mobile first screen: '+JSON.stringify(measure.fold));
+  }
+  if(acceptance){
+    const lies=await evaluate(`(()=>{const out=[];for(const m of document.querySelectorAll('.mark.ok')){if(m.closest('.state-legend'))continue;if(m.dataset.result!=='safe')out.push(m.dataset.result||'no-result');}return out})()`);
+    if(lies.length)throw Error('A clearance mark is not backed by a safe evaluation: '+JSON.stringify(lies));
+  }
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   await writeFile(resolve(output,`dashboard-${mode==='zoom'?'native-400pct':width}.png`),Buffer.from(shot.data,'base64'));
   await evaluate(`document.querySelectorAll('details').forEach(x=>x.open=true)`);await pause();
@@ -58,6 +81,18 @@ try{
   if(acceptance){const l=measure.layout;if(l.overflowTables)throw Error('Table overflows its container: '+JSON.stringify(l));if(l.brokenCells)throw Error('Cells still break words mid-word: '+JSON.stringify(l));if(l.ledgerColumns&&l.ledgerColumns!==5)throw Error('Ledger is not five columns: '+JSON.stringify(l));if(!l.ledgerColumns&&!l.emptyLedgerCopy)throw Error('Empty ledger state has no copy to verify: '+JSON.stringify(l));if(l.ledgerColumns&&!l.ledgerRows)throw Error('Ledger table has no rows: '+JSON.stringify(l));if(l.disclosureHeadingPx!==null&&l.disclosureHeadingPx>18)throw Error('Disclosure heading is not on the design scale: '+JSON.stringify(l));if(l.mutedColor===l.bodyColor)throw Error('.muted does not mute: '+JSON.stringify(l));if(measure.width>=768&&l.captionWidth!==null&&l.captionWidth<220)throw Error('Table caption squeezed: '+JSON.stringify(l));}
   const expandedShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});
   await writeFile(resolve(output,`expanded-${mode==='zoom'?'native-400pct':width}.png`),Buffer.from(expandedShot.data,'base64'));
+  if(mode==='capture'&&(width===1440||width===390)){
+    const full=Buffer.from(expandedShot.data,'base64');
+    const fullFile=`full-${width}.png`;
+    await writeFile(resolve(output,fullFile),full);
+    captureManifest.captures.push({file:fullFile,sha256:createHash('sha256').update(full).digest('hex'),width,section:'full-page'});
+    for(const [name,selector] of [['attention','.attention'],['action','.today'],['runway','.runway'],['ledger','.ledger']]){
+      await captureSection(call,evaluate,name,selector,width);
+    }
+    if(await evaluate(`!!document.querySelector('.ledger tbody tr')`)){
+      await captureSection(call,evaluate,'ledger-row','.ledger tbody tr:first-child',width);
+    }
+  }
   await evaluate(`document.querySelector('a.skip-link')?.focus()`);
   const trace=[];
   for(let i=0;i<6;i++){await call('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});await call('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});trace.push(await evaluate(`(()=>{const e=document.activeElement,s=getComputedStyle(e);return {tag:e.tagName,text:e.textContent.slice(0,80),outline:s.outlineStyle,width:s.outlineWidth}})()`));}
@@ -74,8 +109,9 @@ try{
  const planFile=resolve(output,'downloads/buy-list.json');let exported=null;
  try{exported=JSON.parse(await readFile(planFile,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(exported&&(exported.approval_required!==true||exported.checkout_available!==false))throw Error('Unsafe export');
- const report={ok:true,mode,acceptance,requests,errors,downloads,exported,measurements};
+ const report={ok:true,mode,acceptance,artifactSha256,requests,errors,downloads,exported,measurements};
  await writeFile(resolve(output,'browser-report.json'),JSON.stringify(report,null,2));
+ if(mode==='capture')await writeFile(resolve(output,'capture-manifest.json'),JSON.stringify(captureManifest,null,2));
  console.log(JSON.stringify({ok:true,mode,acceptance,viewports:measurements.length,externalRequests:external.length,errors:errors.length,downloaded:downloads}));
  await send('Browser.close');
 }finally{ws?.close();if(chrome.exitCode===null)chrome.kill('SIGTERM');}

@@ -165,7 +165,7 @@ def test_sourcing_states_its_unit_and_confidence_basis():
     assert 'Unit prices' in text and 'per-unit figures' in text
     assert 'no unit label can be stated' in text
     assert 'modelled' in text and 'not a checked shelf price' in text
-    assert 'confidence; checked 25 May 2026' in text
+    assert 'confidence; checked 20 May 2026' in text
     assert 'Best sourcing move' not in text
     assert 'One sourcing candidate' in text
 
@@ -193,6 +193,9 @@ def test_disclosure_titles_are_not_duplicated():
                         r"<div class='disclosure-grid'>(.*?)</div></details>", markup, re.S)
     assert len(blocks) >= 8
     for title, body in blocks:
+        # One visible title (the summary); the panel's own heading survives for
+        # heading navigation but is not drawn twice.
+        assert "<h2 class='visually-hidden'>" in body, title
         assert '<h2>' not in body, title
     titles = [title for title, _ in blocks]
     assert 'Easy Food' in titles and 'Sourcing Research' in titles
