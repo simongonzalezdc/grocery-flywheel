@@ -198,6 +198,16 @@ def test_disclosure_titles_are_not_duplicated():
     assert 'Easy Food' in titles and 'Sourcing Research' in titles
 
 
+def test_all_unpriced_items_use_the_no_price_bucket():
+    state = json.loads((ROOT / 'examples/sample_state.json').read_text())
+    for item in state['items']:
+        item['pricing_status'] = 'unpriced'
+    markup = render_dashboard(analyze_state(state))
+    assert ('0 priced &middot; 0 stale &middot; 13 no price &middot; 0 estimated') in markup
+    assert 'No price captured' in markup
+    assert "class='mark ok'" not in markup.split("The ledger</h2>")[1].split('</article>')[0]
+
+
 def test_runway_percentage_is_one_number():
     markup = render_dashboard(analysis())
     assert '16.4%' in markup
