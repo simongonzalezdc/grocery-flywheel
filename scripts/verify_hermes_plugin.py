@@ -153,11 +153,30 @@ def run(bundle, scratch, offline):
     long_state["items"][-1]["name"] = "Sanitized long item " + "x" * 2000
     long_state["items"][-1]["notes"] = "Sanitized long note " + "y" * 2500
     variants["long"] = long_state
+    # Mixed state: one current-evidence safe item and one blocked item under a
+    # critical restriction, so the success path is exercised beside the failure.
+    mixed = json.loads(sample)
+    mixed["dietary_profiles"] = [{"profile_id": "native-mixed", "label": "Sanitized household",
+                                  "restrictions": [{"value": "peanut_allergy",
+                                                    "safety_tier": "critical",
+                                                    "behavior": "block"}]}]
+    mixed["items"][0]["product_evidence"] = [{"evidence_type": "label", "source": "sanitized label",
+                                              "checked_date": mixed["as_of"], "ingredients": ["oats"],
+                                              "allergen_statements": [], "certifications": []}]
+    mixed["items"][1]["product_evidence"] = [{"evidence_type": "label", "source": "sanitized label",
+                                              "checked_date": mixed["as_of"], "ingredients": ["peanut"],
+                                              "allergen_statements": ["peanut"], "certifications": []}]
+    variants["mixed"] = mixed
     for label, state in variants.items():
         response = call("grocery_dashboard", {"state_json": json.dumps(state)})
         require(response.get("ok"), label + " native dashboard")
         output = home / "plugin-data/grocery-flywheel" / response["data"]["artifact"]
         shutil.copyfile(output, scratch / (label + "-dashboard.html"))
+    mixed_html = (scratch / "mixed-dashboard.html").read_text()
+    require("data-raw-result='blocked'" in mixed_html, "mixed fixture renders a blocked evaluation")
+    require("data-raw-result='safe'" in mixed_html, "mixed fixture exercises the cleared path")
+    require("data-raw-status='safe'" in mixed_html, "mixed ledger shows an explicit clearance")
+    require("Not evaluated" in mixed_html, "mixed ledger marks unevaluated items neutral")
     for consent, visible in ((None, False), ({}, False), ({"correction_telemetry": "disabled"}, False),
                              ({"correction_telemetry": "local_only"}, True),
                              ({"correction_telemetry": "hosted_opt_in"}, True)):
