@@ -40,8 +40,10 @@ try{
   if(measure.injected)throw Error('Hostile fixture executed');
   if(acceptance&&measure.scrollWidth>measure.width)throw Error('Collapsed viewport overflow '+JSON.stringify(measure));
   if(mode==='zoom'&&measure.dpr<3.9)throw Error('Native browser zoom preference did not take effect: '+JSON.stringify(measure));
-  measure.fold=await evaluate(`(()=>{const a=document.querySelector('.today'),att=document.querySelector('.attention'),l=document.querySelector('.ledger');return {width:innerWidth,actionTop:a?Math.round(a.getBoundingClientRect().top+scrollY):null,attentionHeight:att?Math.round(att.getBoundingClientRect().height):null,ledgerTop:l?Math.round(l.getBoundingClientRect().top+scrollY):null}})()`);
+  measure.fold=await evaluate(`(()=>{const a=document.querySelector('.today'),att=document.querySelector('.attention'),l=document.querySelector('.ledger'),fig=document.querySelector('.attention-figure');return {width:innerWidth,actionTop:a?Math.round(a.getBoundingClientRect().top+scrollY):null,attentionHeight:att?Math.round(att.getBoundingClientRect().height):null,ledgerTop:l?Math.round(l.getBoundingClientRect().top+scrollY):null,hasAttention:!!att,warnTier:!!att&&att.classList.contains('warn-tier'),figureColor:fig?getComputedStyle(fig).color:null}})()`);
   if(acceptance&&measure.width>=1280&&measure.fold.actionTop!==null&&measure.fold.actionTop>=900)throw Error('One action starts below the 900px fold on cold load: '+JSON.stringify(measure.fold));
+  if(acceptance&&measure.fold.warnTier&&measure.fold.figureColor!=='rgb(138, 91, 18)')throw Error('Preference warning is not wearing the ochre tier: '+JSON.stringify(measure.fold));
+  if(acceptance&&measure.fold.hasAttention&&!measure.fold.warnTier&&measure.fold.figureColor&&measure.fold.figureColor!=='rgb(163, 45, 34)')throw Error('Blocking evidence is not wearing the brick uniform: '+JSON.stringify(measure.fold));
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   await writeFile(resolve(output,`dashboard-${mode==='zoom'?'native-400pct':width}.png`),Buffer.from(shot.data,'base64'));
   await evaluate(`document.querySelectorAll('details').forEach(x=>x.open=true)`);await pause();
