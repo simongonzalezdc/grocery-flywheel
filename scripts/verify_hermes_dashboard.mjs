@@ -46,7 +46,7 @@ try{
  await mkdir(resolve(output,'downloads'),{recursive:true});
  await send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:resolve(output,'downloads'),eventsEnabled:true});
  const measurements=[];
- for(const width of mode==='zoom'?[1440]:[1440,885,820,768,753,390,320]){
+ for(const width of mode==='zoom'?[1440]:[1440,1280,1024,885,820,768,753,390,320]){
   if(mode!=='zoom')await call('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
   await call('Page.navigate',{url:pathToFileURL(resolve(artifact)).href});await pause();
   const measure=await evaluate(`(()=>{const r={width:innerWidth,outerWidth,scrollWidth:document.documentElement.scrollWidth,dpr:devicePixelRatio,injected:!!window.GROCERY_INJECTED,heading:document.querySelector('h1')?.textContent,details:document.querySelectorAll('details').length,corrections:!!document.querySelector('#correction-item')};return r})()`);
@@ -97,9 +97,37 @@ try{
     const ledgerCraft=await evaluate(`(()=>{const t=document.querySelector('.ledger table');if(!t)return null;const ths=[...t.querySelectorAll('th')];const price=ths[2],spend=ths[1];const first=t.querySelector('tbody tr');const priceCell=first&&first.children[2];return {spendAlign:spend?getComputedStyle(spend).textAlign:null,priceAlign:price?getComputedStyle(price).textAlign:null,priceCellAlign:priceCell?getComputedStyle(priceCell).textAlign:null,priceCellH:priceCell?Math.round(priceCell.getBoundingClientRect().height):null,label:(priceCell&&priceCell.textContent||'').replace(/\\s+/g,' ').trim(),maxLabelLines:Math.max(0,...[...t.querySelectorAll('tbody tr')].map(r=>{const m=r.children[2]&&r.children[2].querySelector('.cell-value .mark');return m?m.getClientRects().length:0}))}})()`);
     measure.ledgerCraft=ledgerCraft;
     if(acceptance&&ledgerCraft){
-      if(ledgerCraft.spendAlign!=='right'||ledgerCraft.priceAlign!=='right'||ledgerCraft.priceCellAlign!=='right')throw Error('Ledger money columns are not right-aligned: '+JSON.stringify(ledgerCraft));
+      if(width>=821){
+        if(ledgerCraft.spendAlign!=='right'||ledgerCraft.priceAlign!=='right'||ledgerCraft.priceCellAlign!=='right')throw Error('Ledger money columns are not right-aligned: '+JSON.stringify(ledgerCraft));
+      }else if(ledgerCraft.priceCellAlign!=='left'){
+        throw Error('Stacked ledger money cell does not align with the record: '+JSON.stringify(ledgerCraft));
+      }
       if(ledgerCraft.priceCellH>120)throw Error('Ledger Price cell still stacks over three lines: '+JSON.stringify(ledgerCraft));
       if(ledgerCraft.maxLabelLines>(width>=821?1:2))throw Error('Ledger Price label wraps beyond its column: '+JSON.stringify(ledgerCraft));
+    }
+    // One count sentence per width: the compact counts and the full verdict
+    // sentence are mutually exclusive, a count is never repeated, and the
+    // compact form never prints a zero cleared bucket (r9 B1).
+    const status=await evaluate(`(()=>{const p=document.querySelector('.masthead-status');if(!p)return null;const shown=e=>!!e&&e.getClientRects().length>0;const spans=[...p.querySelectorAll('.status-compact,.status-verdict')];const text=(p.innerText||'').replace(/\\s+/g,' ').trim();const tokens=text.match(/\\b\\d+ of \\d+\\b/g)||[];return {height:Math.round(p.getBoundingClientRect().height),visible:spans.filter(shown).map(e=>e.className),spans:spans.length,text,tokens,duplicate:tokens.filter((t,i)=>tokens.indexOf(t)!==i),zeroBucket:/\\b0 of \\d+ cleared\\b/.test(text)}})()`);
+    measure.status=status;
+    if(status){
+      if(status.spans&&status.visible.length!==1)throw Error('Sticky status renders '+status.visible.length+' count spans at '+width+'px: '+JSON.stringify(status));
+      if(status.duplicate.length)throw Error('Sticky status repeats a count at '+width+'px: '+JSON.stringify(status));
+      if(status.zeroBucket)throw Error('Sticky status prints a zero cleared bucket at '+width+'px: '+JSON.stringify(status));
+      const bannerLimit=width>=1024?64:width>=761?88:100;
+      if(status.height>bannerLimit)throw Error('Sticky status banner is '+status.height+'px at '+width+'px (limit '+bannerLimit+'): '+JSON.stringify(status));
+    }
+    // Stacked records: Spend/Price labels and values align left with every
+    // other cell at <=820px (r9 B2: the tabular right-alignment leaked in).
+    if(width<=820){
+      const stacked=await evaluate(`(()=>{const rows=[...document.querySelectorAll('.ledger tbody tr')];if(!rows.length)return null;const cells=[...rows[0].children];const values=cells.map(c=>{const v=c.querySelector(':scope > .cell-value')||c;const r=v.getBoundingClientRect();return {label:c.dataset.label,align:getComputedStyle(c).textAlign,before:getComputedStyle(c,'::before').textAlign,valueLeft:Math.round(r.left)}});return {values}})()`);
+      measure.stacked=stacked;
+      if(stacked){
+        const off=stacked.values.filter(v=>v.align!=='left'||v.before!=='left');
+        if(off.length)throw Error('Stacked ledger cell does not align left at '+width+'px: '+JSON.stringify(off));
+        const xs=[...new Set(stacked.values.map(v=>v.valueLeft))];
+        if(xs.length!==1)throw Error('Stacked ledger values start at different x at '+width+'px: '+JSON.stringify(stacked.values));
+      }
     }
     // An unpriced placeholder is not a recorded zero.
     const ledgerSpend=await evaluate(`(()=>{const rows=[...document.querySelectorAll('.ledger tbody tr')].map(r=>r.textContent.replace(/\\s+/g,' '));return {rows:rows.length,fabricated:rows.filter(t=>/No price captured/.test(t)&&/\\$0\\.00/.test(t))}})()`);

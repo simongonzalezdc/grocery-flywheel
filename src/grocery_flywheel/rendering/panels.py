@@ -535,9 +535,13 @@ def _dietary(a: dict[str, Any]) -> str:
 def _status_line(a: dict[str, Any]) -> str:
     """One persistent line above every section: the dietary state, in words.
 
-    The compact counts are always visible; the full verdict sentence is hidden
-    at 1440px and wider, where the attention panel already states it (Design F1),
-    so the banner does not repeat the hero's sentence on the same screen.
+    Exactly one of the two count spans is visible at any width, so the banner
+    states the fact once: the compact counts alone at >=1440px (where the
+    attention panel states the verdict on the same screen) and on mobile, the
+    full verdict sentence alone in the 761-1439px band (r9 B1: that band
+    rendered both spans and repeated the count). The compact form omits the
+    cleared bucket when nothing is cleared, so it never prints ``0 of N
+    cleared``.
     """
     if not (a.get("dietary_profiles") or []):
         return ("<p class='masthead-status quiet'>No dietary profile configured. "
@@ -557,8 +561,9 @@ def _status_line(a: dict[str, Any]) -> str:
                 "<span class='status-note'>See Needs attention today.</span></p>")
     if verdict["open"]:
         cleared = (f"{verdict['cleared']} of {total} cleared; " if verdict["cleared"] else "")
-        compact = (f"{verdict['cleared']} of {total} cleared &middot; {verdict['open']} "
-                   "of " + f"{total} not cleared")
+        bucket = (f"{verdict['cleared']} of {total} cleared &middot; "
+                  if verdict["cleared"] else "")
+        compact = f"{bucket}{verdict['open']} of {total} not cleared"
         full = (f"{cleared}{verdict['open']} of {total} "
                 f"{_plural(total, 'item is', 'items are')} not cleared.")
         return (f"<p class='masthead-status warn'><span class='status-compact'>"

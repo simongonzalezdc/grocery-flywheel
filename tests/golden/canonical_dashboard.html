@@ -96,6 +96,12 @@ p { max-width:var(--measure); }
   margin:2px 0 0; font-size:var(--step-1); font-weight:600; text-underline-offset:3px; }
 .status-compact { display:inline; }
 .status-verdict { display:inline; }
+@media (min-width:761px) and (max-width:1439px) {
+  /* One count sentence per width (r9 B1: this band rendered the compact counts
+     and the full verdict together). The full sentence replaces the counts here;
+     at >=1440px and <=760px the compact counts render alone. */
+  .masthead-status .status-compact { display:none; }
+}
 .attention-context { margin:8px 0 0; }
 .attention-context > summary { padding:6px 0; min-height:32px; font-size:var(--step--1); }
 #today, #household-review { scroll-margin-top:8rem; }
@@ -245,6 +251,10 @@ footer p { max-width:var(--measure); }
  .at-risk td > .cell-sub, .at-risk td > .mark-detail { grid-column:2; grid-row:auto; }
  .ledger td:first-child, .at-risk td:first-child { padding-top:10px; }
  .ledger td:last-child, .at-risk td:last-child { padding-bottom:10px; }
+ /* Numeric right-alignment belongs to the tabular layout only: in a stacked
+    record the Spend/Price labels and values align left with every other cell
+    (r9 B2: right-aligned money cells zig-zagged every record). */
+ .ledger td.money-col, .ledger td.money-col::before { text-align:left; }
 }
 @media (max-width:760px) {
  main { padding:24px 16px 48px; }

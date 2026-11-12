@@ -220,6 +220,31 @@ def run(bundle, scratch, offline):
                     "non-cleared action carries its dietary qualifier")
     require("Dietary evidence &middot; blocked" in mixed_html,
             "mixed fixture names its severity in text")
+    # r10: one count sentence per width. The compact counts and the full verdict
+    # sentence are mutually exclusive, and a zero cleared bucket is never printed.
+    require(mixed_html.count("class='status-compact'") == 1
+            and mixed_html.count("class='status-verdict'") == 1,
+            "status line carries one compact span and one verdict span")
+    mixed_compact_match = re.search(r"<span class='status-compact'>(.*?)</span>", mixed_html)
+    assert mixed_compact_match is not None, "mixed dashboard carries compact status counts"
+    mixed_compact = mixed_compact_match.group(1)
+    require("1 item blocked" in mixed_compact and "12 of 13 not cleared" in mixed_compact,
+            "compact status states the blocked row and the open count once")
+    sample_html = (scratch / "sample-dashboard.html").read_text()
+    sample_compact_match = re.search(r"<span class='status-compact'>(.*?)</span>", sample_html)
+    assert sample_compact_match is not None, "sample dashboard carries compact status counts"
+    sample_compact = sample_compact_match.group(1)
+    require("0 of" not in sample_compact and "13 of 13 not cleared" in sample_compact,
+            "compact status omits a zero cleared bucket")
+    css = mixed_html.split("<style>")[1].split("</style>")[0]
+    require("@media (min-width:761px) and (max-width:1439px)" in css
+            and ".masthead-status .status-compact { display:none; }" in css
+            and "@media (min-width:1440px)" in css
+            and "@media (max-width:760px)" in css,
+            "mutually exclusive status spans cover every width band")
+    stacked_block = css.split("@media (max-width:820px)", 1)[1].split("\n}", 1)[0]
+    require(".ledger td.money-col, .ledger td.money-col::before { text-align:left; }" in stacked_block,
+            "stacked ledger resets money alignment with the other cells")
     # The draft is what the household reads after clicking download; it must
     # carry the same rows, the same holds and the same qualifiers as the page.
     plan_attr = re.search(r"data-plan='([^']*)'", mixed_html)

@@ -124,8 +124,10 @@ and never clears a row.
 - the item↔evaluation join is casefolded and whitespace-collapsed for matching
   only; the engine's names are never rewritten.
 - the **status line** is sticky and stays visible while scrolling; it leads with
-  compact counts (`1 item blocked · 12 of 13 not cleared`), and its full verdict
-  sentence is hidden at ≥1440 px, where the attention panel states it once. The
+  compact counts (`1 item blocked · 12 of 13 not cleared`) and states a count
+  exactly once: the compact counts alone at ≥1440 px (where the attention panel
+  states the verdict) and at ≤760 px, the full verdict sentence alone at
+  761–1439 px. A zero cleared bucket is never printed. The
   attention qualifier stays at body size on mobile — it is never dropped to the
   smallest step.
 
@@ -251,7 +253,9 @@ The reconciliation below repeats the arithmetic in words.
 - Below 700px each row stacks into labelled blocks. A ledger record is a
   two-column grid; every value cell carries a `.cell-value` wrapper and every
   sub-line (`.cell-sub`, `.mark-detail`) is pinned to column 2, so the note sits
-  under the value and never under the label.
+  under the value and never under the label. Numeric right-alignment applies
+  only while the ledger is a table: inside the stacked record the Spend/Price
+  labels and values align left with every other cell.
 - Meaningful graphics meet **≥3:1** against paper: ruler outlines, legend
   outlines and bar boundaries use `--edge-strong` (#8A7F6E → 3.49:1 on `--bg`,
   3.87:1 on `--panel`). Hairline rules stay decorative.
