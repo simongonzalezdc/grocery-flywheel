@@ -1,30 +1,502 @@
-"""The panel registry: an ordered list of (name, span, render) callables.
+"""The panel registry and the dashboard composition.
 
-Deliberately NOT a framework — no classes to subclass, no plugins, no
-registration decorators. A panel is a function from analysis to HTML;
-adding one means appending an entry here and nowhere else. The order
-below is the D1 decision (2026-08-14): first-wow cards → core runway →
-dietary + easy food → freshness + trips → evidence, corrections, cart
-plan → tables.
+A panel is a function from analysis to HTML. The registry stays the single
+list of panels; ``render_dashboard`` decides the reading order:
+
+    masthead status -> attention -> one action -> runway -> ledger -> evidence
+
+The order is the design decision from t_0abdce8f: the dietary verdict cannot
+be scrolled past, the action comes second, depletion third, and every other
+original panel stays reachable in a native disclosure. No engine semantics
+live here — only presentation of fields the engine already produced.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import re
+from collections import Counter
 from html import escape
 from typing import Any, Callable
 
-from .layout import header_line, page_shell
+from .layout import header_line, human_date, humanize_key, page_shell
 
 PanelRender = Callable[[dict[str, Any]], str]
+
+ROLE_LABELS = {
+    "bridge_food": "Bridge food",
+    "critical_household_essential": "Household essential",
+    "pantry_base": "Pantry base",
+    "flavor_unlock": "Flavour unlock",
+}
+ACTION_LABELS = {
+    "review_alternate_source": "Compare an alternate source",
+    "check_aisle_price": "Check the shelf price",
+    "restock": "Restock",
+}
+APPROVAL_LABELS = {"needs_human_approval": "Needs your approval"}
+RESULT_LABELS = {
+    "blocked": "Blocked",
+    "needs_review": "Needs review",
+    "warn": "Warning",
+    "safe": "Cleared",
+}
+EVIDENCE_LABELS = {
+    "current": "Current evidence",
+    "missing": "No label evidence",
+    "stale": "Evidence out of date",
+    "ambiguous": "No usable label content",
+    "unrecognized_restriction": "Restriction not recognised",
+}
+PRICE_LABELS = {
+    "priced": "Priced",
+    "unpriced": "Unpriced",
+    "estimated": "Estimated",
+}
+SEVERITY = {"safe": 0, "warn": 1, "needs_review": 2, "blocked": 3}
+RESULT_CLASS = {"blocked": "missing", "needs_review": "missing", "warn": "warn", "safe": "ok"}
 
 
 def _panel(name: str, span: str, render: PanelRender) -> dict[str, Any]:
     return {"name": name, "span": span, "render": render}
 
 
-# --- individual panels -------------------------------------------------
+def _plural(count: int, one: str, many: str | None = None) -> str:
+    return one if count == 1 else (many or one + "s")
+
+
+def _label(mapping: dict[str, str], value: object) -> str:
+    raw = str(value or "")
+    return mapping.get(raw, humanize_key(raw))
+
+
+def _role(value: object) -> str:
+    return ROLE_LABELS.get(str(value or ""), humanize_key(value))
+
+
+def _section_head(label: str, note: str = "") -> str:
+    note_html = f"<span class='section-note'>{note}</span>" if note else ""
+    return (f"<div class='section-head'><h2 class='section-label'>{label}</h2>"
+            f"{note_html}</div>")
+
+
+def _money(value: object) -> str:
+    try:
+        return f"${float(value or 0):.2f}"
+    except (TypeError, ValueError):
+        return "$0.00"
+
+
+def _days(value: object) -> str:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "unknown"
+    return str(int(number)) if number == int(number) else f"{number:g}"
+
+
+# --- attention ----------------------------------------------------------
+
+def _dietary_statuses(analysis: dict[str, Any]) -> list[str]:
+    """Per-item dietary severity, from the engine's own item statuses."""
+    return [str(item.get("dietary_status") or "safe") for item in analysis.get("items", [])]
+
+
+def _dietary_verdict(analysis: dict[str, Any]) -> dict[str, Any]:
+    evaluations = analysis.get("dietary_evaluations") or []
+    items = analysis.get("items") or []
+    profiles = analysis.get("dietary_profiles") or []
+    counts = Counter(_dietary_statuses(analysis))
+    total = len(items)
+    blocked, needs_review, warn = counts["blocked"], counts["needs_review"], counts["warn"]
+    open_items = blocked + needs_review + warn
+    current_items = {str(e.get("item")) for e in evaluations
+                     if e.get("evidence_status") == "current"}
+    evidence_counts = Counter(str(e.get("evidence_status") or "missing") for e in evaluations)
+    warn_only = bool(evaluations) and all(str(e.get("result")) == "warn" for e in evaluations)
+    return {
+        "evaluations": evaluations, "items": items, "profiles": profiles,
+        "total": total, "blocked": blocked, "needs_review": needs_review,
+        "warn": warn, "open": open_items, "cleared": counts["safe"],
+        "covered": len(items) - len(current_items), "uncovered": len(current_items),
+        "evidence_counts": evidence_counts, "warn_only": warn_only,
+    }
+
+
+def _dietary(a: dict[str, Any]) -> str:
+    profile_rows = a.get("dietary_profiles") or []
+    verdict = _dietary_verdict(a)
+    head = _section_head("Needs attention today", "Dietary evidence")
+    if not profile_rows:
+        return (f"<article class='panel span-12 attention quiet'>{head}"
+                "<h3>No dietary restriction profile configured.</h3>"
+                "<p class='muted'>This dashboard makes no dietary claim. Add a profile in "
+                "your state file to evaluate items against it.</p></article>")
+
+    total = verdict["total"]
+    open_items = verdict["open"]
+    profiles = "; ".join(
+        escape(str(profile.get("label") or profile.get("profile_id") or "Household profile"))
+        for profile in profile_rows
+    )
+    restrictions = []
+    for profile in profile_rows:
+        for restriction in profile.get("restrictions") or []:
+            value = humanize_key(restriction.get("value") or restriction.get("type") or "")
+            tier = humanize_key(restriction.get("safety_tier") or "preference")
+            behaviour = humanize_key(restriction.get("behavior") or "warn")
+            restrictions.append(f"{value} (safety tier: {tier}; behaviour: {behaviour})")
+    restriction_text = "; ".join(restrictions) or "none recorded"
+
+    if verdict["blocked"]:
+        headline = (f"{verdict['blocked']} {_plural(verdict['blocked'], 'item is', 'items are')} "
+                    "blocked by your household dietary restrictions.")
+    elif open_items:
+        headline = "No item has been cleared as safe for your household diet."
+    elif total:
+        headline = (f"All {total} {_plural(total, 'item is', 'items are')} cleared against "
+                    "current dietary evidence.")
+    else:
+        headline = "No items to evaluate yet."
+    figure = (f"<div class='attention-figure'>{open_items}/{total}"
+              "<small>items unverified</small></div>" if open_items else
+              f"<div class='attention-figure' style='color:var(--sage)'>{verdict['cleared']}/{total}"
+              "<small>items cleared</small></div>")
+
+    evidence_summary = (
+        f"{verdict['covered']} of {total} {_plural(total, 'item has', 'items have')} no current "
+        "ingredient, allergen, or certification evidence on file."
+        if verdict["covered"] else
+        f"Every one of the {total} items carries current label evidence."
+    )
+    engine_note = (
+        "This household's restriction is configured to warn, so the engine returns a "
+        "warning for every item and clears none of them."
+        if verdict["warn_only"] and open_items else
+        "The engine clears an item only when current label evidence rules the "
+        "restriction out; a warning is not a clearance."
+    )
+    caveat = (f"Profile: {profiles}. Restriction: {escape(restriction_text)}. "
+              "Missing evidence is a data gap, not proof of a safety failure — but it "
+              "means this dashboard cannot tell you anything is safe.")
+
+    rows = sorted(
+        verdict["evaluations"],
+        key=lambda e: (-SEVERITY.get(str(e.get("result") or "safe"), 0),
+                       str(e.get("item") or "")),
+    )
+    body = "".join(
+        f"<tr><td>{escape(str(e.get('item') or ''))}</td>"
+        f"<td data-raw-result='{escape(str(e.get('result') or ''))}'>"
+        f"{escape(_label(RESULT_LABELS, e.get('result')))}</td>"
+        f"<td data-raw-evidence='{escape(str(e.get('evidence_status') or ''))}'>"
+        f"{escape(_label(EVIDENCE_LABELS, e.get('evidence_status')))}</td>"
+        f"<td>{escape(str(e.get('reason') or ''))}</td></tr>"
+        for e in rows
+    )
+    disclosure = ""
+    if body:
+        disclosure = (
+            f"<details class='evidence'><summary>See the evidence — "
+            f"{len(rows)} dietary {_plural(len(rows), 'evaluation')}</summary>"
+            "<div class='detail-body'><table><caption>Every evaluation the engine "
+            "produced for this household profile.</caption><thead><tr><th>Item</th>"
+            "<th>Result</th><th>Evidence</th><th>Reason</th></tr></thead>"
+            f"<tbody>{body}</tbody></table></div></details>")
+
+    return (f"<article class='panel span-12 attention'>{head}"
+            f"<div class='attention-body'>{figure}<div>"
+            f"<h3>{escape(headline)}</h3><p>{escape(evidence_summary)}</p>"
+            f"<p>{escape(engine_note)}</p>"
+            f"<p class='attention-caveat'>{escape(caveat)}</p>"
+            "</div></div>"
+            f"{disclosure}</article>")
+
+
+def _status_line(a: dict[str, Any]) -> str:
+    """One persistent line above every section: the dietary state, in words."""
+    if not (a.get("dietary_profiles") or []):
+        return ("<p class='masthead-status quiet'>No dietary profile configured. "
+                "Dietary checks are off until you add one.</p>")
+    verdict = _dietary_verdict(a)
+    total = verdict["total"]
+    if verdict["blocked"]:
+        return (f"<p class='masthead-status alert'>{verdict['blocked']} of {total} "
+                f"{_plural(total, 'item is', 'items are')} blocked by your household "
+                "dietary restrictions. <span class='status-note'>See Needs attention "
+                "today.</span></p>")
+    if verdict["open"]:
+        cleared_note = (f"{verdict['cleared']} cleared, {verdict['open']} unverified. "
+                        if verdict["cleared"] else "Nothing here is cleared as safe. ")
+        return (f"<p class='masthead-status alert'>{verdict['open']}/{total} "
+                f"{_plural(total, 'item is', 'items are')} unverified. "
+                f"<span class='status-note'>{cleared_note}See Needs attention today.</span></p>")
+    return (f"<p class='masthead-status clear'>All {total} "
+            f"{_plural(total, 'item is', 'items are')} cleared against current dietary "
+            "evidence.</p>")
+
+
+# --- one action ---------------------------------------------------------
+
+def _cart_plan(a: dict[str, Any]) -> str:
+    plan = a.get("cart_plan") or {}
+    items = plan.get("items") or []
+    head = _section_head(
+        "Today &middot; one thing",
+        f"{len(items)} {_plural(len(items), 'item')} &middot; every one needs your approval",
+    )
+    note = ("<p class='approve-note'>Everything needs your approval. "
+            "No checkout surface exists.</p>")
+    if not items:
+        return (f"<article class='panel span-12 today'>{head}"
+                "<h3 class='card-headline'>No cart plan yet.</h3>"
+                f"{note}<p class='lede'>Add sourcing research or deplete an item, then "
+                "render this page again.</p></article>")
+
+    rows = []
+    for index, item in enumerate(items, 1):
+        reason = str(item.get("reason") or "").strip() or "No reason recorded by the engine."
+        source = str(item.get("source") or "No source recorded")
+        action = _label(ACTION_LABELS, item.get("action"))
+        rows.append(
+            f"<li><span class='action-num'>{index:02d}</span>"
+            f"<span class='action-item'>{escape(str(item.get('item') or ''))}"
+            f"<span class='action-why'>{escape(reason)}</span></span>"
+            f"<span class='action-source'>{escape(action)}"
+            f"<br>{escape(source)}</span></li>")
+    export = ("<button class='primary' id='buy-list-download' type='button' data-plan='"
+              + escape(json.dumps(plan), quote=True) + "'>Download draft JSON</button>"
+              "<script>document.getElementById('buy-list-download').addEventListener('click', function () {"
+              "var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));"
+              "var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';"
+              "document.body.appendChild(link); link.click(); link.remove();"
+              "setTimeout(function () { URL.revokeObjectURL(url); }, 1000);});</script>"
+              "<span class='section-note'>A .json file you can read or print. Nothing is "
+              "bought, and nothing is written back to your state file.</span>")
+
+    freshness = a.get("freshness") or {}
+    stale = int(freshness.get("stale_count") or 0)
+    priced = int(freshness.get("fresh_count") or 0)
+    price_note = (f"{stale} of {len(a.get('items') or [])} stale or unpriced"
+                  if len(a.get("items") or []) else "no prices on file")
+    if priced and not stale:
+        price_note = f"all {priced} priced"
+    approval = _label(APPROVAL_LABELS, (items[0] or {}).get("approval_state"))
+    meta = (f"Mode <b>{escape(humanize_key(plan.get('mode') or 'pickup'))}</b> &middot; "
+            f"approval required before anything is bought: <b>yes</b> &middot; "
+            f"checkout available: <b>no</b> &middot; prices behind these numbers are "
+            f"<b>{escape(price_note)}</b> &middot; every item is <b>{escape(approval)}</b>.")
+    return (f"<article class='panel span-12 today'>{head}"
+            f"<h3 class='card-headline'>Review {len(items)} "
+            f"{_plural(len(items), 'item')} before your next shop.</h3>"
+            "<p class='lede'>Nothing here is bought for you. There is no checkout, no "
+            "retailer login and no basket to send — this list is yours to take to the "
+            "shelf.</p>"
+            f"<ul class='action-list'>{''.join(rows)}</ul>"
+            f"<div class='btn-row'>{export}</div>"
+            f"{note}<p class='today-meta'>{meta}</p></article>")
+
+
+# --- runway -------------------------------------------------------------
+
+def _runway_text(a: dict[str, Any]) -> str:
+    remaining = a.get("estimated_days_remaining")
+    return f"{_days(remaining)} days remaining" if remaining is not None else "Not enough depletion data"
+
+
+def _ruler(a: dict[str, Any]) -> str:
+    remaining = a.get("estimated_days_remaining")
+    if remaining is None:
+        return ""
+    elapsed = max(0.0, float(a.get("days_elapsed") or 0))
+    total = elapsed + float(remaining)
+    if total <= 0:
+        return ""
+    ticks = max(1, min(60, math.ceil(total)))
+    filled = min(ticks, max(0, round(elapsed / total * ticks)))
+    cell, gap = 18, 3
+    width = ticks * (cell + gap) - gap
+    rects = []
+    for index in range(ticks):
+        x = index * (cell + gap)
+        if index < filled:
+            paint = "fill='var(--ink)' stroke='var(--ink)'"
+        else:
+            paint = "fill='none' stroke='var(--edge)'"
+        rects.append(f"<rect x='{x}' y='10' width='{cell}' height='26' rx='2' "
+                     f"{paint} stroke-width='1'/>")
+    marker = filled * (cell + gap) - gap / 2
+    label = (f"Runway ruler: {_days(elapsed)} days observed, "
+             f"{_days(remaining)} days remaining.")
+    return (f"<div class='ruler'><svg viewBox='0 0 {width} 46' role='img' "
+            f"preserveAspectRatio='xMidYMid meet' aria-label='{escape(label)}'>"
+            f"{''.join(rects)}"
+            f"<line x1='{marker}' y1='4' x2='{marker}' y2='42' "
+            "stroke='var(--copper)' stroke-width='2'/></svg>"
+            "<div class='legend'>"
+            "<span class='legend-item'><span class='legend-swatch filled'></span>"
+            f"Days since the order — {_days(elapsed)} elapsed</span>"
+            "<span class='legend-item'><span class='legend-swatch outline'></span>"
+            f"Days of runway left — {_days(remaining)}</span>"
+            "<span class='legend-item'><span class='legend-swatch marker'></span>Today</span>"
+            "</div></div>")
+
+
+def _at_risk(a: dict[str, Any]) -> str:
+    rows = [item for item in a.get("items") or []
+            if float(item.get("consumed_fraction") or 0) >= 0.5]
+    if not rows:
+        return ("<p class='muted'>No item has passed half of its observed life yet.</p>")
+    rows.sort(key=lambda item: float(item.get("consumed_fraction") or 0), reverse=True)
+    body = "".join(
+        f"<tr><td>{escape(str(item['name']))}</td>"
+        f"<td data-role='{escape(str(item.get('role') or ''))}'>{escape(_role(item.get('role')))}</td>"
+        f"<td>{float(item.get('consumed_fraction') or 0) * 100:.0f}%</td>"
+        f"<td>{_bar(float(item.get('consumed_fraction') or 0))}</td>"
+        f"<td>{_money(item.get('spend'))}</td>"
+        f"<td>{escape(str(item.get('notes') or 'No note recorded.'))}</td></tr>"
+        for item in rows
+    )
+    return ("<table><caption>Items at or past half their observed life.</caption>"
+            "<thead><tr><th>Item</th><th>Role</th><th>Consumed</th><th>Drawn down</th>"
+            "<th>Spend</th><th>Note</th></tr></thead>"
+            f"<tbody>{body}</tbody></table>")
+
+
+def _runway_math(a: dict[str, Any]) -> str:
+    """Runway arithmetic, deliberately quieter than the attention figure."""
+    order = a.get("order") or {}
+    total = float(order.get("total") or 0)
+    consumed = float(a.get("consumed_value") or 0)
+    share = a.get("known_consumed_fraction") or 0
+    remaining = a.get("estimated_days_remaining")
+    runway = (f"{_days(remaining)} days" if remaining is not None
+              else "No estimate")
+    runway_note = ("Based on observed depletion, not a pantry audit."
+                   if remaining is not None else "Not enough depletion data yet.")
+    return (
+        "<div class='runway-math'>"
+        f"<div><span class='math-label'>Observed depletion</span>"
+        f"<span class='math-value'>{_money(consumed)}</span>"
+        f"<span class='math-label'>{float(share) * 100:.1f}% of order value observed consumed</span></div>"
+        f"<div><span class='math-label'>Estimated runway</span>"
+        f"<span class='math-value'>{escape(runway)}</span>"
+        f"<span class='math-label'>{escape(runway_note)}</span></div>"
+        f"<div><span class='math-label'>Order total</span>"
+        f"<span class='math-value'>{_money(total)}</span>"
+        f"<span class='math-label'>{int(a.get('days_elapsed') or 0)} "
+        f"{_plural(int(a.get('days_elapsed') or 0), 'day')} since the order</span></div>"
+        "</div>")
+
+
+def _metrics(a: dict[str, Any]) -> str:
+    return f"<article class='panel span-12'>{_runway_math(a)}</article>"
+
+
+def _runway(a: dict[str, Any]) -> str:
+    remaining = a.get("estimated_days_remaining")
+    elapsed = max(0.0, float(a.get("days_elapsed") or 0))
+    total = elapsed + float(remaining) if remaining is not None else None
+    order_total = float((a.get("order") or {}).get("total") or 0)
+    consumed = float(a.get("consumed_value") or 0)
+    share = (consumed / order_total * 100) if order_total else 0.0
+    head = _section_head("What will run out",
+                         "Estimate from observed depletion, not a pantry audit")
+    if remaining is None:
+        return (f"<article class='panel span-12 runway'>{head}"
+                "<h3>Not enough depletion data for a runway estimate.</h3>"
+                "<p class='muted'>Depletion pulses are needed before this page can say "
+                "how many days of cover are left.</p>"
+                f"{_runway_math(a)}</article>")
+    caption = (
+        "<div class='ruler-caption'>"
+        f"<span><b>{_days(elapsed)} days</b> observed since "
+        f"{escape(human_date((a.get('order') or {}).get('date')))}</span>"
+        f"<span><b>{_days(remaining)} days</b> of runway left of an estimated "
+        f"{_days(total)}</span>"
+        f"<span><b>{_money(consumed)}</b> of {_money(order_total)} seen consumed "
+        f"({share:.0f}%)</span></div>")
+    return (f"<article class='panel span-12 runway'>{head}"
+            f"{_ruler(a)}{caption}{_at_risk(a)}{_runway_math(a)}</article>")
+
+
+# --- ledger -------------------------------------------------------------
+
+def _evidence_drawer(item: dict[str, Any]) -> str:
+    rows = item.get("product_evidence") or []
+    if not rows:
+        return "<span class='mark neutral'>No label evidence</span>"
+    parts = []
+    for row in rows:
+        label = (f"{humanize_key(row.get('evidence_type', 'evidence'))} · "
+                 f"{row.get('source', '')} · {human_date(row.get('checked_date'))}")
+        content = ", ".join(
+            str(part) for field in ("ingredients", "allergen_statements", "certifications")
+            for part in (row.get(field) or [])[:4]
+        )
+        parts.append(f"<details><summary>{escape(label)}</summary>"
+                     f"<p class='muted'>{escape(content)}</p></details>")
+    return "".join(parts)
+
+
+def _dietary_mark(status: object) -> str:
+    raw = str(status or "safe")
+    css = RESULT_CLASS.get(raw, "neutral")
+    return (f"<span class='mark {css}' data-raw-status='{escape(raw)}'>"
+            f"{escape(_label(RESULT_LABELS, raw))}</span>")
+
+
+def _price_mark(status: object) -> str:
+    raw = str(status or "")
+    if not raw:
+        return "<span class='mark neutral'>No price record</span>"
+    css = {"priced": "ok", "estimated": "warn"}.get(raw, "warn")
+    return (f"<span class='mark {css}' data-raw-price='{escape(raw)}'>"
+            f"{escape(_label(PRICE_LABELS, raw))}</span>")
+
+
+def _items(a: dict[str, Any]) -> str:
+    items = a.get("items") or []
+    order = a.get("order") or {}
+    order_total = float(order.get("total") or 0)
+    tracked = sum(float(item.get("spend") or 0) for item in items)
+    unattributed = round(order_total - tracked, 2)
+    consumed = float(a.get("consumed_value") or 0)
+    head = _section_head(
+        "The ledger",
+        f"{len(items)} {_plural(len(items), 'item')} &middot; {_money(order_total)} "
+        f"&middot; {_money(consumed)} consumed",
+    )
+    if not items:
+        return (f"<article class='panel span-12 ledger'>{head}"
+                "<p class='muted'>No items in the ledger yet.</p></article>")
+    body = "".join(
+        f"<tr><td>{escape(str(item['name']))}</td>"
+        f"<td data-role='{escape(str(item.get('role') or ''))}'>"
+        f"{escape(_role(item.get('role')))}</td>"
+        f"<td>{escape(humanize_key(item.get('category') or ''))}</td>"
+        f"<td>{_money(item.get('spend'))}</td>"
+        f"<td>{float(item.get('consumed_fraction') or 0) * 100:.0f}%</td>"
+        f"<td>{_price_mark(item.get('pricing_status'))}</td>"
+        f"<td>{_dietary_mark(item.get('dietary_status'))}</td>"
+        f"<td>{_evidence_drawer(item)}</td></tr>"
+        for item in items
+    )
+    reconcile = (
+        f"<p class='reconcile'>Order total <b>{_money(order_total)}</b>; the {len(items)} "
+        f"{_plural(len(items), 'item')} tracked above account for <b>{_money(tracked)}</b>. "
+        f"<b>{_money(unattributed)}</b> of the order total is not attributed to any "
+        "tracked item, so totals and runway are estimates, not a reconciliation.</p>")
+    return (f"<article class='panel span-12 ledger'>{head}"
+            "<table><caption>Every item the engine holds, with price status, dietary "
+            "status and product evidence.</caption><thead><tr><th>Item</th><th>Role</th>"
+            "<th>Category</th><th>Spend</th><th>Consumed</th><th>Price</th>"
+            "<th>Dietary</th><th>Product evidence</th></tr></thead>"
+            f"<tbody>{body}</tbody></table>{reconcile}</article>")
+
+
+# --- supporting panels (progressive disclosure) -------------------------
 
 def _first_wow(a: dict[str, Any]) -> str:
     wow = a.get("first_wow") or {}
@@ -33,39 +505,18 @@ def _first_wow(a: dict[str, Any]) -> str:
       <article class="panel span-12 wow">
         <h2>First Look</h2>
         <div class="card-row">
-          <div><h2>Potential Unit Savings</h2><div class="metric">${savings:.2f}</div></div>
-          <div><h2>Best Sourcing Move</h2><div class="metric" style="font-size:1.1rem">{escape(str(wow.get('best_sourcing_move', '—')))}</div></div>
-          <div><h2>Runway</h2><div class="metric" style="font-size:1.1rem">{escape(_runway_text(a))}</div></div>
+          <div><h2>Potential Unit Savings</h2><div class="metric">{_money(savings)}</div></div>
+          <div><h2>Best Sourcing Move</h2><div class="metric small">{escape(str(wow.get('best_sourcing_move', '—')))}</div></div>
+          <div><h2>Runway</h2><div class="metric small">{escape(_runway_text(a))}</div></div>
         </div>
         <p class="muted">{escape(str(wow.get('headline', '')))}</p>
       </article>"""
 
 
-def _metrics(a: dict[str, Any]) -> str:
-    order = a["order"]
-    consumed_pct = a["known_consumed_fraction"] * 100
-    return f"""
-      <article class="panel span-12">
-        <div class="card-row">
-          <div><h2>Known Depletion</h2><div class="metric">${a['consumed_value']:.2f}</div>
-            <p class="muted">{consumed_pct:.1f}% of order value observed consumed.</p></div>
-          <div><h2>Runway</h2><div class="metric" style="font-size:1.3rem">{escape(_runway_text(a))}</div>
-            <p class="muted">Estimate is based on observed depletion, not a full pantry audit.</p></div>
-          <div><h2>Order Total</h2><div class="metric">${float(order['total']):.2f}</div>
-            <p class="muted">{a['days_elapsed']} elapsed day(s).</p></div>
-        </div>
-      </article>"""
-
-
-def _runway_text(a: dict[str, Any]) -> str:
-    remaining = a.get("estimated_days_remaining")
-    return f"{remaining} days remaining" if remaining is not None else "Not enough depletion data"
-
-
 def _role_summary(a: dict[str, Any]) -> str:
     body = "\n".join(
-        f"<tr><td>{escape(r['role'])}</td><td>${r['spend']:.2f}</td>"
-        f"<td>${r['consumed']:.2f}</td><td>{_bar(r['consumed_fraction'])}</td></tr>"
+        f"<tr><td>{escape(_role(r['role']))}</td><td>{_money(r['spend'])}</td>"
+        f"<td>{_money(r['consumed'])}</td><td>{_bar(r['consumed_fraction'])}</td></tr>"
         for r in a.get("role_summary", [])
     )
     return ("<article class='panel span-6'><h2>Role Summary</h2>"
@@ -78,39 +529,11 @@ def _preferences(a: dict[str, Any]) -> str:
     if not rows:
         return "<article class='panel span-6'><h2>Preference Signals</h2><p class='muted'>No preference signals yet.</p></article>"
     body = "".join(
-        f"<p><strong>{escape(r['key'])}</strong><br>{escape(r.get('signal', ''))}<br>"
+        f"<p><strong>{escape(humanize_key(r['key']))}</strong><br>{escape(r.get('signal', ''))}<br>"
         f"<span class='muted'>{escape(r.get('rule', ''))}</span></p>"
         for r in rows
     )
     return f"<article class='panel span-6'><h2>Preference Signals</h2>{body}</article>"
-
-
-def _dietary(a: dict[str, Any]) -> str:
-    evaluations = a.get("dietary_evaluations", [])
-    profiles = a.get("dietary_profiles", [])
-    if not profiles:
-        return ("<article class='panel span-6'><h2>Dietary Restrictions</h2>"
-                "<p class='muted'>No dietary restriction profile configured.</p></article>")
-    counts: dict[str, int] = {}
-    for e in evaluations:
-        counts[e["result"]] = counts.get(e["result"], 0) + 1
-    chips = "".join(
-        f"<span class='tag {cls}'>{escape(k)}: {v}</span>"
-        for k, v in sorted(counts.items())
-        for cls in [{"blocked": "critical", "needs_review": "review"}.get(k, "ok")]
-    )
-    profile_chips = "".join(
-        f"<span class='tag'>{escape(p.get('label', 'Dietary profile'))}</span>"
-        for p in profiles
-    )
-    flagged_items = sorted({e["item"] for e in evaluations if e["result"] in ("blocked", "needs_review")})
-    flagged = (
-        "<details><summary>Review flagged items (" + str(len(flagged_items)) + ")</summary><p class='muted'>Flagged for review: "
-        + escape(", ".join(flagged_items)) + "</p></details>"
-        if flagged_items else ""
-    )
-    return (f"<article class='panel span-6'><h2>Dietary Restrictions</h2>"
-            f"<p>{profile_chips}</p><p>{chips}</p>{flagged}</article>")
 
 
 def _easy_food(a: dict[str, Any]) -> str:
@@ -120,12 +543,14 @@ def _easy_food(a: dict[str, Any]) -> str:
                 "<p class='muted'>No unopened top-ups in the easy-food window.</p></article>")
     items = "".join(
         f"<li><strong>{escape(str(r['name']))}</strong> "
-        f"({escape(str(r['role']))}, {escape(str(r['age_label']))}) — "
-        f"rotate into a meal before the next top-up duplicates it.</li>"
+        f"({escape(_role(r['role']))}, {escape(str(r['age_label']))}) — "
+        "rotate into a meal before the next top-up duplicates it.</li>"
         for r in summary["items"]
     )
+    count = int(summary["count"])
     return (f"<article class='panel span-6'><h2>Easy Food</h2>"
-            f"<p><strong>{summary['count']}</strong> unopened top-up(s):</p><ul>{items}</ul></article>")
+            f"<p><strong>{count}</strong> unopened {_plural(count, 'top-up')}:</p>"
+            f"<ul>{items}</ul></article>")
 
 
 def _freshness(a: dict[str, Any]) -> str:
@@ -152,73 +577,21 @@ def _trips(a: dict[str, Any]) -> str:
                 "<p class='muted'>No visits recorded yet. Use <code>capture-visit</code> to log a trip.</p></article>")
     by_type = summary.get("by_type", {}) or {}
     by_type_min = summary.get("by_type_minutes", {}) or {}
-    lines = [f"<p><strong>{summary['visit_count']}</strong> visit(s), "
+    count = int(summary["visit_count"])
+    lines = [f"<p><strong>{count}</strong> {_plural(count, 'visit')}, "
              f"<strong>{summary.get('total_minutes', 0)}</strong> minutes total.</p>"]
     if by_type:
-        items = ", ".join(f"{escape(t)}: {by_type[t]} ({by_type_min.get(t, 0)} min)"
-                          for t in sorted(by_type))
-        lines.append(f"<p class='muted'>By type — {items}.</p>")
+        items = ", ".join(
+            f"{escape(humanize_key(t))}: {by_type[t]} ({by_type_min.get(t, 0)} min)"
+            for t in sorted(by_type))
+        lines.append(f"<p class='muted'>By type — <span data-visit-types=\""
+                     f"{escape(', '.join(sorted(by_type)))}\">{items}</span>.</p>")
     amortized = summary.get("amortized_cost_total", 0.0)
     lines.append(
-        f"<p>Amortized time cost: <strong>${amortized:.2f}</strong></p>" if amortized
+        f"<p>Amortized time cost: <strong>{_money(amortized)}</strong></p>" if amortized
         else "<p class='muted'>Set an hourly value in the state to see amortized cost.</p>"
     )
     return "<article class='panel span-6'><h2>Trip Overhead</h2>" + "".join(lines) + "</article>"
-
-
-def _cart_plan(a: dict[str, Any]) -> str:
-    plan = a.get("cart_plan") or {}
-    items = plan.get("items", [])
-    note = ("<p class='approve-note'>Everything needs your approval. "
-            "No checkout surface exists.</p>")
-    if not items:
-        return (f"<article class='panel span-6'><h2>Internal Cart Plan</h2>{note}"
-                "<p class='muted'>No cart plan yet — add sourcing research or deplete items.</p></article>")
-    body = "\n".join(
-        f"<tr><td>{escape(str(i.get('item', '')))}</td><td>{escape(str(i.get('action', '')))}</td>"
-        f"<td>{escape(str(i.get('source', '')))}</td><td>{escape(str(i.get('approval_state', '')))}</td></tr>"
-        for i in items
-    )
-    export = ("<button class='primary' id='buy-list-download' type='button' data-plan='"
-              + escape(json.dumps(plan), quote=True) + "'>Download draft JSON</button>"
-              "<script>document.getElementById('buy-list-download').addEventListener('click', function () {"
-              "var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));"
-              "var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';"
-              "document.body.appendChild(link); link.click(); link.remove();"
-              "setTimeout(function () { URL.revokeObjectURL(url); }, 1000);});</script>")
-    return (f"<article class='panel span-6'><h2>Internal Cart Plan</h2>{note}"
-            f"{export}<table><thead><tr><th>Item</th><th>Action</th><th>Source</th><th>Approval</th></tr></thead>"
-            f"<tbody>{body}</tbody></table></article>")
-
-
-def _items(a: dict[str, Any]) -> str:
-    body = "\n".join(
-        f"<tr><td>{escape(r['name'])}</td><td>{escape(r['role'])}</td>"
-        f"<td>{escape(r.get('category', ''))}</td>"
-        f"<td>${r['spend']:.2f}</td><td>{r['consumed_fraction'] * 100:.0f}%</td>"
-        f"<td>{escape(r.get('notes', ''))}</td><td>{_evidence_drawer(r)}</td></tr>"
-        for r in a.get("items", [])
-    )
-    return ("<article class='panel span-12'><h2>Items</h2>"
-            "<table><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Spend</th>"
-            "<th>Consumed</th><th>Notes</th><th>Evidence</th></tr></thead>"
-            f"<tbody>{body}</tbody></table></article>")
-
-
-def _evidence_drawer(item: dict[str, Any]) -> str:
-    rows = item.get("product_evidence") or []
-    if not rows:
-        return "<span class='muted'>none</span>"
-    parts = []
-    for row in rows:
-        label = f"{row.get('evidence_type', 'evidence')} · {row.get('source', '')} · {row.get('checked_date', '')}"
-        content = ", ".join(
-            str(part) for field in ("ingredients", "allergen_statements", "certifications")
-            for part in (row.get(field) or [])[:4]
-        )
-        parts.append(f"<details><summary>{escape(label)}</summary>"
-                     f"<p class='muted'>{escape(content)}</p></details>")
-    return "".join(parts)
 
 
 def _substitutions(a: dict[str, Any]) -> str:
@@ -228,25 +601,16 @@ def _substitutions(a: dict[str, Any]) -> str:
                 "<p class='muted'>No substitution candidates yet.</p></article>")
     body = "\n".join(
         f"<tr><td>{escape(r['candidate'])}</td><td>{escape(r['current'])}</td>"
-        f"<td>${float(r.get('candidate_unit_price', 0)):.3f}</td><td>{escape(r.get('fit', ''))}</td>"
-        f"<td>{_dietary_badge(r.get('dietary_status'))}</td><td>{escape(r.get('read', ''))}</td></tr>"
+        f"<td>{_money(r.get('candidate_unit_price'))}</td>"
+        f"<td>{escape(humanize_key(r.get('fit', '')))}</td>"
+        f"<td>{_dietary_mark(r.get('dietary_status'))}</td>"
+        f"<td>{escape(r.get('read', ''))}</td></tr>"
         for r in rows
     )
     return ("<article class='panel span-6'><h2>Substitutions</h2>"
             "<table><thead><tr><th>Candidate</th><th>Replaces</th><th>Unit</th><th>Fit</th>"
             "<th>Dietary</th><th>Read</th></tr></thead>"
             f"<tbody>{body}</tbody></table></article>")
-
-
-def _dietary_badge(status: Any) -> str:
-    value = str(status or "")
-    if value in ("blocked",):
-        return f"<span class='tag critical'>{escape(value)}</span>"
-    if value in ("needs_review", "warn"):
-        return f"<span class='tag review'>{escape(value)}</span>"
-    if value:
-        return f"<span class='tag ok'>{escape(value)}</span>"
-    return ""
 
 
 def _sourcing(a: dict[str, Any]) -> str:
@@ -260,31 +624,13 @@ def _sourcing(a: dict[str, Any]) -> str:
         best = alternatives[0] if alternatives else {}
         body.append(
             f"<tr><td>{escape(row['item'])}</td><td>{escape(row.get('current_source', ''))}</td>"
-            f"<td>{escape(best.get('source', ''))}</td><td>${float(best.get('unit_price', 0)):.3f}</td>"
-            f"<td>{escape(best.get('savings', ''))}</td><td>{escape(row.get('recommendation', ''))}</td></tr>"
+            f"<td>{escape(best.get('source', ''))}</td><td>{_money(best.get('unit_price'))}</td>"
+            f"<td>{escape(str(best.get('savings', '')))}</td>"
+            f"<td>{escape(row.get('recommendation', ''))}</td></tr>"
         )
     return ("<article class='panel span-6'><h2>Sourcing Research</h2>"
             "<table><thead><tr><th>Item</th><th>Current</th><th>Best alternative</th><th>Unit</th>"
             "<th>Savings</th><th>Read</th></tr></thead><tbody>" + "".join(body) + "</tbody></table></article>")
-
-
-def _script_json(value: Any) -> str:
-    """JSON that is safe to embed inside a <script> block.
-
-    json.dumps alone leaves ``</script>``, ``&``, and the Unicode line
-    separators intact, so data could close the script context and execute
-    attacker JS (the XSS the adversarial QA pass found). Escaping them as
-    JSON unicode escapes keeps the payload valid JS-in-JSON while making
-    breakout impossible.
-    """
-    return (
-        json.dumps(value)
-        .replace("<", "\\u003c")
-        .replace(">", "\\u003e")
-        .replace("&", "\\u0026")
-        .replace(chr(0x2028), "\\u2028")
-        .replace(chr(0x2029), "\\u2029")
-    )
 
 
 def _corrections_capture(a: dict[str, Any]) -> str:
@@ -292,13 +638,14 @@ def _corrections_capture(a: dict[str, Any]) -> str:
     if consent.get("correction_telemetry") not in ("local_only", "hosted_opt_in"):
         return ""
     item_names = [r["name"] for r in a.get("items", [])]
-    options = "".join(f"<option>{escape(n)}</option>" for n in item_names)
+    options = "".join(f"<option>{escape(str(n))}</option>" for n in item_names)
+    signals = ("never_again", "buy_elsewhere", "wrong_format", "too_expensive",
+               "good_default", "emergency_only")
     buttons = "".join(
-        f"<button class='correction' data-signal='{escape(s)}' onclick=\"capture('{escape(s)}')\">{escape(s.replace('_', ' '))}</button>"
-        for s in ("never_again", "buy_elsewhere", "wrong_format", "too_expensive",
-                  "good_default", "emergency_only")
+        f"<button class='correction' data-signal='{s}' onclick=\"capture('{s}')\">"
+        f"{escape(humanize_key(s))}</button>"
+        for s in signals
     )
-    payload = _script_json({"items": item_names})
     return f"""
       <article class="panel span-12" id="corrections">
         <h2>Correction Capture</h2>
@@ -322,7 +669,6 @@ def _corrections_capture(a: dict[str, Any]) -> str:
             document.body.appendChild(link); link.click(); link.remove();
             setTimeout(function () {{ URL.revokeObjectURL(url); }}, 1000);
           }});
-          var _state = {payload};
         </script>
       </article>"""
 
@@ -333,7 +679,8 @@ def _pulses(a: dict[str, Any]) -> str:
         return "<article class='panel span-12'><h2>Recent Pulses</h2><p class='muted'>No pulses yet.</p></article>"
     body = "".join(
         # tolerant field access: some hand-edited states use 'note' (compat fix, 2026-08-14)
-        f"<p><span class='tag'>{escape(r['date'])}</span>{escape(r.get('text', r.get('note', '')))}</p>"
+        f"<p><span class='tag'>{escape(human_date(r['date']))}</span>"
+        f"{escape(r.get('text', r.get('note', '')))}</p>"
         for r in rows[-5:]
     )
     return f"<article class='panel span-12'><h2>Recent Pulses</h2>{body}</article>"
@@ -341,7 +688,9 @@ def _pulses(a: dict[str, Any]) -> str:
 
 def _bar(fraction: float) -> str:
     pct = max(0, min(100, round(float(fraction) * 100)))
-    return f"<div class='bar' aria-label='{pct}% consumed'><span style='width:{pct}%'></span></div>"
+    css = "bar hot" if pct >= 80 else "bar"
+    return (f"<span class='{css}' role='img' aria-label='{pct}% consumed'>"
+            f"<span style='width:{pct}%'></span></span>")
 
 
 # --- the registry --------------------------------------------------------
@@ -351,17 +700,30 @@ PANELS: list[dict[str, Any]] = [
     _panel("metrics", "span-12", _metrics),
     _panel("role_summary", "span-6", _role_summary),
     _panel("preferences", "span-6", _preferences),
-    _panel("dietary", "span-6", _dietary),
+    _panel("dietary", "span-12", _dietary),
     _panel("easy_food", "span-6", _easy_food),
     _panel("freshness", "span-12", _freshness),
     _panel("trips", "span-6", _trips),
-    _panel("cart_plan", "span-6", _cart_plan),
+    _panel("cart_plan", "span-12", _cart_plan),
     _panel("items", "span-12", _items),
     _panel("substitutions", "span-6", _substitutions),
     _panel("sourcing", "span-6", _sourcing),
     _panel("corrections_capture", "span-12", _corrections_capture),
     _panel("pulses", "span-12", _pulses),
 ]
+
+DISCLOSURES: tuple[tuple[str, str], ...] = (
+    ("first_wow", "Savings and sourcing overview"),
+    ("role_summary", "Spending by household role"),
+    ("preferences", "Preference signals"),
+    ("freshness", "Price freshness and uncertainty"),
+    ("trips", "Trip overhead"),
+    ("easy_food", "Easy food rotation"),
+    ("substitutions", "Substitution comparisons"),
+    ("sourcing", "Sourcing research"),
+    ("corrections_capture", "Download-only correction capture"),
+    ("pulses", "Recent depletion pulses"),
+)
 
 
 def _responsive_table_labels(document: str) -> str:
@@ -381,9 +743,12 @@ def _responsive_table_labels(document: str) -> str:
                 nonlocal index
                 label = labels[index] if index < len(labels) else ""
                 index += 1
-                return f'<td data-label="{escape(label, quote=True)}">'
+                attrs = match.group(1) or ""
+                if "data-label" in attrs:
+                    return match.group(0)
+                return f'<td{attrs} data-label="{escape(label, quote=True)}">'
 
-            return re.sub(r"<td>", cell, match.group(0))
+            return re.sub(r"<td(\s[^>]*)?>", cell, match.group(0))
 
         return re.sub(r"<tr>.*?</tr>", row, markup, flags=re.S)
 
@@ -391,36 +756,16 @@ def _responsive_table_labels(document: str) -> str:
 
 
 def render_dashboard(analysis: dict[str, Any]) -> str:
-    """Lead with safety and one review task; keep every original panel available."""
+    """Attention, one action, runway, ledger, then every original panel."""
     renderers = {panel["name"]: panel["render"] for panel in PANELS}
-    leading = ("dietary", "cart_plan", "metrics", "easy_food")
-    disclosures = {
-        "first_wow": "Savings and sourcing overview",
-        "role_summary": "Spending by household role",
-        "preferences": "Preference signals",
-        "freshness": "Price freshness and uncertainty",
-        "trips": "Trip overhead",
-        "items": "Complete household ledger — all items and evidence",
-        "substitutions": "Substitution comparisons",
-        "sourcing": "Sourcing research",
-        "corrections_capture": "Download-only correction capture",
-        "pulses": "Recent depletion pulses",
-    }
-    parts = []
-    for name in leading:
-        markup = renderers[name](analysis)
-        if name == "dietary":
-            markup = markup.replace("panel span-6", "panel span-12 attention", 1)
-        elif name == "cart_plan":
-            markup = markup.replace("panel span-6", "panel span-12 review-task", 1)
-            markup = markup.replace("<h2>Internal Cart Plan</h2>",
-                                    "<p class='eyebrow'>Your next step</p>"
-                                    "<h2>Review your next grocery run</h2>"
-                                    "<p class='section-intro'>Internal Cart Plan — read the suggestions; "
-                                    "reviewing does not record approval.</p>", 1)
-        parts.append(markup)
-    for name, label in disclosures.items():
+    parts = [renderers["dietary"](analysis),
+             renderers["cart_plan"](analysis),
+             _runway(analysis),
+             renderers["items"](analysis)]
+    for name, label in DISCLOSURES:
         markup = renderers[name](analysis)
         if markup:
-            parts.append(f"<details class='disclosure'><summary>{label}</summary>{markup}</details>")
-    return page_shell(header_line(analysis), _responsive_table_labels("\n".join(parts)))
+            parts.append(f"<details class='disclosure'><summary>{label}</summary>"
+                         f"{markup}</details>")
+    return page_shell(header_line(analysis), _status_line(analysis),
+                      _responsive_table_labels("\n".join(parts)))

@@ -7,76 +7,172 @@
   <style>
 :root {
   color-scheme: light;
-  --bg:#F6F1E7; --panel:#FFFDF8; --panel-edge:#D8CCB6;
-  --ink:#241F19; --muted:#5A5145; --green:#3F6B45; --green-dim:#3F6B45;
-  --blue:#2F5E86; --gold:#8A5B12; --red:#A32D22; --copper:#A2512A;
-  --display:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+  --bg:#F6F1E7; --panel:#FFFDF8; --panel-2:#EFE8DA;
+  --edge:#D8CCB6; --ink:#241F19; --muted:#5A5145; --faint:#8A7F6E;
+  --copper:#A2512A; --copper-deep:#8A4222; --sage:#3F6B45;
+  --ochre:#8A5B12; --brick:#A32D22;
+  --display:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,"Times New Roman","Liberation Serif",serif;
+  --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","Liberation Sans",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --step--1:clamp(0.78rem,0.75rem + 0.12vw,0.84rem);
+  --step-0:clamp(0.95rem,0.91rem + 0.18vw,1.05rem);
+  --step-1:clamp(1.12rem,1.04rem + 0.36vw,1.32rem);
+  --step-2:clamp(1.35rem,1.20rem + 0.70vw,1.75rem);
+  --step-3:clamp(1.70rem,1.40rem + 1.40vw,2.55rem);
+  --step-4:clamp(2.15rem,1.60rem + 2.60vw,3.80rem);
+  --measure:66ch;
 }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-  font-size:1rem; line-height:1.6; font-variant-numeric:tabular-nums; }
-main { max-width:1184px; margin:auto; padding:32px 24px 80px; }
-header { border-bottom:2px solid var(--ink); padding-bottom:24px; margin-bottom:32px; }
+  font-family:var(--body); font-size:var(--step-0); line-height:1.6;
+  font-variant-numeric:tabular-nums; }
+main { max-width:74rem; margin:auto; padding:32px 24px 80px; }
+header.masthead { border-bottom:2px solid var(--ink); padding-bottom:24px; margin-bottom:40px; }
 h1,h2,h3,p { margin:0 0 12px; }
-h1 { font-family:var(--display); font-size:clamp(2rem,5vw,3.5rem); line-height:1.1; font-weight:600; }
-h2 { font-family:var(--display); font-size:1.6rem; font-weight:600; line-height:1.2; }
-header p { max-width:75ch; }
-.eyebrow { text-transform:uppercase; letter-spacing:.15em; font-size:.8rem; color:var(--muted); }
-.grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:24px; }
-.panel { min-width:0; background:transparent; border:0; border-top:1px solid var(--panel-edge);
-  padding:24px 0; overflow-wrap:anywhere; }
+h1 { font-family:var(--display); font-size:var(--step-3); line-height:1.05; font-weight:600; }
+h3 { font-family:var(--display); font-size:var(--step-2); line-height:1.2; font-weight:600; }
+p { max-width:var(--measure); }
+.eyebrow { text-transform:uppercase; letter-spacing:.15em; font-size:var(--step--1);
+  color:var(--muted); margin-bottom:8px; }
+.masthead-meta { display:flex; flex-wrap:wrap; gap:6px 24px; font-size:var(--step--1);
+  color:var(--muted); }
+.masthead-meta b { color:var(--ink); font-weight:600; }
+.masthead-notes { margin-top:8px; }
+.card-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+.card-row h2 { font-family:var(--body); font-size:var(--step--1); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.metric { font-family:var(--display); font-size:var(--step-2); font-weight:600;
+  line-height:1.2; margin:4px 0; }
+.metric.small { font-family:var(--body); font-size:var(--step-0); font-weight:600; }
+.masthead-status { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px;
+  margin:16px 0 0; padding:12px 16px; font-weight:600; font-size:var(--step-0);
+  border:1px solid var(--edge); border-left:5px solid var(--edge);
+  background:var(--panel); max-width:none; }
+.masthead-status.alert { border-left-color:var(--brick); color:var(--brick); }
+.masthead-status.clear { border-left-color:var(--sage); color:var(--sage); }
+.masthead-status .status-note { font-weight:400; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:40px 40px; }
+.panel { min-width:0; background:transparent; border:0; padding:0; overflow-wrap:anywhere; }
 .span-4 { grid-column:span 4; } .span-6 { grid-column:span 6; } .span-12 { grid-column:span 12; }
-.metric { font-family:var(--display); font-size:2.4rem; font-weight:600; line-height:1.2; margin:8px 0; }
-.muted { color:var(--muted); }
-.card-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:32px; }
-.card-row h2 { font-family:inherit; font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; }
-.card-row > div { min-width:0; }
-.attention { background:#EFE8DA; border-left:4px solid var(--gold); padding:24px; }
-.attention h2 { color:var(--gold); }
-.review-task { background:var(--panel); border-top:5px solid var(--ink); padding:24px; }
-.review-task > h2 { font-size:2rem; }
-.section-intro { color:var(--muted); max-width:66ch; }
-.approve-note { color:var(--gold); }
-.wow { border-left:0; }
-.tag { display:inline-block; border:1px solid var(--panel-edge); border-radius:3px;
-  padding:3px 9px; margin:3px 4px 3px 0; font-size:.85rem; }
-.tag.critical { border-color:var(--red); color:var(--red); }
-.tag.review { border-color:var(--gold); color:var(--gold); }
-.tag.ok { border-color:var(--green); color:var(--green); }
-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:.95rem; }
-th,td { border-bottom:1px solid var(--panel-edge); padding:14px 8px; text-align:left;
+.section-head { display:flex; align-items:baseline; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--edge);
+  padding-bottom:8px; margin-bottom:20px; }
+.section-label { font-family:var(--body); font-size:var(--step--1); letter-spacing:.16em;
+  text-transform:uppercase; font-weight:700; color:var(--ink); margin:0; }
+.section-note { font-size:var(--step--1); color:var(--muted); }
+.eyebrow-inline { text-transform:uppercase; letter-spacing:.14em; font-size:var(--step--1);
+  color:var(--muted); font-weight:700; }
+.attention { background:var(--panel); border:1px solid var(--edge);
+  border-left:8px solid var(--brick); padding:24px; }
+.attention.quiet { border-left-color:var(--edge); }
+.attention h2, .attention h3 { color:var(--ink); }
+.attention-figure { font-family:var(--display); font-size:var(--step-4); line-height:.95;
+  color:var(--brick); font-weight:600; margin:0 0 4px; }
+.attention-figure small { display:block; font-family:var(--body); font-size:var(--step--1);
+  letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:8px;
+  line-height:1.3; font-weight:600; }
+.attention-caveat { font-size:var(--step--1); color:var(--muted);
+  border-top:1px solid var(--edge); padding-top:12px; margin-top:12px; }
+.attention-body { display:grid; grid-template-columns:minmax(5.5ch,auto) 1fr;
+  gap:24px; align-items:start; }
+.today { background:var(--panel); border:1px solid var(--edge);
+  border-top:5px solid var(--ink); padding:24px; }
+.card-headline { font-family:var(--display); font-size:var(--step-3); line-height:1.12;
+  font-weight:600; margin-bottom:12px; max-width:none; }
+.lede { font-size:var(--step-1); line-height:1.45; max-width:56ch; }
+.action-list { list-style:none; margin:20px 0 0; padding:0; }
+.action-list li { display:grid; grid-template-columns:2.5rem 1fr minmax(9rem,auto);
+  gap:12px; align-items:baseline; padding:12px 0; border-top:1px solid var(--edge); }
+.action-list li:first-child { border-top:0; }
+.action-num { font-family:var(--mono); font-size:var(--step--1); color:var(--muted); }
+.action-item { font-weight:600; }
+.action-why { display:block; font-weight:400; font-size:var(--step--1); color:var(--muted); }
+.action-source { font-size:var(--step--1); color:var(--muted); text-align:right; }
+.btn-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:20px; }
+.today-meta { font-size:var(--step--1); color:var(--muted); border-top:1px solid var(--edge);
+  margin:16px 0 0; padding-top:12px; max-width:none; }
+.today-meta b { color:var(--ink); font-weight:600; }
+.approve-note { font-size:var(--step--1); color:var(--ochre); }
+.runway-math { display:flex; flex-wrap:wrap; gap:12px 40px; margin:20px 0 0;
+  padding-top:16px; border-top:1px solid var(--edge); }
+.runway-math div { min-width:10rem; }
+.runway-math .math-label { font-size:var(--step--1); color:var(--muted); display:block; }
+.runway-math .math-value { font-family:var(--display); font-size:var(--step-2);
+  font-weight:600; line-height:1.2; }
+.ruler { margin:20px 0 0; }
+.ruler svg { display:block; width:100%; height:auto; max-width:100%; }
+.legend { display:flex; flex-wrap:wrap; gap:6px 24px; font-size:var(--step--1);
+  color:var(--muted); margin-top:12px; }
+.legend-item { display:inline-flex; align-items:center; gap:.45em; }
+.legend-swatch { width:.85rem; height:.85rem; border-radius:2px; flex:none; }
+.legend-swatch.filled { background:var(--ink); }
+.legend-swatch.outline { background:transparent; border:1px solid var(--edge); }
+.legend-swatch.marker { width:3px; height:1rem; border-radius:1px; background:var(--copper); }
+.ruler-caption { display:flex; flex-wrap:wrap; gap:4px 24px; font-size:var(--step--1);
+  color:var(--muted); margin-top:12px; }
+.ruler-caption b { color:var(--ink); font-weight:600; }
+.mark { display:inline-flex; align-items:center; gap:.4em; font-size:var(--step--1);
+  font-weight:600; }
+.mark.missing { color:var(--brick); }
+.mark.warn { color:var(--ochre); }
+.mark.ok { color:var(--sage); }
+.mark.neutral { color:var(--muted); font-weight:400; }
+.tag { display:inline-block; border:1px solid var(--edge); border-radius:3px;
+  padding:3px 9px; margin:3px 4px 3px 0; font-size:var(--step--1); }
+.tag.critical { border-color:var(--brick); color:var(--brick); }
+.tag.review { border-color:var(--ochre); color:var(--ochre); }
+.tag.ok { border-color:var(--sage); color:var(--sage); }
+table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:var(--step-0); }
+th,td { border-bottom:1px solid var(--edge); padding:12px 8px; text-align:left;
   vertical-align:top; overflow-wrap:anywhere; }
-th { color:var(--muted); font-size:.8rem; font-weight:600; }
-.bar { height:8px; background:#E3D9C6; border-radius:2px; overflow:hidden; }
-.bar > span { display:block; height:100%; background:var(--green-dim); }
-button,select,.download-link { font:inherit; color:var(--ink); background:var(--panel);
-  border:1px solid var(--panel-edge); border-radius:3px; padding:10px 14px;
+th { color:var(--muted); font-size:var(--step--1); font-weight:600; }
+caption { display:block; width:100%; text-align:left; font-size:var(--step--1);
+  color:var(--muted); padding-bottom:8px; }
+caption b { color:var(--ink); font-weight:600; }
+.bar { display:block; height:8px; background:#E3D9C6; border-radius:2px; overflow:hidden;
+  min-width:3rem; }
+.bar > span { display:block; height:100%; background:var(--copper); }
+.bar.hot > span { background:var(--brick); }
+.reconcile { font-size:var(--step--1); color:var(--muted);
+  border-left:3px solid var(--edge); padding:8px 12px; margin-top:16px; }
+button,select { font:inherit; color:var(--ink); background:var(--panel);
+  border:1px solid var(--edge); border-radius:3px; padding:10px 14px;
   min-height:44px; max-width:100%; }
 button { cursor:pointer; } button:hover { border-color:var(--copper); }
-button.primary { background:var(--copper); border-color:var(--copper); color:#FFF8F1; }
-button.primary:hover { background:#8A4222; }
+button.primary { background:var(--copper); border-color:var(--copper); color:#FFF8F1; font-weight:600; }
+button.primary:hover { background:var(--copper-deep); border-color:var(--copper-deep); }
 a { color:var(--copper); }
 :focus-visible { outline:3px solid #7A3A1C; outline-offset:3px; }
 .skip-link { position:absolute; left:-9999px; top:0; padding:12px; background:var(--panel); }
 .skip-link:focus { left:12px; top:12px; z-index:2; }
-details { margin:8px 0; min-width:0; }
+details { margin:10px 0; min-width:0; }
 summary { cursor:pointer; padding:12px 0; min-height:44px; color:var(--muted); }
-.disclosure { grid-column:span 12; border-top:1px solid var(--panel-edge); }
-.disclosure > summary { font-size:1.15rem; color:var(--ink); }
-.disclosure .panel { border-top:0; padding:16px 0; }
-footer { margin-top:48px; border-top:2px solid var(--ink); padding-top:24px; color:var(--muted); }
+details.evidence > summary { color:var(--copper); font-weight:600; }
+.disclosure { grid-column:span 12; border-top:1px solid var(--edge); }
+.disclosure > summary { font-size:var(--step-1); color:var(--ink); }
+.disclosure .panel { border-top:0; }
+.detail-body { padding:8px 0 16px; }
+footer { margin-top:56px; border-top:2px solid var(--ink); padding-top:24px;
+  color:var(--muted); font-size:var(--step--1); }
+footer p { max-width:var(--measure); }
 @media (max-width:760px) {
  main { padding:24px 16px 48px; }
+ .grid { gap:32px 0; }
  .span-4,.span-6 { grid-column:span 12; }
- .card-row { grid-template-columns:1fr; gap:20px; }
- .attention,.review-task { padding:20px 16px; }
+ .attention-body { grid-template-columns:1fr; gap:8px; }
+ .attention,.today { padding:16px; }
+ .action-list li { grid-template-columns:2.5rem 1fr; gap:8px; }
+ .action-source { grid-column:2; text-align:left; }
+ .card-row { grid-template-columns:1fr; gap:16px; }
  table,tbody,tr,td { display:block; width:100%; }
  thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
- tr { padding:12px 0; border-bottom:1px solid var(--panel-edge); }
- td { border:0; padding:5px 0; }
- td::before { content:attr(data-label); display:block; color:var(--muted); font-size:.8rem; }
- td:first-child { font-weight:600; }
+ tr { padding:10px 0; border-bottom:1px solid var(--edge); }
+ td { border:0; padding:3px 0; }
+ td::before { content:attr(data-label); display:block; color:var(--muted);
+  font-size:var(--step--1); }
+ td:empty { display:none; }
+ td:first-child { font-weight:600; padding-top:6px; }
+ .runway-math div { min-width:8rem; }
 }
 @media (prefers-reduced-motion:reduce) {
  *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
@@ -86,69 +182,50 @@ footer { margin-top:48px; border-top:2px solid var(--ink); padding-top:24px; col
 <body>
   <a class="skip-link" href="#dashboard">Skip to household review</a>
   <main id="dashboard" tabindex="-1">
-    <header>
-      <p class="eyebrow">Your household ledger · local and private</p>
+    <header class="masthead">
+      <p class="eyebrow">Your household ledger &middot; local and private</p>
       <h1>Grocery Flywheel</h1>
-      <p>Home groceries via retailer_history_import. Example Grocery run from 2026-05-20, analyzed as of 2026-05-24.</p>
+      <div class="masthead-meta"><span>Home groceries via Retailer history import</span><span>Order <b>Example Grocery</b>, 20 May 2026</span><span>Order total <b>$117.18</b></span><span>As of <b>24 May 2026</b></span><span>4 days observed</span></div>
+      <p class='masthead-status alert'>13/13 items are unverified. <span class='status-note'>Nothing here is cleared as safe. See Needs attention today.</span></p>
     </header>
     <section class="grid" aria-label="Household review">
-<article class='panel span-12 attention'><h2>Dietary Restrictions</h2><p><span class='tag'>Household default</span></p><p><span class='tag ok'>warn: 13</span></p></article>
-<article class='panel span-12 review-task'><p class='eyebrow'>Your next step</p><h2>Review your next grocery run</h2><p class='section-intro'>Internal Cart Plan — read the suggestions; reviewing does not record approval.</p><p class='approve-note'>Everything needs your approval. No checkout surface exists.</p><button class='primary' id='buy-list-download' type='button' data-plan='{&quot;mode&quot;: &quot;pickup&quot;, &quot;approval_required&quot;: true, &quot;items&quot;: [{&quot;item&quot;: &quot;Espresso bricks&quot;, &quot;action&quot;: &quot;review_alternate_source&quot;, &quot;source&quot;: &quot;Online bulk pack&quot;, &quot;reason&quot;: &quot;Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}, {&quot;item&quot;: &quot;Dish soap&quot;, &quot;action&quot;: &quot;review_alternate_source&quot;, &quot;source&quot;: &quot;Warehouse or online refill&quot;, &quot;reason&quot;: &quot;Research refill or warehouse options, but only split the trip if the savings beats the extra errand.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}, {&quot;item&quot;: &quot;Bean and cheese burritos&quot;, &quot;action&quot;: &quot;restock&quot;, &quot;source&quot;: &quot;normal store&quot;, &quot;reason&quot;: &quot;High observed depletion.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}, {&quot;item&quot;: &quot;Rising crust pizza&quot;, &quot;action&quot;: &quot;restock&quot;, &quot;source&quot;: &quot;normal store&quot;, &quot;reason&quot;: &quot;High observed depletion.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}], &quot;checkout_available&quot;: false, &quot;privacy_class&quot;: &quot;sensitive_cart_plan&quot;, &quot;schema_version&quot;: &quot;2026-08-14.mvp2&quot;}'>Download draft JSON</button><script>document.getElementById('buy-list-download').addEventListener('click', function () {var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';document.body.appendChild(link); link.click(); link.remove();setTimeout(function () { URL.revokeObjectURL(url); }, 1000);});</script><table><thead><tr><th>Item</th><th>Action</th><th>Source</th><th>Approval</th></tr></thead><tbody><tr><td data-label="Item">Espresso bricks</td><td data-label="Action">review_alternate_source</td><td data-label="Source">Online bulk pack</td><td data-label="Approval">needs_human_approval</td></tr>
-<tr><td data-label="Item">Dish soap</td><td data-label="Action">review_alternate_source</td><td data-label="Source">Warehouse or online refill</td><td data-label="Approval">needs_human_approval</td></tr>
-<tr><td data-label="Item">Bean and cheese burritos</td><td data-label="Action">restock</td><td data-label="Source">normal store</td><td data-label="Approval">needs_human_approval</td></tr>
-<tr><td data-label="Item">Rising crust pizza</td><td data-label="Action">restock</td><td data-label="Source">normal store</td><td data-label="Approval">needs_human_approval</td></tr></tbody></table></article>
-
-      <article class="panel span-12">
-        <div class="card-row">
-          <div><h2>Known Depletion</h2><div class="metric">$19.22</div>
-            <p class="muted">16.4% of order value observed consumed.</p></div>
-          <div><h2>Runway</h2><div class="metric" style="font-size:1.3rem">20.4 days remaining</div>
-            <p class="muted">Estimate is based on observed depletion, not a full pantry audit.</p></div>
-          <div><h2>Order Total</h2><div class="metric">$117.18</div>
-            <p class="muted">4 elapsed day(s).</p></div>
-        </div>
-      </article>
-<article class='panel span-6'><h2>Easy Food</h2><p><strong>1</strong> unopened top-up(s):</p><ul><li><strong>Example top-up frozen meal</strong> (bridge_food, 2d ago) — rotate into a meal before the next top-up duplicates it.</li></ul></article>
+<article class='panel span-12 attention'><div class='section-head'><h2 class='section-label'>Needs attention today</h2><span class='section-note'>Dietary evidence</span></div><div class='attention-body'><div class='attention-figure'>13/13<small>items unverified</small></div><div><h3>No item has been cleared as safe for your household diet.</h3><p>13 of 13 items have no current ingredient, allergen, or certification evidence on file.</p><p>This household&#x27;s restriction is configured to warn, so the engine returns a warning for every item and clears none of them.</p><p class='attention-caveat'>Profile: Household default. Restriction: Example disliked ingredient (safety tier: Preference; behaviour: Warn). Missing evidence is a data gap, not proof of a safety failure — but it means this dashboard cannot tell you anything is safe.</p></div></div><details class='evidence'><summary>See the evidence — 13 dietary evaluations</summary><div class='detail-body'><table><caption>Every evaluation the engine produced for this household profile.</caption><thead><tr><th>Item</th><th>Result</th><th>Evidence</th><th>Reason</th></tr></thead><tbody><tr><td data-label="Item">Bean and cheese burritos</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Calrose rice 20 lb</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Dish soap</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Dry garbanzo beans</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Dry lentils</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Espresso bricks</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Example top-up frozen meal</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Extra firm tofu</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Grapefruit juice</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Homestyle waffles</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Pasta sauce and pesto</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr><tr><td data-label="Item">Rising crust pizza</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Preference restriction evaluated.</td></tr></tbody></table></div></details></article>
+<article class='panel span-12 today'><div class='section-head'><h2 class='section-label'>Today &middot; one thing</h2><span class='section-note'>4 items &middot; every one needs your approval</span></div><h3 class='card-headline'>Review 4 items before your next shop.</h3><p class='lede'>Nothing here is bought for you. There is no checkout, no retailer login and no basket to send — this list is yours to take to the shelf.</p><ul class='action-list'><li><span class='action-num'>01</span><span class='action-item'>Espresso bricks<span class='action-why'>Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.</span></span><span class='action-source'>Compare an alternate source<br>Online bulk pack</span></li><li><span class='action-num'>02</span><span class='action-item'>Dish soap<span class='action-why'>Research refill or warehouse options, but only split the trip if the savings beats the extra errand.</span></span><span class='action-source'>Compare an alternate source<br>Warehouse or online refill</span></li><li><span class='action-num'>03</span><span class='action-item'>Bean and cheese burritos<span class='action-why'>High observed depletion.</span></span><span class='action-source'>Restock<br>normal store</span></li><li><span class='action-num'>04</span><span class='action-item'>Rising crust pizza<span class='action-why'>High observed depletion.</span></span><span class='action-source'>Restock<br>normal store</span></li></ul><div class='btn-row'><button class='primary' id='buy-list-download' type='button' data-plan='{&quot;mode&quot;: &quot;pickup&quot;, &quot;approval_required&quot;: true, &quot;items&quot;: [{&quot;item&quot;: &quot;Espresso bricks&quot;, &quot;action&quot;: &quot;review_alternate_source&quot;, &quot;source&quot;: &quot;Online bulk pack&quot;, &quot;reason&quot;: &quot;Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}, {&quot;item&quot;: &quot;Dish soap&quot;, &quot;action&quot;: &quot;review_alternate_source&quot;, &quot;source&quot;: &quot;Warehouse or online refill&quot;, &quot;reason&quot;: &quot;Research refill or warehouse options, but only split the trip if the savings beats the extra errand.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}, {&quot;item&quot;: &quot;Bean and cheese burritos&quot;, &quot;action&quot;: &quot;restock&quot;, &quot;source&quot;: &quot;normal store&quot;, &quot;reason&quot;: &quot;High observed depletion.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}, {&quot;item&quot;: &quot;Rising crust pizza&quot;, &quot;action&quot;: &quot;restock&quot;, &quot;source&quot;: &quot;normal store&quot;, &quot;reason&quot;: &quot;High observed depletion.&quot;, &quot;approval_state&quot;: &quot;needs_human_approval&quot;}], &quot;checkout_available&quot;: false, &quot;privacy_class&quot;: &quot;sensitive_cart_plan&quot;, &quot;schema_version&quot;: &quot;2026-08-14.mvp2&quot;}'>Download draft JSON</button><script>document.getElementById('buy-list-download').addEventListener('click', function () {var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';document.body.appendChild(link); link.click(); link.remove();setTimeout(function () { URL.revokeObjectURL(url); }, 1000);});</script><span class='section-note'>A .json file you can read or print. Nothing is bought, and nothing is written back to your state file.</span></div><p class='approve-note'>Everything needs your approval. No checkout surface exists.</p><p class='today-meta'>Mode <b>Pickup</b> &middot; approval required before anything is bought: <b>yes</b> &middot; checkout available: <b>no</b> &middot; prices behind these numbers are <b>12 of 13 stale or unpriced</b> &middot; every item is <b>Needs your approval</b>.</p></article>
+<article class='panel span-12 runway'><div class='section-head'><h2 class='section-label'>What will run out</h2><span class='section-note'>Estimate from observed depletion, not a pantry audit</span></div><div class='ruler'><svg viewBox='0 0 522 46' role='img' preserveAspectRatio='xMidYMid meet' aria-label='Runway ruler: 4 days observed, 20.4 days remaining.'><rect x='0' y='10' width='18' height='26' rx='2' fill='var(--ink)' stroke='var(--ink)' stroke-width='1'/><rect x='21' y='10' width='18' height='26' rx='2' fill='var(--ink)' stroke='var(--ink)' stroke-width='1'/><rect x='42' y='10' width='18' height='26' rx='2' fill='var(--ink)' stroke='var(--ink)' stroke-width='1'/><rect x='63' y='10' width='18' height='26' rx='2' fill='var(--ink)' stroke='var(--ink)' stroke-width='1'/><rect x='84' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='105' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='126' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='147' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='168' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='189' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='210' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='231' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='252' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='273' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='294' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='315' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='336' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='357' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='378' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='399' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='420' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='441' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='462' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='483' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><rect x='504' y='10' width='18' height='26' rx='2' fill='none' stroke='var(--edge)' stroke-width='1'/><line x1='82.5' y1='4' x2='82.5' y2='42' stroke='var(--copper)' stroke-width='2'/></svg><div class='legend'><span class='legend-item'><span class='legend-swatch filled'></span>Days since the order — 4 elapsed</span><span class='legend-item'><span class='legend-swatch outline'></span>Days of runway left — 20.4</span><span class='legend-item'><span class='legend-swatch marker'></span>Today</span></div></div><div class='ruler-caption'><span><b>4 days</b> observed since 20 May 2026</span><span><b>20.4 days</b> of runway left of an estimated 24.4</span><span><b>$19.22</b> of $117.18 seen consumed (16%)</span></div><table><caption>Items at or past half their observed life.</caption><thead><tr><th>Item</th><th>Role</th><th>Consumed</th><th>Drawn down</th><th>Spend</th><th>Note</th></tr></thead><tbody><tr><td data-label="Item">Bean and cheese burritos</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Consumed">100%</td><td data-label="Drawn down"><span class='bar hot' role='img' aria-label='100% consumed'><span style='width:100%'></span></span></td><td data-label="Spend">$6.42</td><td data-label="Note">Immediate food. Expected to deplete first.</td></tr><tr><td data-label="Item">Rising crust pizza</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Consumed">100%</td><td data-label="Drawn down"><span class='bar hot' role='img' aria-label='100% consumed'><span style='width:100%'></span></span></td><td data-label="Spend">$4.94</td><td data-label="Note">Morale food, one per run.</td></tr><tr><td data-label="Item">Dish soap</td><td data-role='critical_household_essential' data-label="Role">Household essential</td><td data-label="Consumed">50%</td><td data-label="Drawn down"><span class='bar' role='img' aria-label='50% consumed'><span style='width:50%'></span></span></td><td data-label="Spend">$4.99</td><td data-label="Note">Non-food household consumable; stockout creates cleanup friction.</td></tr></tbody></table><div class='runway-math'><div><span class='math-label'>Observed depletion</span><span class='math-value'>$19.22</span><span class='math-label'>16.4% of order value observed consumed</span></div><div><span class='math-label'>Estimated runway</span><span class='math-value'>20.4 days</span><span class='math-label'>Based on observed depletion, not a pantry audit.</span></div><div><span class='math-label'>Order total</span><span class='math-value'>$117.18</span><span class='math-label'>4 days since the order</span></div></div></article>
+<article class='panel span-12 ledger'><div class='section-head'><h2 class='section-label'>The ledger</h2><span class='section-note'>13 items &middot; $117.18 &middot; $19.22 consumed</span></div><table><caption>Every item the engine holds, with price status, dietary status and product evidence.</caption><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Spend</th><th>Consumed</th><th>Price</th><th>Dietary</th><th>Product evidence</th></tr></thead><tbody><tr><td data-label="Item">Bean and cheese burritos</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Category">Frozen meal</td><td data-label="Spend">$6.42</td><td data-label="Consumed">100%</td><td data-label="Price"><span class='mark ok' data-raw-price='priced'>Priced</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Homestyle waffles</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Category">Frozen breakfast</td><td data-label="Spend">$5.43</td><td data-label="Consumed">22%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Rising crust pizza</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Category">Frozen meal</td><td data-label="Spend">$4.94</td><td data-label="Consumed">100%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Extra firm tofu</td><td data-role='protein' data-label="Role">Protein</td><td data-label="Category">Refrigerated protein</td><td data-label="Spend">$5.91</td><td data-label="Consumed">17%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-role='drink' data-label="Role">Drink</td><td data-label="Category">Ready drink</td><td data-label="Spend">$6.49</td><td data-label="Consumed">33%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Grapefruit juice</td><td data-role='drink' data-label="Role">Drink</td><td data-label="Category">Ready drink</td><td data-label="Spend">$3.47</td><td data-label="Consumed">10%</td><td data-label="Price"><span class='mark warn' data-raw-price='unpriced'>Unpriced</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Espresso bricks</td><td data-role='coffee' data-label="Role">Coffee</td><td data-label="Category">Coffee</td><td data-label="Spend">$13.84</td><td data-label="Consumed">5%</td><td data-label="Price"><span class='mark warn' data-raw-price='estimated'>Estimated</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Calrose rice 20 lb</td><td data-role='pantry_base' data-label="Role">Pantry base</td><td data-label="Category">Dry good</td><td data-label="Spend">$19.80</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Dry lentils</td><td data-role='pantry_base' data-label="Role">Pantry base</td><td data-label="Category">Dry good</td><td data-label="Spend">$2.97</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Dry garbanzo beans</td><td data-role='pantry_base' data-label="Role">Pantry base</td><td data-label="Category">Dry good</td><td data-label="Spend">$1.98</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Pasta sauce and pesto</td><td data-role='flavor_unlock' data-label="Role">Flavour unlock</td><td data-label="Category">Sauce</td><td data-label="Spend">$7.02</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Dish soap</td><td data-role='critical_household_essential' data-label="Role">Household essential</td><td data-label="Category">Cleaning supply</td><td data-label="Spend">$4.99</td><td data-label="Consumed">50%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Example top-up frozen meal</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Category">Frozen meal</td><td data-label="Spend">$0.00</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark warn' data-raw-price='unpriced'>Unpriced</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr></tbody></table><p class='reconcile'>Order total <b>$117.18</b>; the 13 items tracked above account for <b>$83.26</b>. <b>$33.92</b> of the order total is not attributed to any tracked item, so totals and runway are estimates, not a reconciliation.</p></article>
 <details class='disclosure'><summary>Savings and sourcing overview</summary>
       <article class="panel span-12 wow">
         <h2>First Look</h2>
         <div class="card-row">
           <div><h2>Potential Unit Savings</h2><div class="metric">$0.00</div></div>
-          <div><h2>Best Sourcing Move</h2><div class="metric" style="font-size:1.1rem">Espresso bricks at Online bulk pack</div></div>
-          <div><h2>Runway</h2><div class="metric" style="font-size:1.1rem">20.4 days remaining</div></div>
+          <div><h2>Best Sourcing Move</h2><div class="metric small">Espresso bricks at Online bulk pack</div></div>
+          <div><h2>Runway</h2><div class="metric small">20.4 days remaining</div></div>
         </div>
         <p class="muted">Runway and sourcing baseline are ready</p>
       </article></details>
-<details class='disclosure'><summary>Spending by household role</summary><article class='panel span-6'><h2>Role Summary</h2><table><thead><tr><th>Role</th><th>Spend</th><th>Consumed</th><th>Drawdown</th></tr></thead><tbody><tr><td data-label="Role">bridge_food</td><td data-label="Spend">$16.79</td><td data-label="Consumed">$12.55</td><td data-label="Drawdown"><div class='bar' aria-label='75% consumed'><span style='width:75%'></span></div></td></tr>
-<tr><td data-label="Role">coffee</td><td data-label="Spend">$13.84</td><td data-label="Consumed">$0.69</td><td data-label="Drawdown"><div class='bar' aria-label='5% consumed'><span style='width:5%'></span></div></td></tr>
-<tr><td data-label="Role">critical_household_essential</td><td data-label="Spend">$4.99</td><td data-label="Consumed">$2.50</td><td data-label="Drawdown"><div class='bar' aria-label='50% consumed'><span style='width:50%'></span></div></td></tr>
-<tr><td data-label="Role">drink</td><td data-label="Spend">$9.96</td><td data-label="Consumed">$2.49</td><td data-label="Drawdown"><div class='bar' aria-label='25% consumed'><span style='width:25%'></span></div></td></tr>
-<tr><td data-label="Role">flavor_unlock</td><td data-label="Spend">$7.02</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><div class='bar' aria-label='0% consumed'><span style='width:0%'></span></div></td></tr>
-<tr><td data-label="Role">pantry_base</td><td data-label="Spend">$24.75</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><div class='bar' aria-label='0% consumed'><span style='width:0%'></span></div></td></tr>
-<tr><td data-label="Role">protein</td><td data-label="Spend">$5.91</td><td data-label="Consumed">$0.98</td><td data-label="Drawdown"><div class='bar' aria-label='17% consumed'><span style='width:17%'></span></div></td></tr></tbody></table></article></details>
-<details class='disclosure'><summary>Preference signals</summary><article class='panel span-6'><h2>Preference Signals</h2><p><strong>avoid_diced_chicken</strong><br>Diced microwave chicken was rejected.<br><span class='muted'>Prefer strips, fillets, or whole pieces.</span></p><p><strong>bridge_first</strong><br>Bridge foods are normally exhausted before cooking starts.<br><span class='muted'>Model bridge-first depletion as expected, not failure.</span></p><p><strong>dry_legumes_ok</strong><br>Overnight soaking is viable.<br><span class='muted'>Prefer dry beans and lentils over cans unless emergency food is needed.</span></p></article></details>
+<details class='disclosure'><summary>Spending by household role</summary><article class='panel span-6'><h2>Role Summary</h2><table><thead><tr><th>Role</th><th>Spend</th><th>Consumed</th><th>Drawdown</th></tr></thead><tbody><tr><td data-label="Role">Bridge food</td><td data-label="Spend">$16.79</td><td data-label="Consumed">$12.55</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='75% consumed'><span style='width:75%'></span></span></td></tr>
+<tr><td data-label="Role">Coffee</td><td data-label="Spend">$13.84</td><td data-label="Consumed">$0.69</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='5% consumed'><span style='width:5%'></span></span></td></tr>
+<tr><td data-label="Role">Household essential</td><td data-label="Spend">$4.99</td><td data-label="Consumed">$2.50</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='50% consumed'><span style='width:50%'></span></span></td></tr>
+<tr><td data-label="Role">Drink</td><td data-label="Spend">$9.96</td><td data-label="Consumed">$2.49</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='25% consumed'><span style='width:25%'></span></span></td></tr>
+<tr><td data-label="Role">Flavour unlock</td><td data-label="Spend">$7.02</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
+<tr><td data-label="Role">Pantry base</td><td data-label="Spend">$24.75</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
+<tr><td data-label="Role">Protein</td><td data-label="Spend">$5.91</td><td data-label="Consumed">$0.98</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='17% consumed'><span style='width:17%'></span></span></td></tr></tbody></table></article></details>
+<details class='disclosure'><summary>Preference signals</summary><article class='panel span-6'><h2>Preference Signals</h2><p><strong>Avoid diced chicken</strong><br>Diced microwave chicken was rejected.<br><span class='muted'>Prefer strips, fillets, or whole pieces.</span></p><p><strong>Bridge first</strong><br>Bridge foods are normally exhausted before cooking starts.<br><span class='muted'>Model bridge-first depletion as expected, not failure.</span></p><p><strong>Dry legumes ok</strong><br>Overnight soaking is viable.<br><span class='muted'>Prefer dry beans and lentils over cans unless emergency food is needed.</span></p></article></details>
 <details class='disclosure'><summary>Price freshness and uncertainty</summary><article class='panel span-12'><h2>Data Freshness</h2><p>1 priced recently, 12 unpriced or stale.</p><p><strong>Flagged items:</strong> Homestyle waffles (no check date, priced but stale), Rising crust pizza (no check date, priced but stale), Extra firm tofu (no check date, priced but stale), Chocolate protein milk (no check date, priced but stale), Grapefruit juice (4d ago, no price captured), Espresso bricks (today, estimated (low confidence)), Calrose rice 20 lb (no check date, priced but stale), Dry lentils (no check date, priced but stale), Dry garbanzo beans (no check date, priced but stale), Pasta sauce and pesto (no check date, priced but stale), Dish soap (no check date, priced but stale), Example top-up frozen meal (2d ago, no price captured)</p></article></details>
-<details class='disclosure'><summary>Trip overhead</summary><article class='panel span-6'><h2>Trip Overhead</h2><p><strong>1</strong> visit(s), <strong>40</strong> minutes total.</p><p class='muted'>By type — in_store: 1 (40 min).</p><p>Amortized time cost: <strong>$16.67</strong></p></article></details>
-<details class='disclosure'><summary>Complete household ledger — all items and evidence</summary><article class='panel span-12'><h2>Items</h2><table><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Spend</th><th>Consumed</th><th>Notes</th><th>Evidence</th></tr></thead><tbody><tr><td data-label="Item">Bean and cheese burritos</td><td data-label="Role">bridge_food</td><td data-label="Category">frozen_meal</td><td data-label="Spend">$6.42</td><td data-label="Consumed">100%</td><td data-label="Notes">Immediate food. Expected to deplete first.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Homestyle waffles</td><td data-label="Role">bridge_food</td><td data-label="Category">frozen_breakfast</td><td data-label="Spend">$5.43</td><td data-label="Consumed">22%</td><td data-label="Notes">Low-friction breakfast.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Rising crust pizza</td><td data-label="Role">bridge_food</td><td data-label="Category">frozen_meal</td><td data-label="Spend">$4.94</td><td data-label="Consumed">100%</td><td data-label="Notes">Morale food, one per run.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Extra firm tofu</td><td data-label="Role">protein</td><td data-label="Category">refrigerated_protein</td><td data-label="Spend">$5.91</td><td data-label="Consumed">17%</td><td data-label="Notes">Cooking phase started.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Chocolate protein milk</td><td data-label="Role">drink</td><td data-label="Category">ready_drink</td><td data-label="Spend">$6.49</td><td data-label="Consumed">33%</td><td data-label="Notes">Required ready protein drink.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Grapefruit juice</td><td data-label="Role">drink</td><td data-label="Category">ready_drink</td><td data-label="Spend">$3.47</td><td data-label="Consumed">10%</td><td data-label="Notes">Interesting non-water drink.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Espresso bricks</td><td data-label="Role">coffee</td><td data-label="Category">coffee</td><td data-label="Spend">$13.84</td><td data-label="Consumed">5%</td><td data-label="Notes">One opened, one sealed.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Calrose rice 20 lb</td><td data-label="Role">pantry_base</td><td data-label="Category">dry_good</td><td data-label="Spend">$19.80</td><td data-label="Consumed">0%</td><td data-label="Notes">Bulk runway extender.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Dry lentils</td><td data-label="Role">pantry_base</td><td data-label="Category">dry_good</td><td data-label="Spend">$2.97</td><td data-label="Consumed">0%</td><td data-label="Notes">Fast legume, no soak.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Dry garbanzo beans</td><td data-label="Role">pantry_base</td><td data-label="Category">dry_good</td><td data-label="Spend">$1.98</td><td data-label="Consumed">0%</td><td data-label="Notes">Preferred staple.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Pasta sauce and pesto</td><td data-label="Role">flavor_unlock</td><td data-label="Category">sauce</td><td data-label="Spend">$7.02</td><td data-label="Consumed">0%</td><td data-label="Notes">Friction reducer for pantry meals.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Dish soap</td><td data-label="Role">critical_household_essential</td><td data-label="Category">cleaning_supply</td><td data-label="Spend">$4.99</td><td data-label="Consumed">50%</td><td data-label="Notes">Non-food household consumable; stockout creates cleanup friction.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr>
-<tr><td data-label="Item">Example top-up frozen meal</td><td data-label="Role">bridge_food</td><td data-label="Category">frozen_meal</td><td data-label="Spend">$0.00</td><td data-label="Consumed">0%</td><td data-label="Notes">Example top-up for the easy-food panel demo.</td><td data-label="Evidence"><span class='muted'>none</span></td></tr></tbody></table></article></details>
-<details class='disclosure'><summary>Substitution comparisons</summary><article class='panel span-6'><h2>Substitutions</h2><table><thead><tr><th>Candidate</th><th>Replaces</th><th>Unit</th><th>Fit</th><th>Dietary</th><th>Read</th></tr></thead><tbody><tr><td data-label="Candidate">Tyson grilled strips</td><td data-label="Replaces">Diced chicken</td><td data-label="Unit">$0.454</td><td data-label="Fit">better</td><td data-label="Dietary"></td><td data-label="Read">Same price tier, better form factor.</td></tr>
-<tr><td data-label="Candidate">Espresso bulk or alternate retailer</td><td data-label="Replaces">Espresso from grocery store</td><td data-label="Unit">$0.596</td><td data-label="Fit">better_if_storage_ok</td><td data-label="Dietary"></td><td data-label="Read">Coffee may be a cross-store optimization.</td></tr></tbody></table></article></details>
-<details class='disclosure'><summary>Sourcing research</summary><article class='panel span-6'><h2>Sourcing Research</h2><table><thead><tr><th>Item</th><th>Current</th><th>Best alternative</th><th>Unit</th><th>Savings</th><th>Read</th></tr></thead><tbody><tr><td data-label="Item">Espresso bricks</td><td data-label="Current">Example Grocery</td><td data-label="Best alternative">Online bulk pack</td><td data-label="Unit">$0.596</td><td data-label="Savings">14%</td><td data-label="Read">Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.</td></tr><tr><td data-label="Item">Dish soap</td><td data-label="Current">Example Grocery</td><td data-label="Best alternative">Warehouse or online refill</td><td data-label="Unit">$0.120</td><td data-label="Savings">37%</td><td data-label="Read">Research refill or warehouse options, but only split the trip if the savings beats the extra errand.</td></tr></tbody></table></article></details>
-<details class='disclosure'><summary>Recent depletion pulses</summary><article class='panel span-12'><h2>Recent Pulses</h2><p><span class='tag'>2026-05-21</span>2 burritos, 4 waffles, 1/8 cheese eaten; one coffee brick opened.</p><p><span class='tag'>2026-05-23</span>1 burrito left, pizza eaten, cereal and milk 2/3 full.</p><p><span class='tag'>2026-05-24</span>Burritos finished, tofu half eaten, dish soap about half full.</p></article></details>
+<details class='disclosure'><summary>Trip overhead</summary><article class='panel span-6'><h2>Trip Overhead</h2><p><strong>1</strong> visit, <strong>40</strong> minutes total.</p><p class='muted'>By type — <span data-visit-types="in_store">In store: 1 (40 min)</span>.</p><p>Amortized time cost: <strong>$16.67</strong></p></article></details>
+<details class='disclosure'><summary>Easy food rotation</summary><article class='panel span-6'><h2>Easy Food</h2><p><strong>1</strong> unopened top-up:</p><ul><li><strong>Example top-up frozen meal</strong> (Bridge food, 2d ago) — rotate into a meal before the next top-up duplicates it.</li></ul></article></details>
+<details class='disclosure'><summary>Substitution comparisons</summary><article class='panel span-6'><h2>Substitutions</h2><table><thead><tr><th>Candidate</th><th>Replaces</th><th>Unit</th><th>Fit</th><th>Dietary</th><th>Read</th></tr></thead><tbody><tr><td data-label="Candidate">Tyson grilled strips</td><td data-label="Replaces">Diced chicken</td><td data-label="Unit">$0.45</td><td data-label="Fit">Better</td><td data-label="Dietary"><span class='mark ok' data-raw-status='safe'>Cleared</span></td><td data-label="Read">Same price tier, better form factor.</td></tr>
+<tr><td data-label="Candidate">Espresso bulk or alternate retailer</td><td data-label="Replaces">Espresso from grocery store</td><td data-label="Unit">$0.60</td><td data-label="Fit">Better if storage ok</td><td data-label="Dietary"><span class='mark ok' data-raw-status='safe'>Cleared</span></td><td data-label="Read">Coffee may be a cross-store optimization.</td></tr></tbody></table></article></details>
+<details class='disclosure'><summary>Sourcing research</summary><article class='panel span-6'><h2>Sourcing Research</h2><table><thead><tr><th>Item</th><th>Current</th><th>Best alternative</th><th>Unit</th><th>Savings</th><th>Read</th></tr></thead><tbody><tr><td data-label="Item">Espresso bricks</td><td data-label="Current">Example Grocery</td><td data-label="Best alternative">Online bulk pack</td><td data-label="Unit">$0.60</td><td data-label="Savings">14%</td><td data-label="Read">Worth checking alternate retailers because coffee is recurring, shelf-stable, and bulk-friendly.</td></tr><tr><td data-label="Item">Dish soap</td><td data-label="Current">Example Grocery</td><td data-label="Best alternative">Warehouse or online refill</td><td data-label="Unit">$0.12</td><td data-label="Savings">37%</td><td data-label="Read">Research refill or warehouse options, but only split the trip if the savings beats the extra errand.</td></tr></tbody></table></article></details>
+<details class='disclosure'><summary>Recent depletion pulses</summary><article class='panel span-12'><h2>Recent Pulses</h2><p><span class='tag'>21 May 2026</span>2 burritos, 4 waffles, 1/8 cheese eaten; one coffee brick opened.</p><p><span class='tag'>23 May 2026</span>1 burrito left, pizza eaten, cereal and milk 2/3 full.</p><p><span class='tag'>24 May 2026</span>Burritos finished, tofu half eaten, dish soap about half full.</p></article></details>
     </section>
-    <footer>No retailer connection. No checkout. Review every suggestion yourself.
-      This page does not save approvals or changes to your household state.</footer>
+    <footer>
+      <p><strong>About these numbers.</strong> Runway and totals are estimates from the
+      records in your state file, not a pantry audit. Prices are not live retailer
+      prices. A dietary warning is not a clearance. No retailer connection. No
+      checkout. Review every suggestion yourself. This page does not save approvals
+      or changes to your household state.</p>
+    </footer>
   </main>
 </body>
 </html>

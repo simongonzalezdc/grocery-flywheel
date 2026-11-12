@@ -18,6 +18,12 @@ import sys
 
 def run(bundle, scratch, offline):
     require = check
+    manifest = json.loads((bundle / "ENGINE-MANIFEST.json").read_text())
+    present = {str(p.relative_to(bundle)) for p in bundle.rglob("*") if p.is_file()}
+    unmanifested = sorted(present - set(manifest["bundle_files"]) - {"ENGINE-MANIFEST.json"})
+    require(not unmanifested, "bundle has no unmanifested files: " + ", ".join(unmanifested[:5]))
+    require(not [p for p in present if "__pycache__" in p or p.endswith(".pyc")],
+            "bundle ships no bytecode caches")
     home = scratch / "profile-a"
     home.mkdir(parents=True, exist_ok=False)
     os.environ["HERMES_HOME"] = str(home)

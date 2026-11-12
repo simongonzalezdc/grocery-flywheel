@@ -311,3 +311,38 @@ def test_registration_inert_and_slash_errors(plugin, tools, monkeypatch):
                  'plan {"state_json":NaN}', 'dashboard ' + 'x' * 65537):
         assert '"ok": false' in ctx.command(text)
     assert json.loads(ctx.command("sample"))["ok"]
+
+
+def test_csp_authorizes_every_emitted_script_and_handler(tools):
+    """Every inline script body and fixed click handler is hash-authorized."""
+    import base64
+    import hashlib
+    import re
+    from html import unescape
+    state = sample()
+    state["consent"] = {"correction_telemetry": "local_only"}
+    result = invoke(tools, "grocery_dashboard", state=state)
+    assert result["ok"], result
+    home = Path(os.environ["GROCERY_TEST_HOME"])
+    document = (home / "plugin-data/grocery-flywheel" / result["data"]["artifact"]).read_text()
+    policy = unescape(re.search(r'content="([^"]+)"', document).group(1))
+    bodies = re.findall(r"<script>(.*?)</script>", document, re.S)
+    handlers = re.findall(r'onclick="(capture\(\'[a-z_]+\'\))"', document)
+    assert len(bodies) == 2 and len(handlers) == 6
+    for piece in bodies + handlers:
+        digest = base64.b64encode(hashlib.sha256(piece.encode()).digest()).decode()
+        assert f"'sha256-{digest}'" in policy, piece
+    assert "default-src 'none'" in policy
+    assert "unsafe-eval" not in policy and "script-src *" not in policy
+    assert "connect-src 'none'" in policy and "img-src 'none'" in policy
+
+
+def test_fresh_bundle_manifests_every_file_it_ships(tmp_path):
+    output = tmp_path / "out"
+    subprocess.run([sys.executable, str(ROOT / "scripts/build_hermes_plugin.py"),
+                    "--output", str(output)], check=True)
+    directory = output / "grocery-flywheel"
+    manifest = json.loads((directory / "ENGINE-MANIFEST.json").read_text())
+    bundled = {str(p.relative_to(directory)) for p in directory.rglob("*") if p.is_file()}
+    assert bundled - {"ENGINE-MANIFEST.json"} == set(manifest["bundle_files"])
+    assert not [p for p in bundled if "__pycache__" in p or p.endswith(".pyc")]
