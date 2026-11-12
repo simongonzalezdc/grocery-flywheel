@@ -58,7 +58,7 @@ def test_reading_order_is_attention_action_runway_ledger_then_evidence():
     markup = render_dashboard(a)
     assert a == before, 'rendering must not mutate the analysis'
     order = ['Needs attention today', 'Today &middot; one thing', 'What will run out',
-             'The ledger', 'Savings and sourcing overview']
+             'The ledger', 'Savings and sourcing']
     positions = [markup.index(item) for item in order]
     assert positions == sorted(positions)
     # Easy Food is no longer a half-width orphan between full-width sections.

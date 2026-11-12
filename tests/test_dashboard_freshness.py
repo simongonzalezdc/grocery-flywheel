@@ -48,5 +48,4 @@ def test_dashboard_freshness_panel_handles_empty_state():
         "sourcing_research": [],
     }))
     assert "Data Freshness" in html
-    assert "priced recently" in html
-    assert "stale or unpriced" in html
+    assert "No prices on file." in html

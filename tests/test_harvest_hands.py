@@ -86,7 +86,7 @@ def test_pulses_tolerate_note_field():
 def test_first_wow_cards_render():
     html = render_dashboard(analyze_state(_canonical()))
     assert "Savings and sourcing" in html
-    assert "Best sourcing move" in html
+    assert "One sourcing candidate" in html
     assert "Recorded unit savings" in html
     # A zero sum is not dressed up as a saving, and not shown as a $0.00 claim.
     assert "Potential Unit Savings" not in html

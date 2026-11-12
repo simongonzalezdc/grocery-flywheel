@@ -151,7 +151,7 @@ def run(bundle, scratch, offline):
     variants["empty"] = empty
     long_state = json.loads(sample)
     long_state["items"][-1]["name"] = "Sanitized long item " + "x" * 2000
-    long_state["items"][-1]["notes"] = "Sanitized long note " + "y" * 2500
+    long_state["items"][0]["notes"] = "Sanitized long note " + "y" * 2500
     variants["long"] = long_state
     # Mixed state: one current-evidence safe item and one blocked item under a
     # critical restriction, so the success path is exercised beside the failure.
@@ -177,6 +177,15 @@ def run(bundle, scratch, offline):
     require("data-raw-result='safe'" in mixed_html, "mixed fixture exercises the cleared path")
     require("data-raw-status='safe'" in mixed_html, "mixed ledger shows an explicit clearance")
     require("Not evaluated" in mixed_html, "mixed ledger marks unevaluated items neutral")
+    long_html = (scratch / "long-dashboard.html").read_text()
+    require("Read the note (2520 characters)" in long_html, "long note is disclosed, not clipped")
+    require(all("<colgroup>" in table for table in long_html.split("<table>")[1:]),
+            "every table declares fixed column widths")
+    empty_html = (scratch / "empty-dashboard.html").read_text()
+    require("No items in the ledger yet." in empty_html, "empty state states its own copy")
+    require("No dietary restriction profile configured." in empty_html, "empty state names the missing profile")
+    empty_ledger = empty_html.split("The ledger</h2>")[1].split("</article>")[0]
+    require("<table>" not in empty_ledger, "empty ledger renders no table")
     for consent, visible in ((None, False), ({}, False), ({"correction_telemetry": "disabled"}, False),
                              ({"correction_telemetry": "local_only"}, True),
                              ({"correction_telemetry": "hosted_opt_in"}, True)):
@@ -189,6 +198,15 @@ def run(bundle, scratch, offline):
         require(response.get("ok"), "consent variant native dashboard")
         output = home / "plugin-data/grocery-flywheel" / response["data"]["artifact"]
         require(('id="correction-item"' in output.read_text()) == visible, "consent visibility")
+    # A consent artifact is captured for the browser run (downloads under CSP).
+    consent_state = json.loads(sample)
+    consent_state["consent"] = {"correction_telemetry": "local_only", "hosted_sync": False,
+                                "retailer_session_storage": "none",
+                                "password_storage": "forbidden"}
+    response = call("grocery_dashboard", {"state_json": json.dumps(consent_state)})
+    require(response.get("ok"), "consent artifact native dashboard")
+    output = home / "plugin-data/grocery-flywheel" / response["data"]["artifact"]
+    shutil.copyfile(output, scratch / "consent-dashboard.html")
     results["malformed_state"] = call("grocery_dashboard", {"state_json": "{"})
     require(results["malformed_state"]["ok"] is False, "malformed state returns error not dashboard")
     # Same-process profile rebinding via the supported effective-home resolver.

@@ -57,18 +57,23 @@ evaluation. The dashboard derives its own per-item result map from
 - the evidence gap: how many items have no `current` evidence;
 - the engine rule that would clear an item, and — when every evaluation is
   `warn` — that this profile warns on every item and clears none;
-- profile label and restriction (`value`, `safety_tier`, `behaviour`) in a
-  caveat whose first sentence is weighted: **"Missing evidence is a data gap,
-  not proof of a safety failure."**
-- a state legend defining Blocked, Needs review, Warning, Cleared and Not
-  evaluated in one place;
+- profile label and restriction (`value`, `safety_tier`, `behaviour`) in the
+  notes row, and the qualifier promoted to body size directly under the
+  verdict headline: **"Missing evidence is a data gap, not proof of a safety
+  failure."**
+- the five-state legend sits inside the evidence disclosure with the full
+  evaluation table, so reference material does not push the action below the
+  fold;
 - a `<details class="evidence">` table of **every** evaluation with item, result,
   evidence and the engine's own reason. Raw result/evidence keys stay in
   `data-raw-*` attributes for machines; visible text uses the label maps.
 
 Status colours: `blocked` and `needs_review` use `--brick`; `warn` uses
 `--ochre`; `safe` uses `--sage`; unknown/missing uses `--muted`. **`warn` must
-never use the success token.**
+never use the success token.** A preference-tier warning is not a blocker: the
+whole attention panel wears `.attention.warn-tier` (ochre edge and figure) and
+the qualifier is body-size, not the smallest tier. Brick is reserved for
+blocking evidence (`blocked`/`needs_review`).
 
 ## Vocabulary: dietary and price
 
@@ -84,11 +89,16 @@ One vocabulary per concept across every panel:
 
 | price state (resolved by `freshness.item_freshness`) | label | token |
 |---|---|---|
-| priced, fresh | Priced | sage |
+| priced, fresh | Priced | ink (`plain`) |
 | priced, stale | Stale price on file | ochre |
 | `unpriced` | No price captured | muted |
 | `estimated` | Estimated price | ochre |
 | `gift` | Gift — price optional | muted |
+
+Sage is reserved for a dietary clearance. A price state never wears the sage
+token, so green cannot mean both "Cleared" and "Priced". Aggregates use four
+buckets from the freshness record — `priced · stale · no price · estimated` —
+so an item whose own cell says "Estimated price" is never counted as stale.
 
 The ledger, freshness panel and action list all read the freshness record, so a
 missing `items[*].pricing_status` no longer renders as "No price record" while
@@ -102,7 +112,8 @@ own `reason`, the humanized `action`, `source`, and a **Dietary** line with the
 item's mark and evidence label. No raw `action` or `approval_state` slug appears
 in visible prose. Approval is stated once in words ("every item needs your
 approval"), together with `approval_required=true`, `checkout_available=false`,
-the price-freshness caveat and the honest export note.
+the four-bucket price caveat (`priced · stale · no price · estimated`) and the
+honest export note.
 
 The downloaded draft is the real engine plan plus a `presentation` envelope:
 `schema`, `note`, and `dietary_context` (per-item result, `cleared`, evidence
@@ -136,20 +147,28 @@ labelled, opens a disclosure per evidence row, and reads "No label evidence"
 when absent. When every item shares one dietary result the caption says so once
 instead of repeating the same token thirteen times.
 
-Below the table, the reconciliation states the order total, the tracked total,
-and the **unattributed remainder** in words.
+The headline attributes the money instead of repeating the order total:
+**`{n} items · {tracked} tracked · {unattributed} unattributed · {order} order`**.
+The reconciliation below repeats the arithmetic in words.
 
 ## Layout and contrast
 
-- Tables use content-driven columns (`table-layout:auto`), `overflow-wrap:
-  break-word`, `word-break:normal`, `hyphens:none`. Captions live outside the
-  table. Below 700px each row stacks into labelled blocks; a ledger row is five
-  labelled pairs at 390px and every datum stays reachable. 753–885px keeps the
-  real table (rows 72–92px).
+- Every table declares `table-layout:fixed` and an explicit `<colgroup>`; widths
+  are percentages that sum to 100. A 2,000-character unbroken token therefore
+  wraps inside its column instead of growing the table's min-content width. Long
+  notes open a `<details class="note-disclosure">`; captions live outside the
+  table.
+- Below 700px each row stacks into labelled blocks. A ledger record is a
+  two-column grid; every value cell carries a `.cell-value` wrapper and every
+  sub-line (`.cell-sub`, `.mark-detail`) is pinned to column 2, so the note sits
+  under the value and never under the label.
 - Meaningful graphics meet **≥3:1** against paper: ruler outlines, legend
   outlines and bar boundaries use `--edge-strong` (#8A7F6E → 3.49:1 on `--bg`,
   3.87:1 on `--panel`). Hairline rules stay decorative.
 - The `.muted` class is defined; `.wow` and other dead tokens are gone.
+- Disclosure titles are the panel's own `<h2>` promoted to the `<summary>`, and
+  the heading is removed from the body: one title per section, never a summary
+  plus a near-duplicate heading.
 - A skip link targets the review section (not a `<main>` that still contains the
   masthead). A print stylesheet removes the paper background; collapsed
   sections are documented as printing their titles only.
@@ -174,11 +193,16 @@ used by every artifact.
 - Fresh bundle build, then the native verifier: manifest coverage, no caches,
   plugin validate/doctor, dispatch through the installed manager, empty/long/
   mixed fixtures, malformed state → `INVALID_INPUT`.
-- Chrome at 1440/885/820/768/390/320 and native 400% zoom: zero external
-  requests, zero JS errors, no overflow, labelled cells, visible focus, measured
-  text contrast, **measured non-text contrast ≥3:1** for ruler/legend/bar,
-  word-intact cells, five-column ledger, styled disclosure headings, real
-  downloads.
+- Chrome at 1440/885/820/768/753/390/320 and native 400% zoom on **normal,
+  consent, empty, long, mixed and hostile fixtures**: zero external requests,
+  zero JS errors, no page or table overflow, labelled cells, visible focus,
+  measured text contrast, **measured non-text contrast ≥3:1** for
+  ruler/legend/bar, word-intact cells, a five-column ledger *when a ledger table
+  exists*, the empty ledger's own copy when it does not, and the one action
+  starting above the 900px fold at desktop width.
+- Long content is a standard fixture: a 2,000-character item name and a
+  2,500-character note must not widen any table past its panel; a long note is
+  disclosed, and the page gains no horizontal overflow.
 - `capture` mode in the browser verifier is evidence only and reports
   `acceptance:false`; `baseline` is rejected. Only `normal` and `zoom` count.
 - Golden dashboards are regenerated intentionally; a golden diff is a design
