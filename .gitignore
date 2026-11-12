@@ -22,3 +22,7 @@ id_ed25519
 .playwright-mcp/
 .mimosa/
 .zcode/
+
+# Local browser/native QA output (attach evidence, never publish profiles)
+evidence/
+

@@ -45,8 +45,8 @@ def test_every_panel_renders_for_both_state_families():
         html = render_dashboard(analysis)
         assert html.startswith("<!doctype html>")
         assert html.count("class='panel") + html.count('class="panel') >= 10
-    # dark command-center theme present
-    assert "color-scheme: dark" in render_dashboard(analyze_state(_legacy()))
+    # Warm pantry-ledger A intentionally supersedes the original dark shell.
+    assert "color-scheme: light" in render_dashboard(analyze_state(_legacy()))
 
 
 def test_approval_boundary_is_structural():

@@ -1,86 +1,90 @@
-"""Page shell and theme for the dashboard — the dark command-center
-aesthetic chosen in decision D1 (2026-08-14). Panels render into the
-grid; this module owns everything a panel should NOT define."""
-
+"""Self-contained warm pantry-ledger shell; analysis stays in the engine."""
 from __future__ import annotations
 
 from html import escape
 
 CSS = """
-    :root {
-      color-scheme: dark;
-      --bg: #0e1210;
-      --panel: #161d19;
-      --panel-edge: #243029;
-      --ink: #e6ece7;
-      --muted: #8fa398;
-      --green: #4ade80;
-      --green-dim: #2f7d5c;
-      --blue: #7ab8e8;
-      --gold: #e8b04b;
-      --red: #f87171;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background:
-        radial-gradient(1200px 500px at 20% -10%, #16211b 0%, transparent 60%),
-        var(--bg);
-      color: var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.45;
-    }
-    main { max-width: 1180px; margin: 0 auto; padding: 28px; }
-    header { display: grid; gap: 10px; margin-bottom: 22px; }
-    h1, h2 { margin: 0; }
-    h1 { font-size: clamp(1.8rem, 5vw, 3.4rem); line-height: .95; letter-spacing: .01em; }
-    h2 { font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
-    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--panel-edge);
-      border-radius: 10px;
-      padding: 16px;
-      box-shadow: 0 1px 0 rgba(0,0,0,.35);
-    }
-    .span-4 { grid-column: span 4; }
-    .span-6 { grid-column: span 6; }
-    .span-12 { grid-column: span 12; }
-    .metric { font-size: 1.9rem; font-weight: 750; margin-top: 6px; }
-    .muted { color: var(--muted); }
-    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-    th, td { border-bottom: 1px solid var(--panel-edge); padding: 9px 8px; text-align: left; vertical-align: top; }
-    th { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
-    .bar { height: 10px; background: #0b0f0d; border-radius: 999px; overflow: hidden; min-width: 80px; }
-    .bar > span { display: block; height: 100%; background: var(--green-dim); }
-    .tag {
-      display: inline-block; border: 1px solid var(--panel-edge); border-radius: 999px;
-      padding: 3px 9px; margin: 3px 4px 3px 0; font-size: .8rem;
-    }
-    .tag.critical { border-color: var(--red); color: var(--red); }
-    .tag.review { border-color: var(--gold); color: var(--gold); }
-    .tag.ok { border-color: var(--green); color: var(--green); }
-    .card-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .wow { border-left: 3px solid var(--green); }
-    .approve-note { color: var(--gold); }
-    button.correction {
-      background: #1d251f; border: 1px solid var(--panel-edge); color: var(--ink);
-      border-radius: 6px; padding: 4px 8px; font-size: .78rem; cursor: pointer;
-    }
-    button.correction:hover { border-color: var(--green); }
-    details { margin: 4px 0; }
-    summary { cursor: pointer; color: var(--muted); font-size: .85rem; }
-    @media (max-width: 760px) {
-      main { padding: 16px; }
-      .span-4, .span-6, .card-row { grid-column: span 12; }
-      .card-row { grid-template-columns: 1fr; }
-      table { font-size: .82rem; }
-    }
+:root {
+  color-scheme: light;
+  --bg:#F6F1E7; --panel:#FFFDF8; --panel-edge:#D8CCB6;
+  --ink:#241F19; --muted:#5A5145; --green:#3F6B45; --green-dim:#3F6B45;
+  --blue:#2F5E86; --gold:#8A5B12; --red:#A32D22; --copper:#A2512A;
+  --display:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:1rem; line-height:1.6; font-variant-numeric:tabular-nums; }
+main { max-width:1184px; margin:auto; padding:32px 24px 80px; }
+header { border-bottom:2px solid var(--ink); padding-bottom:24px; margin-bottom:32px; }
+h1,h2,h3,p { margin:0 0 12px; }
+h1 { font-family:var(--display); font-size:clamp(2rem,5vw,3.5rem); line-height:1.1; font-weight:600; }
+h2 { font-family:var(--display); font-size:1.6rem; font-weight:600; line-height:1.2; }
+header p { max-width:75ch; }
+.eyebrow { text-transform:uppercase; letter-spacing:.15em; font-size:.8rem; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:24px; }
+.panel { min-width:0; background:transparent; border:0; border-top:1px solid var(--panel-edge);
+  padding:24px 0; overflow-wrap:anywhere; }
+.span-4 { grid-column:span 4; } .span-6 { grid-column:span 6; } .span-12 { grid-column:span 12; }
+.metric { font-family:var(--display); font-size:2.4rem; font-weight:600; line-height:1.2; margin:8px 0; }
+.muted { color:var(--muted); }
+.card-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:32px; }
+.card-row h2 { font-family:inherit; font-size:.85rem; letter-spacing:.08em; text-transform:uppercase; }
+.card-row > div { min-width:0; }
+.attention { background:#EFE8DA; border-left:4px solid var(--gold); padding:24px; }
+.attention h2 { color:var(--gold); }
+.review-task { background:var(--panel); border-top:5px solid var(--ink); padding:24px; }
+.review-task > h2 { font-size:2rem; }
+.section-intro { color:var(--muted); max-width:66ch; }
+.approve-note { color:var(--gold); }
+.wow { border-left:0; }
+.tag { display:inline-block; border:1px solid var(--panel-edge); border-radius:3px;
+  padding:3px 9px; margin:3px 4px 3px 0; font-size:.85rem; }
+.tag.critical { border-color:var(--red); color:var(--red); }
+.tag.review { border-color:var(--gold); color:var(--gold); }
+.tag.ok { border-color:var(--green); color:var(--green); }
+table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:.95rem; }
+th,td { border-bottom:1px solid var(--panel-edge); padding:14px 8px; text-align:left;
+  vertical-align:top; overflow-wrap:anywhere; }
+th { color:var(--muted); font-size:.8rem; font-weight:600; }
+.bar { height:8px; background:#E3D9C6; border-radius:2px; overflow:hidden; }
+.bar > span { display:block; height:100%; background:var(--green-dim); }
+button,select,.download-link { font:inherit; color:var(--ink); background:var(--panel);
+  border:1px solid var(--panel-edge); border-radius:3px; padding:10px 14px;
+  min-height:44px; max-width:100%; }
+button { cursor:pointer; } button:hover { border-color:var(--copper); }
+button.primary { background:var(--copper); border-color:var(--copper); color:#FFF8F1; }
+button.primary:hover { background:#8A4222; }
+a { color:var(--copper); }
+:focus-visible { outline:3px solid #7A3A1C; outline-offset:3px; }
+.skip-link { position:absolute; left:-9999px; top:0; padding:12px; background:var(--panel); }
+.skip-link:focus { left:12px; top:12px; z-index:2; }
+details { margin:8px 0; min-width:0; }
+summary { cursor:pointer; padding:12px 0; min-height:44px; color:var(--muted); }
+.disclosure { grid-column:span 12; border-top:1px solid var(--panel-edge); }
+.disclosure > summary { font-size:1.15rem; color:var(--ink); }
+.disclosure .panel { border-top:0; padding:16px 0; }
+footer { margin-top:48px; border-top:2px solid var(--ink); padding-top:24px; color:var(--muted); }
+@media (max-width:760px) {
+ main { padding:24px 16px 48px; }
+ .span-4,.span-6 { grid-column:span 12; }
+ .card-row { grid-template-columns:1fr; gap:20px; }
+ .attention,.review-task { padding:20px 16px; }
+ table,tbody,tr,td { display:block; width:100%; }
+ thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+ tr { padding:12px 0; border-bottom:1px solid var(--panel-edge); }
+ td { border:0; padding:5px 0; }
+ td::before { content:attr(data-label); display:block; color:var(--muted); font-size:.8rem; }
+ td:first-child { font-weight:600; }
+}
+@media (prefers-reduced-motion:reduce) {
+ *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+}
 """
 
 
 def page_shell(header_html: str, panels_html: str) -> str:
-    """Assemble the full self-contained HTML document."""
+    """Assemble a local document without fetched assets or fonts."""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -90,15 +94,18 @@ def page_shell(header_html: str, panels_html: str) -> str:
   <style>{CSS}</style>
 </head>
 <body>
-  <main>
+  <a class="skip-link" href="#dashboard">Skip to household review</a>
+  <main id="dashboard" tabindex="-1">
     <header>
-      <p class="muted">Local-first household replenishment — command center</p>
+      <p class="eyebrow">Your household ledger · local and private</p>
       <h1>Grocery Flywheel</h1>
       {header_html}
     </header>
-    <section class="grid">
+    <section class="grid" aria-label="Household review">
 {panels_html}
     </section>
+    <footer>No retailer connection. No checkout. Review every suggestion yourself.
+      This page does not save approvals or changes to your household state.</footer>
   </main>
 </body>
 </html>

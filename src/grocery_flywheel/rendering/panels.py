@@ -11,6 +11,7 @@ plan → tables.
 from __future__ import annotations
 
 import json
+import re
 from html import escape
 from typing import Any, Callable
 
@@ -104,7 +105,8 @@ def _dietary(a: dict[str, Any]) -> str:
     )
     flagged_items = sorted({e["item"] for e in evaluations if e["result"] in ("blocked", "needs_review")})
     flagged = (
-        "<p class='muted'>Flagged for review: " + escape(", ".join(flagged_items)) + "</p>"
+        "<details><summary>Review flagged items (" + str(len(flagged_items)) + ")</summary><p class='muted'>Flagged for review: "
+        + escape(", ".join(flagged_items)) + "</p></details>"
         if flagged_items else ""
     )
     return (f"<article class='panel span-6'><h2>Dietary Restrictions</h2>"
@@ -177,8 +179,15 @@ def _cart_plan(a: dict[str, Any]) -> str:
         f"<td>{escape(str(i.get('source', '')))}</td><td>{escape(str(i.get('approval_state', '')))}</td></tr>"
         for i in items
     )
+    export = ("<button class='primary' id='buy-list-download' type='button' data-plan='"
+              + escape(json.dumps(plan), quote=True) + "'>Download draft JSON</button>"
+              "<script>document.getElementById('buy-list-download').addEventListener('click', function () {"
+              "var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));"
+              "var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';"
+              "document.body.appendChild(link); link.click(); link.remove();"
+              "setTimeout(function () { URL.revokeObjectURL(url); }, 1000);});</script>")
     return (f"<article class='panel span-6'><h2>Internal Cart Plan</h2>{note}"
-            f"<table><thead><tr><th>Item</th><th>Action</th><th>Source</th><th>Approval</th></tr></thead>"
+            f"{export}<table><thead><tr><th>Item</th><th>Action</th><th>Source</th><th>Approval</th></tr></thead>"
             f"<tbody>{body}</tbody></table></article>")
 
 
@@ -293,11 +302,11 @@ def _corrections_capture(a: dict[str, Any]) -> str:
     return f"""
       <article class="panel span-12" id="corrections">
         <h2>Correction Capture</h2>
-        <p class="muted">Record durable signals — kept local, appended to a JSONL file you download. Nothing is sent anywhere.</p>
-        <p><select id="correction-item">{options}</select></p>
+        <p class="muted">Capture signals in this page only. Download JSONL to keep them; nothing is saved to household state or sent anywhere.</p>
+        <p><label for="correction-item">Item to correct</label><br><select id="correction-item">{options}</select></p>
         <p>{buttons}</p>
-        <p><a id="correction-download" download="corrections.jsonl"><button class="correction">Download JSONL</button></a>
-        <span class="muted" id="correction-count"></span></p>
+        <p><button class="correction" id="correction-download" type="button">Download JSONL</button>
+        <span class="muted" id="correction-count" role="status"></span></p>
         <script>
           var log = [];
           function capture(signal) {{
@@ -307,7 +316,11 @@ def _corrections_capture(a: dict[str, Any]) -> str:
           }}
           document.getElementById("correction-download").addEventListener("click", function () {{
             var blob = new Blob([log.map(function (e) {{ return JSON.stringify(e); }}).join("\\n")], {{type: "application/jsonl"}});
-            this.href = URL.createObjectURL(blob);
+            var url = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url; link.download = "corrections.jsonl";
+            document.body.appendChild(link); link.click(); link.remove();
+            setTimeout(function () {{ URL.revokeObjectURL(url); }}, 1000);
           }});
           var _state = {payload};
         </script>
@@ -351,10 +364,63 @@ PANELS: list[dict[str, Any]] = [
 ]
 
 
+def _responsive_table_labels(document: str) -> str:
+    """Retain semantic tables and repeat their trusted headings on narrow records.
+
+    Only panel-generated tags are matched: user text is already HTML-escaped.
+    No user content becomes markup or executable data here.
+    """
+    def table(match: re.Match[str]) -> str:
+        markup = match.group(0)
+        labels = re.findall(r"<th>(.*?)</th>", markup, re.S)
+
+        def row(match: re.Match[str]) -> str:
+            index = 0
+
+            def cell(match: re.Match[str]) -> str:
+                nonlocal index
+                label = labels[index] if index < len(labels) else ""
+                index += 1
+                return f'<td data-label="{escape(label, quote=True)}">'
+
+            return re.sub(r"<td>", cell, match.group(0))
+
+        return re.sub(r"<tr>.*?</tr>", row, markup, flags=re.S)
+
+    return re.sub(r"<table>.*?</table>", table, document, flags=re.S)
+
+
 def render_dashboard(analysis: dict[str, Any]) -> str:
-    """Render the analysis through the panel registry into the dark shell."""
-    panels_html = "\n".join(
-        f"      {panel['render'](analysis)}"
-        for panel in PANELS
-    )
-    return page_shell(header_line(analysis), panels_html)
+    """Lead with safety and one review task; keep every original panel available."""
+    renderers = {panel["name"]: panel["render"] for panel in PANELS}
+    leading = ("dietary", "cart_plan", "metrics", "easy_food")
+    disclosures = {
+        "first_wow": "Savings and sourcing overview",
+        "role_summary": "Spending by household role",
+        "preferences": "Preference signals",
+        "freshness": "Price freshness and uncertainty",
+        "trips": "Trip overhead",
+        "items": "Complete household ledger — all items and evidence",
+        "substitutions": "Substitution comparisons",
+        "sourcing": "Sourcing research",
+        "corrections_capture": "Download-only correction capture",
+        "pulses": "Recent depletion pulses",
+    }
+    parts = []
+    for name in leading:
+        markup = renderers[name](analysis)
+        if name == "dietary":
+            markup = markup.replace("panel span-6", "panel span-12 attention", 1)
+        elif name == "cart_plan":
+            markup = markup.replace("panel span-6", "panel span-12 review-task", 1)
+            markup = markup.replace("<h2>Internal Cart Plan</h2>",
+                                    "<p class='eyebrow'>Your next step</p>"
+                                    "<h2>Review your next grocery run</h2>"
+                                    "<p class='section-intro'>Internal Cart Plan — read the suggestions; "
+                                    "reviewing does not record approval.</p>", 1)
+        parts.append(markup)
+    for name, label in disclosures.items():
+        markup = renderers[name](analysis)
+        if markup:
+            parts.append(f"<details class='disclosure'><summary>{label}</summary>{markup}</details>")
+    return page_shell(header_line(analysis), _responsive_table_labels("\n".join(parts)))

@@ -19,7 +19,7 @@ pipx install git+https://github.com/simongonzalezdc/grocery-flywheel   # or: uv 
 grocery-flywheel examples/sample_state.json --output dist/sample-dashboard.html
 ```
 
-Open `dist/sample-dashboard.html` in a browser: the dark command-center dashboard with runway, sourcing moves, dietary flags, and a next-cart plan that waits for your approval.
+Open `dist/sample-dashboard.html` in a browser: a warm household ledger with a dietary-attention summary, one cart-review task, depletion metrics and expandable supporting evidence. Draft downloads are JSON; approvals are not recorded by the page.
 
 <details><summary>No pipx? Plain venv works too</summary>
 

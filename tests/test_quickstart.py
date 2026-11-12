@@ -49,7 +49,7 @@ def test_thirty_second_first_look(tmp_path: Path):
     assert result.returncode == 0, result.stderr
     html = out.read_text()
     assert len(html) > 5000 and html.startswith("<!doctype html>")
-    assert "Grocery Flywheel" in html and "color-scheme: dark" in html
+    assert "Grocery Flywheel" in html and "color-scheme: light" in html
 
 
 def test_import_both_fixture_formats(tmp_path: Path):
