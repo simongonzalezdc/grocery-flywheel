@@ -76,6 +76,7 @@ try{
     const actionArea=await evaluate(`(()=>{const t=document.querySelector('.today');if(!t)return null;const blocked=[...new Set([...document.querySelectorAll(".mark[data-verdict='blocked'][data-item]")].map(m=>m.dataset.item))];const text=t.textContent;const missing=blocked.filter(n=>!text.includes(n));const rows=[...t.querySelectorAll('li[data-action-item]')].map(li=>{const m=li.querySelector('.mark[data-verdict]');return {item:li.dataset.actionItem,verdict:m?m.dataset.verdict:'',qualifier:!!li.querySelector('.action-qualifier')}});return {blocked,missing,rows,unqualified:rows.filter(r=>r.verdict&&r.verdict!=='cleared'&&!r.qualifier)}})()`);
     if(actionArea&&actionArea.missing.length)throw Error('A blocked item is absent from the action area: '+JSON.stringify(actionArea));
     if(actionArea&&actionArea.unqualified.length)throw Error('A non-cleared action has no dietary qualifier: '+JSON.stringify(actionArea));
+    measure.actionArea=actionArea;
     // An unpriced placeholder is not a recorded zero.
     const ledgerSpend=await evaluate(`(()=>{const rows=[...document.querySelectorAll('.ledger tbody tr')].map(r=>r.textContent.replace(/\\s+/g,' '));return {rows:rows.length,fabricated:rows.filter(t=>/No price captured/.test(t)&&/\\$0\\.00/.test(t))}})()`);
     if(ledgerSpend.fabricated.length)throw Error('Unpriced ledger row renders a fabricated $0.00: '+JSON.stringify(ledgerSpend));
@@ -122,6 +123,29 @@ try{
  const planFile=resolve(output,'downloads/buy-list.json');let exported=null;
  try{exported=JSON.parse(await readFile(planFile,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(exported&&(exported.approval_required!==true||exported.checkout_available!==false))throw Error('Unsafe export');
+ if(exported&&acceptance){
+   // The draft is an artifact the household reads; it must mirror the page it was
+   // downloaded from. r6 B1: four engine rows restocked an item the page held.
+   const presentation=exported.presentation||{};
+   const list=presentation.action_list;
+   if(!Array.isArray(list))throw Error('Export has no presentation.action_list mirroring the page');
+   const pageRows=(measurements[measurements.length-1].actionArea||{}).rows||[];
+   if(!pageRows.length)throw Error('No rendered action rows to bind the export to');
+   if(list.length!==pageRows.length)throw Error('Exported action_list has '+list.length+' rows; page renders '+pageRows.length);
+   for(const row of pageRows){
+     const entry=list.find(x=>x.item===row.item);
+     if(!entry)throw Error('Exported action_list omits a rendered row: '+row.item);
+     if(entry.state!==row.verdict)throw Error('Exported state '+entry.state+' disagrees with rendered '+row.verdict+' for '+row.item);
+     if(entry.cleared!==(row.verdict==='cleared'))throw Error('Exported cleared flag disagrees with the rendered mark for '+row.item);
+     if(!entry.cleared&&entry.display_action==='Restock')throw Error('Export restocks a non-cleared item: '+row.item);
+     if(!entry.cleared&&!entry.qualifier)throw Error('Export drops the dietary qualifier for '+row.item);
+     if(entry.held&&(entry.cleared||entry.state!=='blocked'))throw Error('Exported hold is not a blocked row: '+JSON.stringify(entry));
+   }
+   const context=presentation.dietary_context||{};
+   const contextNames=(context.items||[]).map(x=>x.item);
+   for(const row of pageRows)if(!contextNames.includes(row.item))throw Error('Dietary context omits an action row: '+row.item);
+   if(!String(presentation.action_list_note||'').includes('held=true'))throw Error('Export does not explain its hold flag');
+ }
  const report={ok:true,mode,acceptance,artifactSha256,requests,errors,downloads,exported,measurements};
  await writeFile(resolve(output,'browser-report.json'),JSON.stringify(report,null,2));
  if(mode==='capture')await writeFile(resolve(output,'capture-manifest.json'),JSON.stringify(captureManifest,null,2));

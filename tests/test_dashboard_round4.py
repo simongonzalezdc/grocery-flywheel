@@ -93,8 +93,9 @@ def test_empty_state_renders_copy_instead_of_a_ledger_table():
 def test_mobile_ledger_grid_places_sub_lines_under_the_value():
     markup = render_dashboard(analysis())
     css = markup.split('<style>')[1].split('</style>')[0]
-    assert ".ledger td > .cell-value { grid-column:2; grid-row:1;" in css
-    assert ".ledger td > .cell-sub, .ledger td > .mark-detail { grid-column:2;" in css
+    assert ".ledger td > .cell-value, .at-risk td > .cell-value { grid-column:2; grid-row:1;" in css
+    assert ".ledger td > .cell-sub, .ledger td > .mark-detail," in css
+    assert ".at-risk td > .cell-sub, .at-risk td > .mark-detail { grid-column:2;" in css
     ledger = markup.split("The ledger</h2>")[1].split('</article>')[0]
     # Every ledger value cell carries the wrapper the mobile grid depends on.
     assert ledger.count("<span class='cell-value'>") == 5 * 13
@@ -143,7 +144,8 @@ def test_ledger_headline_reconciles_tracked_unattributed_and_order():
 
 def test_price_aggregate_renders_the_four_buckets():
     markup = render_dashboard(analysis())
-    assert '1 priced &middot; 9 stale &middot; 2 no price &middot; 1 estimated' in markup
+    assert ('1 priced &middot; 0 stale &middot; 9 price date unknown '
+            '&middot; 2 no price &middot; 1 estimated') in markup
     assert '12 of 13 stale or unpriced' not in visible(markup)
     assert 'stale or unpriced' not in visible(markup)
 
@@ -207,7 +209,8 @@ def test_all_unpriced_items_use_the_no_price_bucket():
     for item in state['items']:
         item['pricing_status'] = 'unpriced'
     markup = render_dashboard(analyze_state(state))
-    assert ('0 priced &middot; 0 stale &middot; 13 no price &middot; 0 estimated') in markup
+    assert ('0 priced &middot; 0 stale &middot; 0 price date unknown '
+            '&middot; 13 no price &middot; 0 estimated') in markup
     assert 'No price captured' in markup
     assert "class='mark ok'" not in markup.split("The ledger</h2>")[1].split('</article>')[0]
 

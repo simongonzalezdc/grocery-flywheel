@@ -99,10 +99,33 @@ and never clears a row.
 - the five-state legend sits inside the evidence disclosure with the full
   evaluation table, so reference material does not push the action below the
   fold;
-- a `<details class="evidence">` table of **every** evaluation with item, result,
-  evidence and the engine's own reason. Raw result/evidence keys stay in
-  `data-raw-*` attributes for machines; visible text uses the label maps. The
-  evidence drawer shows **every** entry in a label list — it does not truncate.
+- a `<details class="evidence">` table with **one row per evaluation** — item,
+  result, evidence and the engine's own reason. The summary count is
+  `len(evaluations)`, not the number of items; an item under two restrictions
+  appears twice, and the item's badge uses the most severe result. Raw
+  result/evidence keys stay in `data-raw-*` attributes for machines; visible
+  text uses the label maps. The evidence drawer shows **every** entry in a label
+  list — it does not truncate. The ledger caption derives from the *display*
+  state (`Cleared` only when the authority says cleared); it is never built from
+  a raw `safe` result.
+- the action area, the downloadable draft and the page are **one list computed
+  once**. The draft's `presentation.action_list` mirrors every rendered row with
+  `item`, `engine_action`, `display_action`, `state`, `cleared`, `held`,
+  `qualifier`, `reason`, `source`; `items[]` remains the engine's cart plan
+  verbatim. `presentation.dietary_context.items` covers every ledger item **and**
+  every cart or held row. A buy verb (`Restock`) never stands on a non-cleared
+  row: it renders `Hold restock` with the dietary qualifier.
+- Easy Food's rotation sentence is gated on the same verdict: only a cleared
+  item is told to rotate. The sourcing "best recorded move" sentence carries the
+  item's dietary mark; alternatives are explicitly not evaluated there.
+- the **at-risk table** ("What will run out") carries a Dietary mark per row, so
+  a depletion warning never reads as a buy signal on its own.
+- the item↔evaluation join is casefolded and whitespace-collapsed for matching
+  only; the engine's names are never rewritten.
+- the **status line** is sticky and stays visible while scrolling; it uses the
+  blocked count for grammar (`1 item is blocked`) and states the not-cleared
+  count (`12 of 13 items are not cleared`). The attention qualifier stays at
+  body size on mobile — it is never dropped to the smallest step.
 
 Status colours: `blocked` and `needs_review` use `--brick`; `warn` uses
 `--ochre`; `safe` uses `--sage`; unknown/missing uses `--muted`. **`warn` must
@@ -140,9 +163,10 @@ recent pulses are labelled **unverified note** with a caption saying they are
 not reconciled against the ledger or the depletion model.
 
 Sage is reserved for a dietary clearance. A price state never wears the sage
-token, so green cannot mean both "Cleared" and "Priced". Aggregates use four
-buckets from the freshness record — `priced · stale · no price · estimated` —
-so an item whose own cell says "Estimated price" is never counted as stale.
+token, so green cannot mean both "Cleared" and "Priced". Aggregates use five
+buckets derived from the rendered label — `priced · stale · price date unknown ·
+no price · estimated` (plus `gift` when present) — so an item whose own cell says
+"Price on file · date unknown" is counted as undated, never as stale.
 
 The ledger, freshness panel and action list all read the freshness record, so a
 missing `items[*].pricing_status` no longer renders as "No price record" while
@@ -157,19 +181,24 @@ evaluation-derived mark and evidence label. Action and source carry visible
 `Action` / `Source` labels, and no raw `action` or `approval_state` slug appears
 in visible prose. Approval is stated once in words ("every item needs your
 approval before anything is bought."), together with `approval_required=true`,
-`checkout_available=false`, the four-bucket price caveat (`priced · stale · no
-price · estimated`) and the honest export note. On mobile the source line moves
-under the item instead of squeezing the reason into a narrow column.
+`checkout_available=false`, the five-bucket price caveat (`priced · stale · price
+date unknown · no price · estimated`, scoped to the whole ledger) and the honest
+export note. On mobile the source line moves under the item instead of squeezing
+the reason into a narrow column.
 
 The sourcing panel labels its mark **"Dietary · this item, not the
 alternatives"** and its basis note says alternatives are not evaluated there.
 A missing amount renders **"not recorded"**; `_money` never fabricates `$0.00`.
 
 The downloaded draft is the real engine plan plus a `presentation` envelope:
-`schema`, `note`, and `dietary_context` (per-item result, `cleared`, evidence
-status, reason, restriction tiers). Every engine field of the plan is retained
-verbatim at the top level. The page says the JSON includes the dietary state and
-that nothing is bought or written back.
+`schema`, `note`, `dietary_context` (per-item state, result, `cleared`, evidence
+status, reason, restriction tiers), and `action_list` — a row-for-row mirror of
+the page's action area with `item`, `engine_action`, `display_action`, `state`,
+`cleared`, `held`, `qualifier`, `reason`, `source`. Every engine field of the
+plan is retained verbatim at the top level (`items[]` is the cart plan, unchanged;
+held rows appear only in `action_list`). `dietary_context` covers every ledger
+item and every cart or held row. The page says the JSON includes the dietary
+state and that nothing is bought or written back.
 
 ## Runway contract
 

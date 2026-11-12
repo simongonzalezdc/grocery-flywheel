@@ -67,6 +67,7 @@ p { max-width:var(--measure); }
   line-height:1.2; margin:4px 0; }
 .metric.small { font-family:var(--body); font-size:var(--step-0); font-weight:600; }
 .masthead-status { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px;
+  position:sticky; top:0; z-index:4;
   margin:16px 0 0; padding:12px 16px; font-weight:600; font-size:var(--step-0);
   border:1px solid var(--edge); border-left:5px solid var(--edge);
   background:var(--panel); max-width:none; }
@@ -107,7 +108,7 @@ p { max-width:var(--measure); }
   margin:2px 0 0; font-weight:600; text-underline-offset:3px; }
 .attention-context { margin:8px 0 0; }
 .attention-context > summary { padding:6px 0; min-height:32px; font-size:var(--step--1); }
-#today { scroll-margin-top:12px; }
+#today { scroll-margin-top:5.5rem; }
 .attention-notes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px 32px; margin-top:16px; padding-top:12px; border-top:1px solid var(--edge); }
 .attention-notes p { font-size:var(--step--1); color:var(--muted); margin:0; max-width:60ch; }
@@ -186,7 +187,7 @@ button.primary:hover { background:var(--copper-deep); border-color:var(--copper-
 a { color:var(--copper); }
 :focus-visible { outline:3px solid #7A3A1C; outline-offset:3px; }
 .skip-link { position:absolute; left:-9999px; top:0; padding:12px; background:var(--panel); }
-.skip-link:focus { left:12px; top:12px; z-index:2; }
+.skip-link:focus { left:12px; top:12px; z-index:10; }
 details { margin:10px 0; min-width:0; }
 summary { cursor:pointer; padding:12px 0; min-height:44px; color:var(--muted); }
 details.evidence > summary { color:var(--copper); font-weight:600; }
@@ -238,13 +239,14 @@ footer p { max-width:var(--measure); }
  td:empty { display:none; }
  td:first-child { font-weight:600; padding-top:6px; }
  /* Dense ledger records: label and value on one line, the sub-line under the value. */
- .ledger td { display:grid; grid-template-columns:6.2rem minmax(0,1fr); gap:0 10px;
-  padding:4px 10px; }
- .ledger td::before { margin:0; padding:0; grid-column:1; grid-row:1; }
- .ledger td > .cell-value { grid-column:2; grid-row:1; min-width:0; }
- .ledger td > .cell-sub, .ledger td > .mark-detail { grid-column:2; grid-row:auto; }
- .ledger td:first-child { padding-top:10px; }
- .ledger td:last-child { padding-bottom:10px; }
+ .ledger td, .at-risk td { display:grid; grid-template-columns:6.2rem minmax(0,1fr);
+   gap:0 10px; padding:4px 10px; }
+ .ledger td::before, .at-risk td::before { margin:0; padding:0; grid-column:1; grid-row:1; }
+ .ledger td > .cell-value, .at-risk td > .cell-value { grid-column:2; grid-row:1; min-width:0; }
+ .ledger td > .cell-sub, .ledger td > .mark-detail,
+ .at-risk td > .cell-sub, .at-risk td > .mark-detail { grid-column:2; grid-row:auto; }
+ .ledger td:first-child, .at-risk td:first-child { padding-top:10px; }
+ .ledger td:last-child, .at-risk td:last-child { padding-bottom:10px; }
 }
 @media (max-width:760px) {
  main { padding:24px 16px 48px; }
@@ -255,7 +257,8 @@ footer p { max-width:var(--measure); }
  .attention-figure { font-size:var(--step-3); margin-bottom:2px; }
  .attention-figure small { margin-top:4px; }
  .attention-verdict h3 { font-size:var(--step-1); line-height:1.25; margin-bottom:6px; }
- .attention-qualifier { font-size:var(--step--1); margin-bottom:8px; }
+ /* The qualifier stays at body size on mobile (design contract, r6 M7). */
+ .attention-qualifier { margin-bottom:8px; }
  .attention-verdict > p { margin-bottom:6px; }
  .attention-notes { grid-template-columns:1fr; gap:6px; margin-top:10px; padding-top:10px; }
  .today { padding:16px; }
@@ -269,6 +272,7 @@ footer p { max-width:var(--measure); }
  body { background:#fff; color:#000; }
  main { max-width:none; padding:0; }
  .skip-link { display:none; }
+ .masthead-status { position:static; }
  a { color:#000; text-decoration:underline; }
  .attention,.today { break-inside:avoid; }
  .disclosure { break-inside:avoid; }
@@ -306,8 +310,8 @@ def page_shell(header_html: str, status_html: str, panels_html: str) -> str:
       <p class="eyebrow">Your household ledger &middot; local and private</p>
       <h1>Grocery Flywheel</h1>
       {header_html}
-      {status_html}
     </header>
+    {status_html}
     <section id="household-review" tabindex="-1" class="grid" aria-label="Household review">
 {panels_html}
     </section>

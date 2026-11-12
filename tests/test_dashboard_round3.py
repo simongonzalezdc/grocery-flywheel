@@ -110,7 +110,8 @@ def test_substitution_rows_without_a_dietary_field_are_not_evaluated():
     for row in a['substitutions']:
         assert 'dietary_status' not in row
     assert 'Not evaluated' in visible(markup)
-    assert 'it is not a clearance' in visible(markup)
+    assert 'not a clearance' in visible(markup)
+    assert "candidate's own engine state" in visible(markup)
 
 
 def test_safe_requires_current_evidence_and_a_dietary_evaluation():
@@ -205,7 +206,7 @@ def test_ledger_has_five_columns_and_captions_stay_outside_tables():
     assert ledger.count('<th>') == 5
     assert '<caption' not in markup
     assert "<p class='table-caption'>" in ledger
-    assert 'All 13 items share the same dietary result (Warning)' in visible(markup)
+    assert 'All 13 items share the same dietary display (Warning)' in visible(markup)
 
 
 def test_disclosure_layer_is_styled_and_span_classes_are_not_inert():

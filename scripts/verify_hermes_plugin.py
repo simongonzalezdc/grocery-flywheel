@@ -7,6 +7,7 @@ Every report assertion is an observed check, not an acceptance waiver.
 from __future__ import annotations
 import argparse
 import hashlib
+import html
 import json
 import os
 from pathlib import Path
@@ -212,6 +213,29 @@ def run(bundle, scratch, offline):
                     "non-cleared action carries its dietary qualifier")
     require("Dietary evidence &middot; blocked" in mixed_html,
             "mixed fixture names its severity in text")
+    # The draft is what the household reads after clicking download; it must
+    # carry the same rows, the same holds and the same qualifiers as the page.
+    plan_attr = re.search(r"data-plan='([^']*)'", mixed_html)
+    assert plan_attr is not None, "mixed dashboard embeds its draft payload"
+    check(True, "mixed dashboard embeds its draft payload")
+    draft = json.loads(html.unescape(plan_attr.group(1)))
+    action_list = draft["presentation"]["action_list"]
+    require(len(action_list) == 5, "draft action list mirrors the five rendered rows")
+    held = [row for row in action_list if row["held"]]
+    require(len(held) == 1 and held[0]["item"] == "Homestyle waffles"
+            and held[0]["cleared"] is False and "peanut" in held[0]["qualifier"],
+            "draft holds the peanut-blocked waffles with its reason")
+    pizza = next(row for row in action_list if row["item"] == "Rising crust pizza")
+    require(pizza["cleared"] is False and pizza["display_action"] == "Hold restock"
+            and pizza["qualifier"],
+            "draft never restocks a non-cleared item")
+    context_names = [row["item"] for row in draft["presentation"]["dietary_context"]["items"]]
+    require(all(row["item"] in context_names for row in action_list),
+            "draft dietary context covers every action row")
+    require("rotate into a meal" not in mixed_html,
+            "no uncleared easy-food rotation copy")
+    require("13 dietary evaluations" in mixed_html,
+            "evidence drawer counts every evaluation")
     long_html = (scratch / "long-dashboard.html").read_text()
     require("Read the note (2520 characters)" in long_html, "long note is disclosed, not clipped")
     require(all("<colgroup>" in table for table in long_html.split("<table>")[1:]),
