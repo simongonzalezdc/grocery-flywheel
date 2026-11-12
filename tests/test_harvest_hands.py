@@ -45,8 +45,8 @@ def test_every_panel_renders_for_both_state_families():
         html = render_dashboard(analysis)
         assert html.startswith("<!doctype html>")
         assert html.count("class='panel") + html.count('class="panel') >= 10
-    # dark command-center theme present
-    assert "color-scheme: dark" in render_dashboard(analyze_state(_legacy()))
+    # Warm pantry-ledger A intentionally supersedes the original dark shell.
+    assert "color-scheme: light" in render_dashboard(analyze_state(_legacy()))
 
 
 def test_approval_boundary_is_structural():
@@ -71,9 +71,10 @@ def test_correction_capture_only_renders_under_consent():
 
 def test_evidence_drawer_only_for_items_with_evidence():
     canonical_html = render_dashboard(analyze_state(_canonical()))
-    assert "<details>" in canonical_html
+    assert "<details><summary>Ingredient label ·" in canonical_html
     legacy_html = render_dashboard(analyze_state(_legacy()))
-    assert legacy_html.count("<details>") == 0
+    assert "No label evidence" in legacy_html
+    assert "<details><summary>Ingredient label ·" not in legacy_html
 
 
 def test_pulses_tolerate_note_field():
@@ -85,9 +86,15 @@ def test_pulses_tolerate_note_field():
 
 def test_first_wow_cards_render():
     html = render_dashboard(analyze_state(_canonical()))
-    assert "First Look" in html
-    assert "Best Sourcing Move" in html
-    assert "Potential Unit Savings" in html
+    assert "Savings and sourcing" in html
+    assert "Sourcing candidates" in html
+    # No absolute candidate claim: the card states the real count (none here).
+    assert "One sourcing candidate" not in html
+    assert "None recorded" in html
+    assert "Recorded savings" in html
+    # A zero sum is not dressed up as a saving, and not shown as a $0.00 claim.
+    assert "Potential Unit Savings" not in html
+    assert "No unit savings" not in html
 
 
 def test_mcp_plan_next_cart_asserts_boundary():

@@ -42,7 +42,7 @@ def test_substitution_prefers_better_fit_even_when_unit_price_is_tied():
     analysis = analyze_state(state)
 
     top = analysis["substitutions"][0]
-    assert top["candidate"] == "Tyson grilled strips"
+    assert top["candidate"] == "Store-brand grilled strips"
     assert top["fit"] == "better"
 
 

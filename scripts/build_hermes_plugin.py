@@ -26,6 +26,10 @@ def build(output):
     (target / "examples").mkdir(exist_ok=True)
     shutil.copyfile(ROOT / "examples/sample_state.json", target / "examples/sample_state.json")
     shutil.copyfile(ROOT / "LICENSE", target / "LICENSE")
+    stray = [str(p.relative_to(target)) for p in target.rglob("*")
+             if p.is_file() and ("__pycache__" in p.parts or p.suffix == ".pyc")]
+    if stray:
+        raise SystemExit("bundle would ship cache files: " + ", ".join(stray[:5]))
     hashes = {str(p.relative_to(engine)): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in sorted(engine.rglob("*")) if p.is_file()}
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
