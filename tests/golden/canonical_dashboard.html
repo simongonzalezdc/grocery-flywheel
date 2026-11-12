@@ -8,7 +8,7 @@
 :root {
   color-scheme: light;
   --bg:#F6F1E7; --panel:#FFFDF8; --panel-2:#EFE8DA;
-  --edge:#D8CCB6; --ink:#241F19; --muted:#5A5145; --faint:#8A7F6E;
+  --edge:#D8CCB6; --edge-strong:#8A7F6E; --ink:#241F19; --muted:#5A5145; --faint:#8A7F6E;
   --copper:#A2512A; --copper-deep:#8A4222; --sage:#3F6B45;
   --ochre:#8A5B12; --brick:#A32D22;
   --display:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,"Times New Roman","Liberation Serif",serif;
@@ -29,9 +29,17 @@ body { margin:0; background:var(--bg); color:var(--ink);
 main { max-width:74rem; margin:auto; padding:32px 24px 80px; }
 header.masthead { border-bottom:2px solid var(--ink); padding-bottom:24px; margin-bottom:40px; }
 h1,h2,h3,p { margin:0 0 12px; }
-h1 { font-family:var(--display); font-size:var(--step-3); line-height:1.05; font-weight:600; }
-h3 { font-family:var(--display); font-size:var(--step-2); line-height:1.2; font-weight:600; }
+h1 { font-family:var(--display); font-size:var(--step-3); line-height:1.05; font-weight:600;
+  text-wrap:balance; }
+h3 { font-family:var(--display); font-size:var(--step-2); line-height:1.2; font-weight:600;
+  text-wrap:balance; }
 p { max-width:var(--measure); }
+.muted { color:var(--muted); }
+.cell-sub, .mark-detail { display:block; font-weight:400; font-size:var(--step--1);
+  color:var(--muted); }
+.stat-label { font-family:var(--body); font-size:var(--step--1); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 4px; font-weight:600; }
+.stat-note { font-size:var(--step--1); margin:6px 0 0; }
 .eyebrow { text-transform:uppercase; letter-spacing:.15em; font-size:var(--step--1);
   color:var(--muted); margin-bottom:8px; }
 .masthead-meta { display:flex; flex-wrap:wrap; gap:6px 24px; font-size:var(--step--1);
@@ -49,10 +57,11 @@ p { max-width:var(--measure); }
   border:1px solid var(--edge); border-left:5px solid var(--edge);
   background:var(--panel); max-width:none; }
 .masthead-status.alert { border-left-color:var(--brick); color:var(--brick); }
+.masthead-status.warn { border-left-color:var(--ochre); color:var(--ochre); }
 .masthead-status.clear { border-left-color:var(--sage); color:var(--sage); }
 .masthead-status .status-note { font-weight:400; color:var(--muted); }
 .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:40px 40px; }
-.panel { min-width:0; background:transparent; border:0; padding:0; overflow-wrap:anywhere; }
+.panel { min-width:0; background:transparent; border:0; padding:0; overflow-wrap:break-word; word-break:normal; }
 .span-4 { grid-column:span 4; } .span-6 { grid-column:span 6; } .span-12 { grid-column:span 12; }
 .section-head { display:flex; align-items:baseline; justify-content:space-between;
   gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--edge);
@@ -77,9 +86,9 @@ p { max-width:var(--measure); }
   gap:24px; align-items:start; }
 .today { background:var(--panel); border:1px solid var(--edge);
   border-top:5px solid var(--ink); padding:24px; }
-.card-headline { font-family:var(--display); font-size:var(--step-3); line-height:1.12;
-  font-weight:600; margin-bottom:12px; max-width:none; }
-.lede { font-size:var(--step-1); line-height:1.45; max-width:56ch; }
+.card-headline { font-family:var(--display); font-size:var(--step-2); line-height:1.15;
+  font-weight:600; margin-bottom:12px; max-width:none; text-wrap:balance; }
+.lede { font-size:var(--step-1); line-height:1.45; max-width:56ch; text-wrap:balance; }
 .action-list { list-style:none; margin:20px 0 0; padding:0; }
 .action-list li { display:grid; grid-template-columns:2.5rem 1fr minmax(9rem,auto);
   gap:12px; align-items:baseline; padding:12px 0; border-top:1px solid var(--edge); }
@@ -106,7 +115,7 @@ p { max-width:var(--measure); }
 .legend-item { display:inline-flex; align-items:center; gap:.45em; }
 .legend-swatch { width:.85rem; height:.85rem; border-radius:2px; flex:none; }
 .legend-swatch.filled { background:var(--ink); }
-.legend-swatch.outline { background:transparent; border:1px solid var(--edge); }
+.legend-swatch.outline { background:transparent; border:1px solid var(--edge-strong); }
 .legend-swatch.marker { width:3px; height:1rem; border-radius:1px; background:var(--copper); }
 .ruler-caption { display:flex; flex-wrap:wrap; gap:4px 24px; font-size:var(--step--1);
   color:var(--muted); margin-top:12px; }
@@ -122,15 +131,15 @@ p { max-width:var(--measure); }
 .tag.critical { border-color:var(--brick); color:var(--brick); }
 .tag.review { border-color:var(--ochre); color:var(--ochre); }
 .tag.ok { border-color:var(--sage); color:var(--sage); }
-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:var(--step-0); }
+table { width:100%; border-collapse:collapse; font-size:var(--step-0); }
 th,td { border-bottom:1px solid var(--edge); padding:12px 8px; text-align:left;
-  vertical-align:top; overflow-wrap:anywhere; }
+  vertical-align:top; overflow-wrap:break-word; word-break:normal; hyphens:none; }
 th { color:var(--muted); font-size:var(--step--1); font-weight:600; }
-caption { display:block; width:100%; text-align:left; font-size:var(--step--1);
-  color:var(--muted); padding-bottom:8px; }
-caption b { color:var(--ink); font-weight:600; }
-.bar { display:block; height:8px; background:#E3D9C6; border-radius:2px; overflow:hidden;
-  min-width:3rem; }
+.table-caption { font-size:var(--step--1); color:var(--muted); padding:0 0 8px;
+  max-width:var(--measure); }
+.table-caption b { color:var(--ink); font-weight:600; }
+.bar { display:block; height:8px; background:#E3D9C6; border:1px solid var(--edge-strong);
+  border-radius:2px; overflow:hidden; min-width:3rem; box-sizing:border-box; }
 .bar > span { display:block; height:100%; background:var(--copper); }
 .bar.hot > span { background:var(--brick); }
 .reconcile { font-size:var(--step--1); color:var(--muted);
@@ -149,30 +158,61 @@ details { margin:10px 0; min-width:0; }
 summary { cursor:pointer; padding:12px 0; min-height:44px; color:var(--muted); }
 details.evidence > summary { color:var(--copper); font-weight:600; }
 .disclosure { grid-column:span 12; border-top:1px solid var(--edge); }
-.disclosure > summary { font-size:var(--step-1); color:var(--ink); }
-.disclosure .panel { border-top:0; }
+.disclosure > summary { font-size:var(--step-1); color:var(--ink); font-weight:600; }
+.disclosure h2 { font-family:var(--body); font-size:var(--step--1); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 12px; }
+.disclosure-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(22rem,100%),1fr));
+  gap:24px 40px; padding:4px 0 24px; }
+.disclosure-grid .panel { grid-column:auto; }
 .detail-body { padding:8px 0 16px; }
+.state-legend { display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+  gap:8px 24px; margin:16px 0 0; padding:12px 0 0; border-top:1px solid var(--edge); }
+.state-legend div { margin:0; }
+.state-legend dt { margin:0; }
+.state-legend dd { margin:2px 0 0; font-size:var(--step--1); color:var(--muted); }
+.basis-note { border-left:3px solid var(--edge-strong); padding:8px 12px; margin:0 0 16px;
+  font-size:var(--step--1); color:var(--muted); max-width:var(--measure); }
+.basis-note b { color:var(--ink); }
+.tier-note { font-size:var(--step--1); color:var(--ink); margin:8px 0 0; }
+.action-diet { display:block; font-size:var(--step--1); color:var(--muted); margin-top:4px; }
 footer { margin-top:56px; border-top:2px solid var(--ink); padding-top:24px;
   color:var(--muted); font-size:var(--step--1); }
 footer p { max-width:var(--measure); }
+@media (max-width:700px) {
+ table,tbody,tr,td { display:block; width:100%; }
+ thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+ tr { padding:12px 0; border-bottom:1px solid var(--edge); }
+ td { border:0; padding:2px 0; }
+ td::before { content:attr(data-label); display:block; color:var(--muted);
+  font-size:var(--step--1); letter-spacing:.04em; }
+ td:empty { display:none; }
+ td:first-child { font-weight:600; padding-top:6px; }
+ /* Dense ledger rows: label and value side by side instead of five stacked blocks. */
+ .ledger td { display:grid; grid-template-columns:6.5rem minmax(0,1fr); gap:0 10px; padding:5px 10px; }
+ .ledger td::before { margin:0; padding:0; }
+ .ledger td:first-child { padding-top:10px; }
+ .ledger td:last-child { padding-bottom:10px; }
+}
 @media (max-width:760px) {
  main { padding:24px 16px 48px; }
  .grid { gap:32px 0; }
  .span-4,.span-6 { grid-column:span 12; }
  .attention-body { grid-template-columns:1fr; gap:8px; }
  .attention,.today { padding:16px; }
- .action-list li { grid-template-columns:2.5rem 1fr; gap:8px; }
+ .action-list li { grid-template-columns:2.5rem 1fr; gap:8px; padding:10px 0; }
  .action-source { grid-column:2; text-align:left; }
+ .action-why { font-size:var(--step--1); }
  .card-row { grid-template-columns:1fr; gap:16px; }
- table,tbody,tr,td { display:block; width:100%; }
- thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
- tr { padding:10px 0; border-bottom:1px solid var(--edge); }
- td { border:0; padding:3px 0; }
- td::before { content:attr(data-label); display:block; color:var(--muted);
-  font-size:var(--step--1); }
- td:empty { display:none; }
- td:first-child { font-weight:600; padding-top:6px; }
  .runway-math div { min-width:8rem; }
+}
+@media print {
+ body { background:#fff; color:#000; }
+ main { max-width:none; padding:0; }
+ .skip-link { display:none; }
+ a { color:#000; text-decoration:underline; }
+ .attention,.today { break-inside:avoid; }
+ .disclosure { break-inside:avoid; }
+ .disclosure > summary { color:#000; }
 }
 @media (prefers-reduced-motion:reduce) {
  *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
@@ -180,7 +220,7 @@ footer p { max-width:var(--measure); }
 </style>
 </head>
 <body>
-  <a class="skip-link" href="#dashboard">Skip to household review</a>
+  <a class="skip-link" href="#household-review">Skip to household review</a>
   <main id="dashboard" tabindex="-1">
     <header class="masthead">
       <p class="eyebrow">Your household ledger &middot; local and private</p>
@@ -188,33 +228,37 @@ footer p { max-width:var(--measure); }
       <div class="masthead-meta"><span>Home groceries via Retailer history import</span><span>Order <b>Example Grocery</b>, 20 May 2026</span><span>Order total <b>$65.75</b></span><span>As of <b>26 May 2026</b></span><span>6 days observed</span></div>
       <p class='masthead-status alert'>1 of 6 items are blocked by your household dietary restrictions. <span class='status-note'>See Needs attention today.</span></p>
     </header>
-    <section class="grid" aria-label="Household review">
-<article class='panel span-12 attention'><div class='section-head'><h2 class='section-label'>Needs attention today</h2><span class='section-note'>Dietary evidence</span></div><div class='attention-body'><div class='attention-figure'>6/6<small>items unverified</small></div><div><h3>1 item is blocked by your household dietary restrictions.</h3><p>4 of 6 items have no current ingredient, allergen, or certification evidence on file.</p><p>The engine clears an item only when current label evidence rules the restriction out; a warning is not a clearance.</p><p class='attention-caveat'>Profile: Household default. Restriction: Peanut allergy (safety tier: Critical; behaviour: Block); Vegan (safety tier: Lifestyle; behaviour: Warn). Missing evidence is a data gap, not proof of a safety failure — but it means this dashboard cannot tell you anything is safe.</p></div></div><details class='evidence'><summary>See the evidence — 12 dietary evaluations</summary><div class='detail-body'><table><caption>Every evaluation the engine produced for this household profile.</caption><thead><tr><th>Item</th><th>Result</th><th>Evidence</th><th>Reason</th></tr></thead><tbody><tr><td data-label="Item">Peanut granola bars</td><td data-raw-result='blocked' data-label="Result">Blocked</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Evidence matched: peanut.</td></tr><tr><td data-label="Item">Cafe Bustelo bricks</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Calrose rice</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Dish soap</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Mystery frozen meal</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Cafe Bustelo bricks</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Calrose rice</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Evidence matched: milk.</td></tr><tr><td data-label="Item">Dish soap</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Mystery frozen meal</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Peanut granola bars</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-raw-result='safe' data-label="Result">Cleared</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Current product evidence did not match the safety-critical restriction.</td></tr></tbody></table></div></details></article>
+    <section id="household-review" tabindex="-1" class="grid" aria-label="Household review">
+<article class='panel span-12 attention'><div class='section-head'><h2 class='section-label'>Needs attention today</h2><span class='section-note'>Dietary evidence</span></div><div class='attention-body'><div class='attention-figure'>6/6<small>items blocked or unverified</small></div><div><h3>1 item is blocked by your household dietary restrictions.</h3><p>4 of 6 items have no current ingredient, allergen, or certification evidence on file.</p><p>The engine clears an item only when current label evidence rules the restriction out; a warning is not a clearance.</p><p class='tier-note'>Restriction: Peanut allergy (safety tier: Critical; behaviour: Block); Vegan (safety tier: Lifestyle; behaviour: Warn). The engine flags every item it cannot clear; a warning is never a safety verdict.</p></div></div><p class='attention-caveat'>Profile: Household default. <b>Missing evidence is a data gap, not proof of a safety failure.</b> But it means this dashboard cannot tell you anything is safe.</p><dl class='state-legend'><div><dt><span class='mark missing'>Blocked</span></dt><dd>The engine&#x27;s evidence contradicts this household restriction.</dd></div><div><dt><span class='mark missing'>Needs review</span></dt><dd>Evidence is missing, stale, ambiguous or unrecognised; a person must check it.</dd></div><div><dt><span class='mark warn'>Warning</span></dt><dd>A warn-tier restriction, or evidence that does not settle the question. Never a clearance.</dd></div><div><dt><span class='mark ok'>Cleared</span></dt><dd>Current label evidence rules this restriction out.</dd></div><div><dt><span class='mark neutral'>Not evaluated</span></dt><dd>No evaluation exists for this item. Treated as unverified.</dd></div></dl><details class='evidence'><summary>See the evidence — 12 dietary evaluations</summary><div class='detail-body'><p class='table-caption'>Every evaluation the engine produced for this household profile.</p><table><thead><tr><th>Item</th><th>Result</th><th>Evidence</th><th>Reason</th></tr></thead><tbody><tr><td data-label="Item">Peanut granola bars</td><td data-raw-result='blocked' data-label="Result">Blocked</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Evidence matched: peanut.</td></tr><tr><td data-label="Item">Cafe Bustelo bricks</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Calrose rice</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Dish soap</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Mystery frozen meal</td><td data-raw-result='needs_review' data-label="Result">Needs review</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Safety-critical restriction needs ingredient, allergen, or certification evidence with type, source, and checked date.</td></tr><tr><td data-label="Item">Cafe Bustelo bricks</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Calrose rice</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Evidence matched: milk.</td></tr><tr><td data-label="Item">Dish soap</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Mystery frozen meal</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='missing' data-label="Evidence">No label evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Peanut granola bars</td><td data-raw-result='warn' data-label="Result">Warning</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Lifestyle restriction defaults to review unless the user config says block.</td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-raw-result='safe' data-label="Result">Cleared</td><td data-raw-evidence='current' data-label="Evidence">Current evidence</td><td data-label="Reason">Current product evidence did not match the safety-critical restriction.</td></tr></tbody></table></div></details></article>
 <article class='panel span-12 today'><div class='section-head'><h2 class='section-label'>Today &middot; one thing</h2><span class='section-note'>0 items &middot; every one needs your approval</span></div><h3 class='card-headline'>No cart plan yet.</h3><p class='approve-note'>Everything needs your approval. No checkout surface exists.</p><p class='lede'>Add sourcing research or deplete an item, then render this page again.</p></article>
 <article class='panel span-12 runway'><div class='section-head'><h2 class='section-label'>What will run out</h2><span class='section-note'>Estimate from observed depletion, not a pantry audit</span></div><h3>Not enough depletion data for a runway estimate.</h3><p class='muted'>Depletion pulses are needed before this page can say how many days of cover are left.</p><div class='runway-math'><div><span class='math-label'>Observed depletion</span><span class='math-value'>$0.00</span><span class='math-label'>0.0% of order value observed consumed</span></div><div><span class='math-label'>Estimated runway</span><span class='math-value'>No estimate</span><span class='math-label'>Not enough depletion data yet.</span></div><div><span class='math-label'>Order total</span><span class='math-value'>$65.75</span><span class='math-label'>6 days since the order</span></div></div></article>
-<article class='panel span-12 ledger'><div class='section-head'><h2 class='section-label'>The ledger</h2><span class='section-note'>6 items &middot; $65.75 &middot; $0.00 consumed</span></div><table><caption>Every item the engine holds, with price status, dietary status and product evidence.</caption><thead><tr><th>Item</th><th>Role</th><th>Category</th><th>Spend</th><th>Consumed</th><th>Price</th><th>Dietary</th><th>Product evidence</th></tr></thead><tbody><tr><td data-label="Item">Cafe Bustelo bricks</td><td data-role='coffee' data-label="Role">Coffee</td><td data-label="Category">Coffee</td><td data-label="Spend">$13.84</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Dish soap</td><td data-role='critical_household_essential' data-label="Role">Household essential</td><td data-label="Category">Cleaning supply</td><td data-label="Spend">$4.99</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Calrose rice</td><td data-role='pantry_base' data-label="Role">Pantry base</td><td data-label="Category">Dry good</td><td data-label="Spend">$19.80</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item">Chocolate protein milk</td><td data-role='drink' data-label="Role">Drink</td><td data-label="Category">Ready drink</td><td data-label="Spend">$6.49</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span></td><td data-label="Product evidence"><details><summary>Ingredient label · example package · 26 May 2026</summary><p class='muted'>milk, cocoa, contains milk</p></details></td></tr><tr><td data-label="Item">Peanut granola bars</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Category">Snack</td><td data-label="Spend">$4.50</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='blocked'>Blocked</span></td><td data-label="Product evidence"><details><summary>Allergen statement · example package · 26 May 2026</summary><p class='muted'>oats, peanut butter, contains peanuts</p></details></td></tr><tr><td data-label="Item">Mystery frozen meal</td><td data-role='bridge_food' data-label="Role">Bridge food</td><td data-label="Category">Frozen meal</td><td data-label="Spend">$4.25</td><td data-label="Consumed">0%</td><td data-label="Price"><span class='mark neutral'>No price record</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr></tbody></table><p class='reconcile'>Order total <b>$65.75</b>; the 6 items tracked above account for <b>$53.87</b>. <b>$11.88</b> of the order total is not attributed to any tracked item, so totals and runway are estimates, not a reconciliation.</p></article>
-<details class='disclosure'><summary>Savings and sourcing overview</summary>
-      <article class="panel span-12 wow">
-        <h2>First Look</h2>
+<article class='panel span-12 ledger'><div class='section-head'><h2 class='section-label'>The ledger</h2><span class='section-note'>6 items &middot; $65.75 &middot; $0.00 consumed</span></div><p class='table-caption'>Every item the engine holds, with price state, dietary state and product evidence.</p><table><thead><tr><th>Item</th><th>Spend</th><th>Price</th><th>Dietary</th><th>Product evidence</th></tr></thead><tbody><tr><td data-label="Item"><span class='ledger-item'>Cafe Bustelo bricks</span><span class='cell-sub'>Coffee &middot; Coffee</span></td><td data-label="Spend">$13.84<span class='cell-sub'>0% consumed</span></td><td data-label="Price"><span class='mark warn' data-raw-price='priced'>Stale price on file</span><span class='mark-detail'>no check date</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span><span class='mark-detail'>No label evidence</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item"><span class='ledger-item'>Dish soap</span><span class='cell-sub'>Household essential &middot; Cleaning supply</span></td><td data-label="Spend">$4.99<span class='cell-sub'>0% consumed</span></td><td data-label="Price"><span class='mark warn' data-raw-price='priced'>Stale price on file</span><span class='mark-detail'>no check date</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span><span class='mark-detail'>No label evidence</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item"><span class='ledger-item'>Calrose rice</span><span class='cell-sub'>Pantry base &middot; Dry good</span></td><td data-label="Spend">$19.80<span class='cell-sub'>0% consumed</span></td><td data-label="Price"><span class='mark warn' data-raw-price='priced'>Stale price on file</span><span class='mark-detail'>no check date</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span><span class='mark-detail'>No label evidence</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr><tr><td data-label="Item"><span class='ledger-item'>Chocolate protein milk</span><span class='cell-sub'>Drink &middot; Ready drink</span></td><td data-label="Spend">$6.49<span class='cell-sub'>0% consumed</span></td><td data-label="Price"><span class='mark warn' data-raw-price='priced'>Stale price on file</span><span class='mark-detail'>no check date</span></td><td data-label="Dietary"><span class='mark warn' data-raw-status='warn'>Warning</span><span class='mark-detail'>Current evidence</span></td><td data-label="Product evidence"><details><summary>Ingredient label · example package · 26 May 2026</summary><p class='muted'>milk, cocoa, contains milk</p></details></td></tr><tr><td data-label="Item"><span class='ledger-item'>Peanut granola bars</span><span class='cell-sub'>Bridge food &middot; Snack</span></td><td data-label="Spend">$4.50<span class='cell-sub'>0% consumed</span></td><td data-label="Price"><span class='mark warn' data-raw-price='priced'>Stale price on file</span><span class='mark-detail'>no check date</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='blocked'>Blocked</span><span class='mark-detail'>Current evidence</span></td><td data-label="Product evidence"><details><summary>Allergen statement · example package · 26 May 2026</summary><p class='muted'>oats, peanut butter, contains peanuts</p></details></td></tr><tr><td data-label="Item"><span class='ledger-item'>Mystery frozen meal</span><span class='cell-sub'>Bridge food &middot; Frozen meal</span></td><td data-label="Spend">$4.25<span class='cell-sub'>0% consumed</span></td><td data-label="Price"><span class='mark warn' data-raw-price='priced'>Stale price on file</span><span class='mark-detail'>no check date</span></td><td data-label="Dietary"><span class='mark missing' data-raw-status='needs_review'>Needs review</span><span class='mark-detail'>No label evidence</span></td><td data-label="Product evidence"><span class='mark neutral'>No label evidence</span></td></tr></tbody></table><p class='reconcile'>Order total <b>$65.75</b>; the 6 items tracked above account for <b>$53.87</b>. <b>$11.88</b> of the order total is not attributed to any tracked item, so totals and runway are estimates, not a reconciliation.</p></article>
+<details class='disclosure'><summary>Savings and sourcing overview</summary><div class='disclosure-grid'>
+      <article class="panel">
+        <h2>Savings and sourcing</h2>
         <div class="card-row">
-          <div><h2>Potential Unit Savings</h2><div class="metric">$0.00</div></div>
-          <div><h2>Best Sourcing Move</h2><div class="metric small">No sourcing move yet</div></div>
-          <div><h2>Runway</h2><div class="metric small">Not enough depletion data</div></div>
+          <div><h3 class="stat-label">Recorded unit savings</h3>
+            <div class="metric">None recorded</div>
+            <p class="muted stat-note">The engine&#x27;s sourcing rows record no per-unit saving to sum; this is not a $0.00 claim about the order.</p></div>
+          <div><h3 class="stat-label">Best sourcing move</h3>
+            <div class="metric small">No sourcing move yet</div></div>
+          <div><h3 class="stat-label">Runway</h3>
+            <div class="metric small">Not enough depletion data</div></div>
         </div>
         <p class="muted">Runway and sourcing baseline are ready</p>
-      </article></details>
-<details class='disclosure'><summary>Spending by household role</summary><article class='panel span-6'><h2>Role Summary</h2><table><thead><tr><th>Role</th><th>Spend</th><th>Consumed</th><th>Drawdown</th></tr></thead><tbody><tr><td data-label="Role">Bridge food</td><td data-label="Spend">$8.75</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
+      </article></div></details>
+<details class='disclosure'><summary>Spending by household role</summary><div class='disclosure-grid'><article class='panel span-6'><h2>Role Summary</h2><table><thead><tr><th>Role</th><th>Spend</th><th>Consumed</th><th>Drawdown</th></tr></thead><tbody><tr><td data-label="Role">Bridge food</td><td data-label="Spend">$8.75</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
 <tr><td data-label="Role">Coffee</td><td data-label="Spend">$13.84</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
 <tr><td data-label="Role">Household essential</td><td data-label="Spend">$4.99</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
 <tr><td data-label="Role">Drink</td><td data-label="Spend">$6.49</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr>
-<tr><td data-label="Role">Pantry base</td><td data-label="Spend">$19.80</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr></tbody></table></article></details>
-<details class='disclosure'><summary>Preference signals</summary><article class='panel span-6'><h2>Preference Signals</h2><p><strong>Wrong format:diced microwave chicken</strong><br>wrong_format<br><span class='muted'>Avoid the same form factor; preserve the broader protein/category need.</span></p></article></details>
-<details class='disclosure'><summary>Price freshness and uncertainty</summary><article class='panel span-12'><h2>Data Freshness</h2><p>0 priced recently, 6 unpriced or stale.</p><p><strong>Flagged items:</strong> Cafe Bustelo bricks (no check date, priced but stale), Dish soap (no check date, priced but stale), Calrose rice (no check date, priced but stale), Chocolate protein milk (no check date, priced but stale), Peanut granola bars (no check date, priced but stale), Mystery frozen meal (no check date, priced but stale)</p></article></details>
-<details class='disclosure'><summary>Trip overhead</summary><article class='panel span-6'><h2>Trip Overhead</h2><p class='muted'>No visits recorded yet. Use <code>capture-visit</code> to log a trip.</p></article></details>
-<details class='disclosure'><summary>Easy food rotation</summary><article class='panel span-6'><h2>Easy Food</h2><p class='muted'>No unopened top-ups in the easy-food window.</p></article></details>
-<details class='disclosure'><summary>Substitution comparisons</summary><article class='panel span-6'><h2>Substitutions</h2><p class='muted'>No substitution candidates yet.</p></article></details>
-<details class='disclosure'><summary>Sourcing research</summary><article class='panel span-6'><h2>Sourcing Research</h2><p class='muted'>No sourcing research yet.</p></article></details>
-<details class='disclosure'><summary>Download-only correction capture</summary>
+<tr><td data-label="Role">Pantry base</td><td data-label="Spend">$19.80</td><td data-label="Consumed">$0.00</td><td data-label="Drawdown"><span class='bar' role='img' aria-label='0% consumed'><span style='width:0%'></span></span></td></tr></tbody></table></article></div></details>
+<details class='disclosure'><summary>Preference signals</summary><div class='disclosure-grid'><article class='panel span-6'><h2>Preference Signals</h2><p><strong>Wrong format:diced microwave chicken</strong><br>wrong_format<br><span class='muted'>Avoid the same form factor; preserve the broader protein/category need.</span></p></article></div></details>
+<details class='disclosure'><summary>Price freshness and uncertainty</summary><div class='disclosure-grid'><article class='panel span-12'><h2>Data Freshness</h2><p><b>0</b> priced recently, <b>6</b> stale or unpriced.</p><p><strong>Flagged items:</strong> Cafe Bustelo bricks — Stale price on file (no check date), Dish soap — Stale price on file (no check date), Calrose rice — Stale price on file (no check date), Chocolate protein milk — Stale price on file (no check date), Peanut granola bars — Stale price on file (no check date), Mystery frozen meal — Stale price on file (no check date)</p><p class='muted'>One price vocabulary across this page: Priced, Stale price on file, No price captured, Estimated price, Gift.</p></article></div></details>
+<details class='disclosure'><summary>Trip overhead</summary><div class='disclosure-grid'><article class='panel span-6'><h2>Trip Overhead</h2><p class='muted'>No visits recorded yet. Use <code>capture-visit</code> to log a trip.</p></article></div></details>
+<details class='disclosure'><summary>Easy food rotation</summary><div class='disclosure-grid'><article class='panel span-6'><h2>Easy Food</h2><p class='muted'>No unopened top-ups in the easy-food window.</p></article></div></details>
+<details class='disclosure'><summary>Substitution comparisons</summary><div class='disclosure-grid'><article class='panel span-6'><h2>Substitutions</h2><p class='muted'>No substitution candidates yet.</p></article></div></details>
+<details class='disclosure'><summary>Sourcing research</summary><div class='disclosure-grid'><article class='panel span-6'><h2>Sourcing Research</h2><p class='muted'>No sourcing research yet.</p></article></div></details>
+<details class='disclosure'><summary>Download-only correction capture</summary><div class='disclosure-grid'>
       <article class="panel span-12" id="corrections">
         <h2>Correction Capture</h2>
         <p class="muted">Capture signals in this page only. Download JSONL to keep them; nothing is saved to household state or sent anywhere.</p>
@@ -238,8 +282,8 @@ footer p { max-width:var(--measure); }
             setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
           });
         </script>
-      </article></details>
-<details class='disclosure'><summary>Recent depletion pulses</summary><article class='panel span-12'><h2>Recent Pulses</h2><p class='muted'>No pulses yet.</p></article></details>
+      </article></div></details>
+<details class='disclosure'><summary>Recent depletion pulses</summary><div class='disclosure-grid'><article class='panel span-12'><h2>Recent Pulses</h2><p class='muted'>No pulses yet.</p></article></div></details>
     </section>
     <footer>
       <p><strong>About these numbers.</strong> Runway and totals are estimates from the
@@ -247,6 +291,8 @@ footer p { max-width:var(--measure); }
       prices. A dietary warning is not a clearance. No retailer connection. No
       checkout. Review every suggestion yourself. This page does not save approvals
       or changes to your household state.</p>
+      <p>Collapsed sections print as their titles only; open a section before printing
+      to include its detail.</p>
     </footer>
   </main>
 </body>

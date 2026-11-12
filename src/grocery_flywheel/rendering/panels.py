@@ -9,6 +9,15 @@ The order is the design decision from t_0abdce8f: the dietary verdict cannot
 be scrolled past, the action comes second, depletion third, and every other
 original panel stays reachable in a native disclosure. No engine semantics
 live here — only presentation of fields the engine already produced.
+
+Two display rules are load-bearing and fail closed:
+
+* A dietary result of ``safe`` is shown as Cleared only when an evaluation for
+  that item exists *and* its evidence status is current. A missing status, an
+  unknown status, or a ``safe`` field without current evidence renders
+  "Not evaluated" — never a success token.
+* Price state comes from the freshness record the page already computes, so
+  the ledger and the freshness panel speak one vocabulary.
 """
 
 from __future__ import annotations
@@ -51,9 +60,11 @@ EVIDENCE_LABELS = {
 }
 PRICE_LABELS = {
     "priced": "Priced",
-    "unpriced": "Unpriced",
-    "estimated": "Estimated",
+    "unpriced": "No price captured",
+    "estimated": "Estimated price",
+    "gift": "Gift — price optional",
 }
+SOURCE_LABELS = {"normal store": "your usual store"}
 SEVERITY = {"safe": 0, "warn": 1, "needs_review": 2, "blocked": 3}
 RESULT_CLASS = {"blocked": "missing", "needs_review": "missing", "warn": "warn", "safe": "ok"}
 
@@ -96,32 +107,72 @@ def _days(value: object) -> str:
     return str(int(number)) if number == int(number) else f"{number:g}"
 
 
+def _explicit_result(value: object) -> str:
+    raw = str(value or "").strip().lower()
+    return raw if raw in SEVERITY else ""
+
+
+def _verdict_rows(evaluations: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """One evaluation per item, keeping the most severe result (fail closed)."""
+    by_item: dict[str, dict[str, Any]] = {}
+    for row in evaluations:
+        name = str(row.get("item") or "")
+        result = _explicit_result(row.get("result"))
+        if not name or not result:
+            continue
+        current = by_item.get(name)
+        if current is None or SEVERITY[result] > SEVERITY[_explicit_result(current.get("result"))]:
+            by_item[name] = row
+    return by_item
+
+
 # --- attention ----------------------------------------------------------
-
-def _dietary_statuses(analysis: dict[str, Any]) -> list[str]:
-    """Per-item dietary severity, from the engine's own item statuses."""
-    return [str(item.get("dietary_status") or "safe") for item in analysis.get("items", [])]
-
 
 def _dietary_verdict(analysis: dict[str, Any]) -> dict[str, Any]:
     evaluations = analysis.get("dietary_evaluations") or []
     items = analysis.get("items") or []
     profiles = analysis.get("dietary_profiles") or []
-    counts = Counter(_dietary_statuses(analysis))
+    by_item = _verdict_rows(evaluations)
+    results = [_explicit_result(row.get("result")) for row in by_item.values()]
+    counts = Counter(results)
     total = len(items)
-    blocked, needs_review, warn = counts["blocked"], counts["needs_review"], counts["warn"]
-    open_items = blocked + needs_review + warn
-    current_items = {str(e.get("item")) for e in evaluations
-                     if e.get("evidence_status") == "current"}
-    evidence_counts = Counter(str(e.get("evidence_status") or "missing") for e in evaluations)
-    warn_only = bool(evaluations) and all(str(e.get("result")) == "warn" for e in evaluations)
+    cleared = sum(1 for row in by_item.values()
+                  if _explicit_result(row.get("result")) == "safe"
+                  and str(row.get("evidence_status") or "") == "current")
+    with_current = {name for name, row in by_item.items()
+                    if str(row.get("evidence_status") or "") == "current"}
+    evidence_counts = Counter(str(row.get("evidence_status") or "missing")
+                              for row in evaluations)
+    warn_only = bool(evaluations) and all(
+        _explicit_result(row.get("result")) == "warn" for row in evaluations)
     return {
         "evaluations": evaluations, "items": items, "profiles": profiles,
-        "total": total, "blocked": blocked, "needs_review": needs_review,
-        "warn": warn, "open": open_items, "cleared": counts["safe"],
-        "covered": len(items) - len(current_items), "uncovered": len(current_items),
+        "by_item": by_item,
+        "total": total, "blocked": counts["blocked"], "needs_review": counts["needs_review"],
+        "warn": counts["warn"], "open": total - cleared, "cleared": cleared,
+        "evidence_gap": total - len(with_current), "current_items": len(with_current),
         "evidence_counts": evidence_counts, "warn_only": warn_only,
     }
+
+
+def _state_legend() -> str:
+    entries = (
+        ("missing", "Blocked",
+         "The engine's evidence contradicts this household restriction."),
+        ("missing", "Needs review",
+         "Evidence is missing, stale, ambiguous or unrecognised; a person must check it."),
+        ("warn", "Warning",
+         "A warn-tier restriction, or evidence that does not settle the question. Never a clearance."),
+        ("ok", "Cleared",
+         "Current label evidence rules this restriction out."),
+        ("neutral", "Not evaluated",
+         "No evaluation exists for this item. Treated as unverified."),
+    )
+    body = "".join(
+        f"<div><dt><span class='mark {css}'>{escape(word)}</span></dt>"
+        f"<dd>{escape(meaning)}</dd></div>"
+        for css, word, meaning in entries)
+    return f"<dl class='state-legend'>{body}</dl>"
 
 
 def _dietary(a: dict[str, Any]) -> str:
@@ -159,17 +210,21 @@ def _dietary(a: dict[str, Any]) -> str:
                     "current dietary evidence.")
     else:
         headline = "No items to evaluate yet."
-    figure = (f"<div class='attention-figure'>{open_items}/{total}"
-              "<small>items unverified</small></div>" if open_items else
-              f"<div class='attention-figure' style='color:var(--sage)'>{verdict['cleared']}/{total}"
-              "<small>items cleared</small></div>")
+    if open_items:
+        caption = "items blocked or unverified" if verdict["blocked"] else "items unverified"
+        figure = (f"<div class='attention-figure'>{open_items}/{total}"
+                  f"<small>{caption}</small></div>")
+    else:
+        figure = (f"<div class='attention-figure' style='color:var(--sage)'>"
+                  f"{verdict['cleared']}/{total}<small>items cleared</small></div>")
 
-    evidence_summary = (
-        f"{verdict['covered']} of {total} {_plural(total, 'item has', 'items have')} no current "
-        "ingredient, allergen, or certification evidence on file."
-        if verdict["covered"] else
-        f"Every one of the {total} items carries current label evidence."
-    )
+    if verdict["evidence_gap"]:
+        evidence_summary = (
+            f"{verdict['evidence_gap']} of {total} {_plural(total, 'item has', 'items have')} no "
+            "current ingredient, allergen, or certification evidence on file."
+        )
+    else:
+        evidence_summary = f"Every one of the {total} items carries current label evidence."
     engine_note = (
         "This household's restriction is configured to warn, so the engine returns a "
         "warning for every item and clears none of them."
@@ -177,13 +232,15 @@ def _dietary(a: dict[str, Any]) -> str:
         "The engine clears an item only when current label evidence rules the "
         "restriction out; a warning is not a clearance."
     )
-    caveat = (f"Profile: {profiles}. Restriction: {escape(restriction_text)}. "
-              "Missing evidence is a data gap, not proof of a safety failure — but it "
-              "means this dashboard cannot tell you anything is safe.")
+    caveat = (f"Profile: {profiles}. <b>Missing evidence is a data gap, not proof of a "
+              "safety failure.</b> But it means this dashboard cannot tell you anything "
+              "is safe.")
+    tier_note = (f"Restriction: {escape(restriction_text)}. The engine flags every item it "
+                 "cannot clear; a warning is never a safety verdict.")
 
     rows = sorted(
         verdict["evaluations"],
-        key=lambda e: (-SEVERITY.get(str(e.get("result") or "safe"), 0),
+        key=lambda e: (-SEVERITY.get(_explicit_result(e.get("result")), 0),
                        str(e.get("item") or "")),
     )
     body = "".join(
@@ -200,8 +257,8 @@ def _dietary(a: dict[str, Any]) -> str:
         disclosure = (
             f"<details class='evidence'><summary>See the evidence — "
             f"{len(rows)} dietary {_plural(len(rows), 'evaluation')}</summary>"
-            "<div class='detail-body'><table><caption>Every evaluation the engine "
-            "produced for this household profile.</caption><thead><tr><th>Item</th>"
+            "<div class='detail-body'><p class='table-caption'>Every evaluation the engine "
+            "produced for this household profile.</p><table><thead><tr><th>Item</th>"
             "<th>Result</th><th>Evidence</th><th>Reason</th></tr></thead>"
             f"<tbody>{body}</tbody></table></div></details>")
 
@@ -209,8 +266,10 @@ def _dietary(a: dict[str, Any]) -> str:
             f"<div class='attention-body'>{figure}<div>"
             f"<h3>{escape(headline)}</h3><p>{escape(evidence_summary)}</p>"
             f"<p>{escape(engine_note)}</p>"
-            f"<p class='attention-caveat'>{escape(caveat)}</p>"
+            f"<p class='tier-note'>{tier_note}</p>"
             "</div></div>"
+            f"<p class='attention-caveat'>{caveat}</p>"
+            f"{_state_legend()}"
             f"{disclosure}</article>")
 
 
@@ -227,17 +286,72 @@ def _status_line(a: dict[str, Any]) -> str:
                 "dietary restrictions. <span class='status-note'>See Needs attention "
                 "today.</span></p>")
     if verdict["open"]:
-        cleared_note = (f"{verdict['cleared']} cleared, {verdict['open']} unverified. "
-                        if verdict["cleared"] else "Nothing here is cleared as safe. ")
-        return (f"<p class='masthead-status alert'>{verdict['open']}/{total} "
+        return (f"<p class='masthead-status warn'>{verdict['open']} of {total} "
                 f"{_plural(total, 'item is', 'items are')} unverified. "
-                f"<span class='status-note'>{cleared_note}See Needs attention today.</span></p>")
+                "<span class='status-note'>Dietary evidence needs attention before you "
+                "shop.</span></p>")
     return (f"<p class='masthead-status clear'>All {total} "
             f"{_plural(total, 'item is', 'items are')} cleared against current dietary "
             "evidence.</p>")
 
 
 # --- one action ---------------------------------------------------------
+
+def _source_label(value: object) -> str:
+    raw = str(value or "No source recorded")
+    return SOURCE_LABELS.get(raw.strip().lower(), raw)
+
+
+def _dietary_context(a: dict[str, Any]) -> dict[str, Any]:
+    """Existing dietary fields, copied for the downloadable draft."""
+    verdict = _dietary_verdict(a)
+    rows = []
+    for item in a.get("items") or []:
+        name = str(item.get("name") or "")
+        evaluation = verdict["by_item"].get(name)
+        result = _explicit_result((evaluation or {}).get("result"))
+        evidence = str((evaluation or {}).get("evidence_status") or "none")
+        cleared = result == "safe" and evidence == "current"
+        rows.append({
+            "item": name,
+            "result": result or "not_evaluated",
+            "cleared": cleared,
+            "evidence_status": evidence,
+            "reason": str((evaluation or {}).get("reason")
+                          or "No dietary evaluation on file."),
+        })
+    restrictions = [
+        {"value": restriction.get("value") or restriction.get("type"),
+         "safety_tier": restriction.get("safety_tier") or "preference",
+         "behavior": restriction.get("behavior") or "warn"}
+        for profile in a.get("dietary_profiles") or []
+        for restriction in profile.get("restrictions") or []
+    ]
+    return {
+        "items_total": verdict["total"],
+        "items_not_cleared": verdict["open"],
+        "items_cleared": verdict["cleared"],
+        "headline": ("No item has been cleared as safe for your household diet."
+                     if verdict["open"] else
+                     "Every item is cleared against current dietary evidence."
+                     if verdict["total"] else "No items to evaluate."),
+        "restrictions": restrictions,
+        "items": rows,
+        "note": ("Dietary state is copied from the engine. A warning or an absent "
+                 "evaluation is not a clearance."),
+    }
+
+
+def _draft_payload(a: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
+    draft = json.loads(json.dumps(plan))
+    draft["presentation"] = {
+        "schema": "grocery-flywheel.dashboard-draft/1",
+        "note": ("Download-only draft. Nothing is bought and nothing is written back "
+                 "to your state file."),
+        "dietary_context": _dietary_context(a),
+    }
+    return draft
+
 
 def _cart_plan(a: dict[str, Any]) -> str:
     plan = a.get("cart_plan") or {}
@@ -254,26 +368,35 @@ def _cart_plan(a: dict[str, Any]) -> str:
                 f"{note}<p class='lede'>Add sourcing research or deplete an item, then "
                 "render this page again.</p></article>")
 
+    verdict = _dietary_verdict(a)
+    items_by_name = {str(row.get("name")): row for row in a.get("items") or []}
     rows = []
     for index, item in enumerate(items, 1):
         reason = str(item.get("reason") or "").strip() or "No reason recorded by the engine."
-        source = str(item.get("source") or "No source recorded")
+        source = _source_label(item.get("source"))
         action = _label(ACTION_LABELS, item.get("action"))
+        name = str(item.get("item") or "")
+        row = items_by_name.get(name) or {}
+        evaluation = verdict["by_item"].get(name)
         rows.append(
             f"<li><span class='action-num'>{index:02d}</span>"
-            f"<span class='action-item'>{escape(str(item.get('item') or ''))}"
-            f"<span class='action-why'>{escape(reason)}</span></span>"
+            f"<span class='action-item'>{escape(name)}"
+            f"<span class='action-why'>{escape(reason)}</span>"
+            f"<span class='action-diet'><span class='eyebrow-inline'>Dietary</span> "
+            f"{_dietary_mark(row.get('dietary_status'), evaluation)}</span></span>"
             f"<span class='action-source'>{escape(action)}"
             f"<br>{escape(source)}</span></li>")
+    draft = _draft_payload(a, plan)
     export = ("<button class='primary' id='buy-list-download' type='button' data-plan='"
-              + escape(json.dumps(plan), quote=True) + "'>Download draft JSON</button>"
+              + escape(json.dumps(draft, sort_keys=True), quote=True) + "'>Download draft JSON</button>"
               "<script>document.getElementById('buy-list-download').addEventListener('click', function () {"
               "var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));"
               "var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';"
               "document.body.appendChild(link); link.click(); link.remove();"
               "setTimeout(function () { URL.revokeObjectURL(url); }, 1000);});</script>"
-              "<span class='section-note'>A .json file you can read or print. Nothing is "
-              "bought, and nothing is written back to your state file.</span>")
+              "<span class='section-note'>A .json file you can read or print, including the "
+              "dietary state above. Nothing is bought, and nothing is written back to your "
+              "state file.</span>")
 
     freshness = a.get("freshness") or {}
     stale = int(freshness.get("stale_count") or 0)
@@ -281,7 +404,7 @@ def _cart_plan(a: dict[str, Any]) -> str:
     price_note = (f"{stale} of {len(a.get('items') or [])} stale or unpriced"
                   if len(a.get("items") or []) else "no prices on file")
     if priced and not stale:
-        price_note = f"all {priced} priced"
+        price_note = f"all {priced} priced recently"
     approval = _label(APPROVAL_LABELS, (items[0] or {}).get("approval_state"))
     meta = (f"Mode <b>{escape(humanize_key(plan.get('mode') or 'pickup'))}</b> &middot; "
             f"approval required before anything is bought: <b>yes</b> &middot; "
@@ -323,7 +446,7 @@ def _ruler(a: dict[str, Any]) -> str:
         if index < filled:
             paint = "fill='var(--ink)' stroke='var(--ink)'"
         else:
-            paint = "fill='none' stroke='var(--edge)'"
+            paint = "fill='none' stroke='var(--edge-strong)'"
         rects.append(f"<rect x='{x}' y='10' width='{cell}' height='26' rx='2' "
                      f"{paint} stroke-width='1'/>")
     marker = filled * (cell + gap) - gap / 2
@@ -347,7 +470,7 @@ def _at_risk(a: dict[str, Any]) -> str:
     rows = [item for item in a.get("items") or []
             if float(item.get("consumed_fraction") or 0) >= 0.5]
     if not rows:
-        return ("<p class='muted'>No item has passed half of its observed life yet.</p>")
+        return "<p class='muted'>No item has passed half of its observed life yet.</p>"
     rows.sort(key=lambda item: float(item.get("consumed_fraction") or 0), reverse=True)
     body = "".join(
         f"<tr><td>{escape(str(item['name']))}</td>"
@@ -358,8 +481,8 @@ def _at_risk(a: dict[str, Any]) -> str:
         f"<td>{escape(str(item.get('notes') or 'No note recorded.'))}</td></tr>"
         for item in rows
     )
-    return ("<table><caption>Items at or past half their observed life.</caption>"
-            "<thead><tr><th>Item</th><th>Role</th><th>Consumed</th><th>Drawn down</th>"
+    return ("<p class='table-caption'>Items at or past half their observed life.</p>"
+            "<table><thead><tr><th>Item</th><th>Role</th><th>Consumed</th><th>Drawn down</th>"
             "<th>Spend</th><th>Note</th></tr></thead>"
             f"<tbody>{body}</tbody></table>")
 
@@ -399,6 +522,8 @@ def _runway(a: dict[str, Any]) -> str:
     elapsed = max(0.0, float(a.get("days_elapsed") or 0))
     total = elapsed + float(remaining) if remaining is not None else None
     order_total = float((a.get("order") or {}).get("total") or 0)
+    tracked = sum(float(item.get("spend") or 0) for item in a.get("items") or [])
+    unattributed = round(order_total - tracked, 2)
     consumed = float(a.get("consumed_value") or 0)
     share = (consumed / order_total * 100) if order_total else 0.0
     head = _section_head("What will run out",
@@ -409,6 +534,11 @@ def _runway(a: dict[str, Any]) -> str:
                 "<p class='muted'>Depletion pulses are needed before this page can say "
                 "how many days of cover are left.</p>"
                 f"{_runway_math(a)}</article>")
+    basis = (
+        "<p class='basis-note'><b>How this is estimated:</b> the full order total "
+        f"({_money(order_total)}), including {_money(unattributed)} not attributed to a "
+        f"tracked item, spread dollar-weighted over {_days(elapsed)} observed "
+        f"{_plural(int(elapsed) or 1, 'day')}. It is not a pantry audit.</p>")
     caption = (
         "<div class='ruler-caption'>"
         f"<span><b>{_days(elapsed)} days</b> observed since "
@@ -418,7 +548,7 @@ def _runway(a: dict[str, Any]) -> str:
         f"<span><b>{_money(consumed)}</b> of {_money(order_total)} seen consumed "
         f"({share:.0f}%)</span></div>")
     return (f"<article class='panel span-12 runway'>{head}"
-            f"{_ruler(a)}{caption}{_at_risk(a)}{_runway_math(a)}</article>")
+            f"{basis}{_ruler(a)}{caption}{_at_risk(a)}{_runway_math(a)}</article>")
 
 
 # --- ledger -------------------------------------------------------------
@@ -440,20 +570,70 @@ def _evidence_drawer(item: dict[str, Any]) -> str:
     return "".join(parts)
 
 
-def _dietary_mark(status: object) -> str:
-    raw = str(status or "safe")
-    css = RESULT_CLASS.get(raw, "neutral")
-    return (f"<span class='mark {css}' data-raw-status='{escape(raw)}'>"
-            f"{escape(_label(RESULT_LABELS, raw))}</span>")
-
-
-def _price_mark(status: object) -> str:
-    raw = str(status or "")
+def _dietary_mark(status: object, evaluation: dict[str, Any] | None = None) -> str:
+    """Fail-closed mark: Cleared needs an explicit safe result with current evidence."""
+    raw = _explicit_result(status)
+    evidence = str((evaluation or {}).get("evidence_status") or "").strip()
     if not raw:
-        return "<span class='mark neutral'>No price record</span>"
-    css = {"priced": "ok", "estimated": "warn"}.get(raw, "warn")
-    return (f"<span class='mark {css}' data-raw-price='{escape(raw)}'>"
-            f"{escape(_label(PRICE_LABELS, raw))}</span>")
+        return ("<span class='mark neutral' data-raw-status='not_evaluated'>Not evaluated</span>"
+                "<span class='mark-detail'>No dietary evaluation on file</span>")
+    if raw == "safe" and (evaluation is None or evidence != "current"):
+        detail = ("Current evidence missing" if evaluation is not None
+                  else "No dietary evaluation on file")
+        return ("<span class='mark neutral' data-raw-status='not_evaluated'>Not evaluated</span>"
+                f"<span class='mark-detail'>{escape(detail)}</span>")
+    css = RESULT_CLASS.get(raw, "neutral")
+    detail = _label(EVIDENCE_LABELS, evidence) if evaluation is not None and evidence else ""
+    detail_html = (f"<span class='mark-detail'>{escape(detail)}</span>" if detail else "")
+    return (f"<span class='mark {css}' data-raw-status='{escape(raw)}'>"
+            f"{escape(_label(RESULT_LABELS, raw))}</span>{detail_html}")
+
+
+def _price_label(status: str, stale: bool) -> tuple[str, str]:
+    if status == "unpriced":
+        return ("No price captured", "neutral")
+    if status == "estimated":
+        return ("Estimated price", "warn")
+    if status == "gift":
+        return ("Gift — price optional", "neutral")
+    if stale:
+        return ("Stale price on file", "warn")
+    return ("Priced", "ok")
+
+
+def _price_state(item: dict[str, Any], fresh: dict[str, Any] | None) -> tuple[str, str, str]:
+    """One price vocabulary for ledger, freshness panel and action list."""
+    if fresh:
+        status = str(fresh.get("pricing_status") or "priced")
+        stale = bool(fresh.get("pricing_stale"))
+        detail = str(fresh.get("age_label") or "")
+        if status == "unpriced":
+            detail = ""
+        elif status == "estimated":
+            detail = "low confidence"
+        elif status == "gift":
+            detail = ""
+    else:
+        status = str(item.get("pricing_status") or "").strip()
+        if not status:
+            return ("No price record", "neutral", "")
+        stale = False
+        detail = ""
+    label, css = _price_label(status, stale)
+    return (label, css, detail)
+
+
+def _price_mark(item: dict[str, Any], fresh: dict[str, Any] | None) -> str:
+    label, css, detail = _price_state(item, fresh)
+    detail_html = (f"<span class='mark-detail'>{escape(detail)}</span>" if detail else "")
+    raw = str((fresh or {}).get("pricing_status") or item.get("pricing_status") or "")
+    attr = f" data-raw-price='{escape(raw)}'" if raw else ""
+    return (f"<span class='mark {css}'{attr}>{escape(label)}</span>{detail_html}")
+
+
+def _freshness_map(a: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    rows = (a.get("freshness") or {}).get("items") or []
+    return {str(row.get("name") or ""): row for row in rows}
 
 
 def _items(a: dict[str, Any]) -> str:
@@ -471,15 +651,27 @@ def _items(a: dict[str, Any]) -> str:
     if not items:
         return (f"<article class='panel span-12 ledger'>{head}"
                 "<p class='muted'>No items in the ledger yet.</p></article>")
+    verdict = _dietary_verdict(a)
+    fresh = _freshness_map(a)
+    results = {_explicit_result((verdict["by_item"].get(str(item.get("name"))) or {})
+                                .get("result")) for item in items}
+    caption = ("Every item the engine holds, with price state, dietary state and "
+               "product evidence.")
+    if results == {""}:
+        caption += (" No item has a dietary evaluation on file; “Not evaluated” is "
+                    "not a clearance.")
+    elif len(results) == 1:
+        only = next(iter(results))
+        caption += (f" All {len(items)} items share the same dietary result "
+                    f"({_label(RESULT_LABELS, only)}); the attention panel explains why.")
     body = "".join(
-        f"<tr><td>{escape(str(item['name']))}</td>"
-        f"<td data-role='{escape(str(item.get('role') or ''))}'>"
-        f"{escape(_role(item.get('role')))}</td>"
-        f"<td>{escape(humanize_key(item.get('category') or ''))}</td>"
-        f"<td>{_money(item.get('spend'))}</td>"
-        f"<td>{float(item.get('consumed_fraction') or 0) * 100:.0f}%</td>"
-        f"<td>{_price_mark(item.get('pricing_status'))}</td>"
-        f"<td>{_dietary_mark(item.get('dietary_status'))}</td>"
+        f"<tr><td><span class='ledger-item'>{escape(str(item['name']))}</span>"
+        f"<span class='cell-sub'>{escape(_role(item.get('role')))} &middot; "
+        f"{escape(humanize_key(item.get('category') or ''))}</span></td>"
+        f"<td>{_money(item.get('spend'))}"
+        f"<span class='cell-sub'>{float(item.get('consumed_fraction') or 0) * 100:.0f}% consumed</span></td>"
+        f"<td>{_price_mark(item, fresh.get(str(item.get('name'))))}</td>"
+        f"<td>{_dietary_mark(item.get('dietary_status'), verdict['by_item'].get(str(item.get('name'))))}</td>"
         f"<td>{_evidence_drawer(item)}</td></tr>"
         for item in items
     )
@@ -489,9 +681,8 @@ def _items(a: dict[str, Any]) -> str:
         f"<b>{_money(unattributed)}</b> of the order total is not attributed to any "
         "tracked item, so totals and runway are estimates, not a reconciliation.</p>")
     return (f"<article class='panel span-12 ledger'>{head}"
-            "<table><caption>Every item the engine holds, with price status, dietary "
-            "status and product evidence.</caption><thead><tr><th>Item</th><th>Role</th>"
-            "<th>Category</th><th>Spend</th><th>Consumed</th><th>Price</th>"
+            f"<p class='table-caption'>{escape(caption)}</p>"
+            "<table><thead><tr><th>Item</th><th>Spend</th><th>Price</th>"
             "<th>Dietary</th><th>Product evidence</th></tr></thead>"
             f"<tbody>{body}</tbody></table>{reconcile}</article>")
 
@@ -501,13 +692,25 @@ def _items(a: dict[str, Any]) -> str:
 def _first_wow(a: dict[str, Any]) -> str:
     wow = a.get("first_wow") or {}
     savings = float(wow.get("estimated_unit_savings", 0) or 0)
+    if savings > 0:
+        savings_value = _money(savings)
+        savings_note = ("Sum of the per-unit savings in the engine's sourcing and "
+                        "substitution rows.")
+    else:
+        savings_value = "None recorded"
+        savings_note = ("The engine's sourcing rows record no per-unit saving to sum; "
+                        "this is not a $0.00 claim about the order.")
     return f"""
-      <article class="panel span-12 wow">
-        <h2>First Look</h2>
+      <article class="panel">
+        <h2>Savings and sourcing</h2>
         <div class="card-row">
-          <div><h2>Potential Unit Savings</h2><div class="metric">{_money(savings)}</div></div>
-          <div><h2>Best Sourcing Move</h2><div class="metric small">{escape(str(wow.get('best_sourcing_move', '—')))}</div></div>
-          <div><h2>Runway</h2><div class="metric small">{escape(_runway_text(a))}</div></div>
+          <div><h3 class="stat-label">Recorded unit savings</h3>
+            <div class="metric">{escape(savings_value)}</div>
+            <p class="muted stat-note">{escape(savings_note)}</p></div>
+          <div><h3 class="stat-label">Best sourcing move</h3>
+            <div class="metric small">{escape(str(wow.get('best_sourcing_move', '—')))}</div></div>
+          <div><h3 class="stat-label">Runway</h3>
+            <div class="metric small">{escape(_runway_text(a))}</div></div>
         </div>
         <p class="muted">{escape(str(wow.get('headline', '')))}</p>
       </article>"""
@@ -556,18 +759,27 @@ def _easy_food(a: dict[str, Any]) -> str:
 def _freshness(a: dict[str, Any]) -> str:
     summary = a.get("freshness")
     if not summary:
-        return "<article class='panel span-12'><h2>Data Freshness</h2><p class='muted'>No freshness data.</p></article>"
-    parts = [f"<p>{summary.get('fresh_count', 0)} priced recently, "
-             f"{summary.get('stale_count', 0)} unpriced or stale.</p>"]
-    flagged = [f"{escape(r['name'])} ({escape(r['age_label'])}, {escape(r['reason'])})"
-               for r in summary.get("items", []) if r["pricing_stale"]]
+        return ("<article class='panel span-12'><h2>Data Freshness</h2>"
+                "<p class='muted'>No freshness data.</p></article>")
+    parts = [f"<p><b>{summary.get('fresh_count', 0)}</b> priced recently, "
+             f"<b>{summary.get('stale_count', 0)}</b> stale or unpriced.</p>"]
+    flagged = []
+    for row in summary.get("items", []):
+        if not row.get("pricing_stale"):
+            continue
+        label, _css = _price_label(str(row.get("pricing_status") or "priced"), True)
+        flagged.append(f"{escape(row['name'])} — {escape(label)} "
+                       f"({escape(row['age_label'])})")
     if flagged:
         parts.append("<p><strong>Flagged items:</strong> " + ", ".join(flagged) + "</p>")
     stale_sourcing = [f"{escape(r['item'])} ({escape(r['age_label'])})"
                       for r in summary.get("stale_sourcing", [])]
     if stale_sourcing:
         parts.append("<p><strong>Stale sourcing research:</strong> " + ", ".join(stale_sourcing) + "</p>")
-    return "<article class='panel span-12'><h2>Data Freshness</h2>" + "".join(parts) + "</article>"
+    parts.append("<p class='muted'>One price vocabulary across this page: Priced, "
+                 "Stale price on file, No price captured, Estimated price, Gift.</p>")
+    return ("<article class='panel span-12'><h2>Data Freshness</h2>"
+            + "".join(parts) + "</article>")
 
 
 def _trips(a: dict[str, Any]) -> str:
@@ -584,8 +796,8 @@ def _trips(a: dict[str, Any]) -> str:
         items = ", ".join(
             f"{escape(humanize_key(t))}: {by_type[t]} ({by_type_min.get(t, 0)} min)"
             for t in sorted(by_type))
-        lines.append(f"<p class='muted'>By type — <span data-visit-types=\""
-                     f"{escape(', '.join(sorted(by_type)))}\">{items}</span>.</p>")
+        lines.append("<p class='muted'>By type — <span data-visit-types='"
+                     f"{escape(', '.join(sorted(by_type)))}'>{items}</span>.</p>")
     amortized = summary.get("amortized_cost_total", 0.0)
     lines.append(
         f"<p>Amortized time cost: <strong>{_money(amortized)}</strong></p>" if amortized
@@ -608,6 +820,9 @@ def _substitutions(a: dict[str, Any]) -> str:
         for r in rows
     )
     return ("<article class='panel span-6'><h2>Substitutions</h2>"
+            "<p class='table-caption'>Candidate substitutes from your state. "
+            "“Not evaluated” means no dietary evaluation exists for the candidate; "
+            "it is not a clearance.</p>"
             "<table><thead><tr><th>Candidate</th><th>Replaces</th><th>Unit</th><th>Fit</th>"
             "<th>Dietary</th><th>Read</th></tr></thead>"
             f"<tbody>{body}</tbody></table></article>")
@@ -750,9 +965,9 @@ def _responsive_table_labels(document: str) -> str:
 
             return re.sub(r"<td(\s[^>]*)?>", cell, match.group(0))
 
-        return re.sub(r"<tr>.*?</tr>", row, markup, flags=re.S)
+        return re.sub(r"<tr[^>]*>.*?</tr>", row, markup, flags=re.S)
 
-    return re.sub(r"<table>.*?</table>", table, document, flags=re.S)
+    return re.sub(r"<table[^>]*>.*?</table>", table, document, flags=re.S)
 
 
 def render_dashboard(analysis: dict[str, Any]) -> str:
@@ -766,6 +981,6 @@ def render_dashboard(analysis: dict[str, Any]) -> str:
         markup = renderers[name](analysis)
         if markup:
             parts.append(f"<details class='disclosure'><summary>{label}</summary>"
-                         f"{markup}</details>")
+                         f"<div class='disclosure-grid'>{markup}</div></details>")
     return page_shell(header_line(analysis), _status_line(analysis),
                       _responsive_table_labels("\n".join(parts)))

@@ -191,7 +191,7 @@
   "substitutions": [
     {
       "current": "Diced chicken",
-      "candidate": "Tyson grilled strips",
+      "candidate": "Store-brand grilled strips",
       "current_unit_price": 0.45,
       "candidate_unit_price": 0.454,
       "fit": "better",

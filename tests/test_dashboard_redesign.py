@@ -79,7 +79,9 @@ def test_dietary_attention_renders_the_fail_closed_verdict():
     for row in analysis()['dietary_evaluations']:
         assert row['item'] in markup
         assert row['reason'] in markup
-    assert 'Nothing here is cleared as safe' in markup
+    # The masthead states the count; the panel owns the full verdict (no 3x repeat).
+    assert '13 of 13 items are unverified' in markup
+    assert 'state-legend' in markup
 
 
 def test_warn_never_uses_the_success_token_and_depletion_is_not_success():
@@ -100,7 +102,8 @@ def test_cart_review_shows_each_reason_and_source_in_visible_prose():
     for item in a['cart_plan']['items']:
         assert item['item'] in text
         assert item['reason'] in text
-        assert item['source'] in text
+        shown_source = {'normal store': 'your usual store'}.get(str(item['source'] or ''), str(item['source'] or ''))
+        assert shown_source in text
     assert '01' in text and '04' in text
     # Raw enum slugs are for machines, not for the household reading the page.
     assert '>review_alternate_source' not in markup
@@ -127,9 +130,11 @@ def test_ledger_carries_dietary_price_and_product_evidence_columns():
     markup = render_dashboard(analysis())
     assert '<th>Price</th><th>Dietary</th><th>Product evidence</th>' in markup
     assert 'No label evidence' in markup
-    assert 'No price record' in markup
+    # One price vocabulary: the ledger uses the freshness record's resolved state.
+    assert 'Stale price on file' in markup
+    assert 'No price record' not in markup
     text = visible(markup)
-    assert 'Priced' in text and 'Unpriced' in text
+    assert 'Priced' in text and 'No price captured' in text
     assert 'Warning' in text
 
 
@@ -174,9 +179,18 @@ def test_download_contains_actual_draft_not_prototype_sample():
     a['order']['store'] = 'Different sanitized store'
     markup = render_dashboard(a)
     attrs = next(attrs for tag, attrs in Document(markup).tags if attrs.get('id') == 'buy-list-download')
-    assert json.loads(attrs['data-plan']) == a['cart_plan']
-    assert json.loads(attrs['data-plan'])['approval_required'] is True
-    assert json.loads(attrs['data-plan'])['checkout_available'] is False
+    payload = json.loads(attrs['data-plan'])
+    # Every engine field of the real draft is retained verbatim.
+    for key, value in a['cart_plan'].items():
+        assert payload[key] == value
+    assert payload['approval_required'] is True
+    assert payload['checkout_available'] is False
+    # The download now carries the dietary state the page shows.
+    context = payload['presentation']['dietary_context']
+    assert context['items_total'] == 13
+    assert context['items_not_cleared'] == 13
+    assert all(row['cleared'] is False for row in context['items'])
+    assert 'not a clearance' in context['note']
 
 
 def test_empty_state_does_not_claim_clearance_or_invent_a_cart():
