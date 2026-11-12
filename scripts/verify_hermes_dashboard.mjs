@@ -97,13 +97,14 @@ try{
     const ledgerCraft=await evaluate(`(()=>{const t=document.querySelector('.ledger table');if(!t)return null;const ths=[...t.querySelectorAll('th')];const price=ths[2],spend=ths[1];const first=t.querySelector('tbody tr');const priceCell=first&&first.children[2];return {spendAlign:spend?getComputedStyle(spend).textAlign:null,priceAlign:price?getComputedStyle(price).textAlign:null,priceCellAlign:priceCell?getComputedStyle(priceCell).textAlign:null,priceCellH:priceCell?Math.round(priceCell.getBoundingClientRect().height):null,label:(priceCell&&priceCell.textContent||'').replace(/\\s+/g,' ').trim(),maxLabelLines:Math.max(0,...[...t.querySelectorAll('tbody tr')].map(r=>{const m=r.children[2]&&r.children[2].querySelector('.cell-value .mark');return m?m.getClientRects().length:0}))}})()`);
     measure.ledgerCraft=ledgerCraft;
     if(acceptance&&ledgerCraft){
-      if(width>=821){
+      const cssWidth=measure.width;
+      if(cssWidth>=821){
         if(ledgerCraft.spendAlign!=='right'||ledgerCraft.priceAlign!=='right'||ledgerCraft.priceCellAlign!=='right')throw Error('Ledger money columns are not right-aligned: '+JSON.stringify(ledgerCraft));
       }else if(ledgerCraft.priceCellAlign!=='left'){
         throw Error('Stacked ledger money cell does not align with the record: '+JSON.stringify(ledgerCraft));
       }
       if(ledgerCraft.priceCellH>120)throw Error('Ledger Price cell still stacks over three lines: '+JSON.stringify(ledgerCraft));
-      if(ledgerCraft.maxLabelLines>(width>=821?1:2))throw Error('Ledger Price label wraps beyond its column: '+JSON.stringify(ledgerCraft));
+      if(ledgerCraft.maxLabelLines>(cssWidth>=821?1:2))throw Error('Ledger Price label wraps beyond its column: '+JSON.stringify(ledgerCraft));
     }
     // One count sentence per width: the compact counts and the full verdict
     // sentence are mutually exclusive, a count is never repeated, and the
@@ -114,12 +115,12 @@ try{
       if(status.spans&&status.visible.length!==1)throw Error('Sticky status renders '+status.visible.length+' count spans at '+width+'px: '+JSON.stringify(status));
       if(status.duplicate.length)throw Error('Sticky status repeats a count at '+width+'px: '+JSON.stringify(status));
       if(status.zeroBucket)throw Error('Sticky status prints a zero cleared bucket at '+width+'px: '+JSON.stringify(status));
-      const bannerLimit=width>=1024?64:width>=761?88:100;
+      const bannerLimit=measure.width>=1024?64:measure.width>=761?88:100;
       if(status.height>bannerLimit)throw Error('Sticky status banner is '+status.height+'px at '+width+'px (limit '+bannerLimit+'): '+JSON.stringify(status));
     }
     // Stacked records: Spend/Price labels and values align left with every
     // other cell at <=820px (r9 B2: the tabular right-alignment leaked in).
-    if(width<=820){
+    if(measure.width<=820){
       const stacked=await evaluate(`(()=>{const rows=[...document.querySelectorAll('.ledger tbody tr')];if(!rows.length)return null;const cells=[...rows[0].children];const values=cells.map(c=>{const v=c.querySelector(':scope > .cell-value')||c;const r=v.getBoundingClientRect();return {label:c.dataset.label,align:getComputedStyle(c).textAlign,before:getComputedStyle(c,'::before').textAlign,valueLeft:Math.round(r.left)}});return {values}})()`);
       measure.stacked=stacked;
       if(stacked){
