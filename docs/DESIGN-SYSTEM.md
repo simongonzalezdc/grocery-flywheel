@@ -12,7 +12,7 @@ offline.
    states the count only; the verdict is not repeated three times in one view.
 2. **Needs attention today** — the dietary verdict, the qualifier, the state
    legend and every evaluation.
-3. **Today · one thing** — the cart review, as an action list with dietary state.
+3. **Today · before you shop** — the cart review, as an action list with dietary state.
 4. **What will run out** — basis note, runway ruler, caption, at-risk table,
    arithmetic.
 5. **The ledger** — every item with price, dietary and product evidence.
@@ -109,14 +109,15 @@ and never clears a row.
   state (`Cleared` only when the authority says cleared); it is never built from
   a raw `safe` result.
 - the action area, the downloadable draft and the page are **one list computed
-  once**. The draft's `presentation.action_list` mirrors every rendered row with
-  `item`, `engine_action`, `display_action`, `state`, `cleared`, `held`,
-  `qualifier`, `reason`, `source`; `items[]` remains the engine's cart plan
-  verbatim. `presentation.dietary_context.items` covers every ledger item **and**
-  every cart or held row. A buy verb (`Restock`) never stands on a non-cleared
-  row: it renders `Hold restock` with the dietary qualifier.
+  once**. The draft's top-level `items[]` is the page's action list with `item`,
+  `engine_action`, `display_action`, `state`, `cleared`, `hold`,
+  `held_out_of_plan`, `qualifier`, `reason`, `source`; the engine cart plan is
+  preserved verbatim under `engine_plan` as reference data, never as an
+  instruction. `dietary_context.items` covers every ledger item **and** every
+  cart or held row. A buy verb never stands on a non-cleared row: it renders
+  `Hold restock`, or `Do not buy` when blocked, with the dietary qualifier.
 - Easy Food's rotation sentence is gated on the same verdict: only a cleared
-  item is told to rotate. The sourcing "best recorded move" sentence carries the
+  item is told to rotate. The sourcing "engine's headline move" sentence carries the
   item's dietary mark; alternatives are explicitly not evaluated there.
 - the **at-risk table** ("What will run out") carries a Dietary mark per row, so
   a depletion warning never reads as a buy signal on its own.
@@ -173,7 +174,7 @@ missing `items[*].pricing_status` no longer renders as "No price record" while
 the freshness panel calls the same item priced. `normal store` (engine draft
 source) displays as "your usual store".
 
-## Action contract (one thing)
+## Action contract (before you shop)
 
 The cart review is an ordered list, one row per item: number, item, the engine's
 own `reason`, the humanized `action`, `source`, and a **Dietary** line with the
@@ -190,14 +191,21 @@ The sourcing panel labels its mark **"Dietary · this item, not the
 alternatives"** and its basis note says alternatives are not evaluated there.
 A missing amount renders **"not recorded"**; `_money` never fabricates `$0.00`.
 
-The downloaded draft is the real engine plan plus a `presentation` envelope:
-`schema`, `note`, `dietary_context` (per-item state, result, `cleared`, evidence
-status, reason, restriction tiers), and `action_list` — a row-for-row mirror of
-the page's action area with `item`, `engine_action`, `display_action`, `state`,
-`cleared`, `held`, `qualifier`, `reason`, `source`. Every engine field of the
-plan is retained verbatim at the top level (`items[]` is the cart plan, unchanged;
-held rows appear only in `action_list`). `dietary_context` covers every ledger
-item and every cart or held row. The page says the JSON includes the dietary
+The downloaded draft (`grocery-flywheel.dashboard-draft/2`) is one authoritative
+action list plus the engine plan as reference data: `schema`, `note`, `mode`,
+`approval_required`, `checkout_available`, `items[]`, `items_note`,
+`dietary_context`, and `engine_plan`. `items[]` **is** the page's action area —
+one row per rendered action with `item`, `engine_action`, `display_action`,
+`state`, `cleared`, `hold`, `held_out_of_plan`, `qualifier`, `reason`, `source`.
+`hold=true` marks every non-cleared row as do-not-buy; `held_out_of_plan` is the
+narrower fact that the engine cart plan has no row for it. No buy instruction
+(`Restock`, `Rotate`, `Buy`, `Purchase`) may appear on a non-cleared entry
+anywhere outside `engine_plan`. `engine_plan` preserves the engine cart plan
+verbatim (its `action` values and raw source slugs included) and is documented as
+reference, not an instruction. `dietary_context` covers every ledger item and
+every cart or held row, counts the two collections separately
+(`action_items_total`, `engine_plan_items_total`), and carries the same
+five-state legend the page renders. The page says the JSON includes the dietary
 state and that nothing is bought or written back.
 
 ## Runway contract

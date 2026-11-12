@@ -93,38 +93,48 @@ def test_draft_action_list_mirrors_every_rendered_action_row():
     a = analyze_state(mixed_state())
     markup = render_dashboard(a)
     draft = _draft_payload(a, a["cart_plan"])
-    action_list = draft["presentation"]["action_list"]
+    action_list = draft["items"]
 
     assert action_items(markup) == [row["item"] for row in action_list]
     assert len(action_list) == 5
     waffles = next(row for row in action_list
                    if row["item"] == "Homestyle waffles")
-    assert waffles["held"] is True and waffles["cleared"] is False
+    assert waffles["hold"] is True and waffles["cleared"] is False
+    assert waffles["held_out_of_plan"] is True
     assert waffles["display_action"] == "Do not buy"
     assert "blocked: Evidence matched: peanut" in waffles["qualifier"]
     pizza = next(row for row in action_list if row["item"] == "Rising crust pizza")
-    assert pizza["cleared"] is False and pizza["display_action"] == "Hold restock"
+    assert pizza["cleared"] is False and pizza["hold"] is True
+    assert pizza["held_out_of_plan"] is False
+    assert pizza["display_action"] == "Hold restock"
     assert "resolve evidence first" in pizza["qualifier"]
     cleared = [row for row in action_list if row["cleared"]]
     assert [row["item"] for row in cleared] == ["Bean and cheese burritos"]
     assert cleared[0]["display_action"] == "Restock"
+    assert cleared[0]["hold"] is False
 
 
-def test_draft_keeps_the_engine_cart_plan_verbatim_and_adds_the_page_view():
+def test_draft_keeps_the_engine_cart_plan_verbatim_under_a_reference_key():
     a = analyze_state(mixed_state())
     draft = _draft_payload(a, a["cart_plan"])
-    assert draft["items"] == a["cart_plan"]["items"]
-    assert "Homestyle waffles" not in [row["item"] for row in draft["items"]]
-    assert len(draft["presentation"]["action_list"]) == 5
+    assert draft["engine_plan"] == a["cart_plan"]
+    assert draft["engine_plan"]["items"] == a["cart_plan"]["items"]
+    assert "Homestyle waffles" not in [row["item"]
+                                       for row in draft["engine_plan"]["items"]]
+    # The instruction-bearing top level is the action list, held row included.
+    assert "Homestyle waffles" in [row["item"] for row in draft["items"]]
+    assert "presentation" not in draft
+    assert draft["schema"] == "grocery-flywheel.dashboard-draft/2"
 
 
 def test_no_exported_action_can_restock_a_non_cleared_item():
     a = analyze_state(mixed_state())
     draft = _draft_payload(a, a["cart_plan"])
-    for row in draft["presentation"]["action_list"]:
+    for row in draft["items"]:
         assert row["cleared"] == (row["state"] == "cleared")
         if not row["cleared"]:
             assert row["display_action"] != "Restock"
+            assert row["hold"] is True
             assert row["qualifier"], row
 
 
@@ -154,8 +164,8 @@ def test_easy_food_only_tells_a_cleared_item_to_rotate():
 def test_sourcing_best_move_carries_a_dietary_mark():
     a = analyze_state(sample_state())
     markup = render_dashboard(a)
-    assert "Best recorded move" in visible(markup)
-    segment = markup.split("Best recorded move", 1)[1][:700]
+    assert "Engine's headline move" in visible(markup)
+    segment = markup.split("Engine's headline move", 1)[1][:700]
     assert "class='mark " in segment
 
 
@@ -290,7 +300,8 @@ def test_dietary_context_covers_a_cart_row_the_ledger_does_not_hold():
     row = next(row for row in context["items"] if row["item"] == "Cart-only oats")
     assert row["state"] == "needs_review" and row["cleared"] is False
     assert context["items_total"] == 13
-    assert context["cart_items_total"] == 6
+    assert context["action_items_total"] == 6
+    assert context["engine_plan_items_total"] == 5
     markup = render_dashboard(a)
     assert "data-item='Cart-only oats'" in markup
     assert "data-verdict='needs_review'" in markup

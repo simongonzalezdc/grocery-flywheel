@@ -219,19 +219,47 @@ def run(bundle, scratch, offline):
     assert plan_attr is not None, "mixed dashboard embeds its draft payload"
     check(True, "mixed dashboard embeds its draft payload")
     draft = json.loads(html.unescape(plan_attr.group(1)))
-    action_list = draft["presentation"]["action_list"]
+    action_list = draft["items"]
+    require(draft.get("schema") == "grocery-flywheel.dashboard-draft/2",
+            "draft declares the action-list schema")
     require(len(action_list) == 5, "draft action list mirrors the five rendered rows")
-    held = [row for row in action_list if row["held"]]
+    engine_plan = draft.get("engine_plan") or {}
+    require(len(engine_plan.get("items") or []) == 4,
+            "engine cart plan is preserved verbatim under engine_plan")
+    raw_pizza = next(row for row in engine_plan["items"]
+                     if row["item"] == "Rising crust pizza")
+    require(raw_pizza["action"] == "restock",
+            "engine plan keeps its raw action under the reference key")
+    held = [row for row in action_list if row["held_out_of_plan"]]
     require(len(held) == 1 and held[0]["item"] == "Homestyle waffles"
-            and held[0]["cleared"] is False and "peanut" in held[0]["qualifier"],
+            and held[0]["cleared"] is False and held[0]["hold"] is True
+            and "peanut" in held[0]["qualifier"],
             "draft holds the peanut-blocked waffles with its reason")
+    for row in action_list:
+        if not row["cleared"]:
+            require(row.get("hold") is True,
+                    "every non-cleared draft row carries hold=true")
+            require(not re.search(r"^(?!(?:do not|hold)\b).*\b(?:restock|rotate|buy|purchase)\b",
+                                  str(row.get("display_action") or ""), re.I),
+                    "a non-cleared draft row never carries a buy instruction")
+            require(bool(row["qualifier"]),
+                    "a non-cleared draft row carries its dietary qualifier")
     pizza = next(row for row in action_list if row["item"] == "Rising crust pizza")
-    require(pizza["cleared"] is False and pizza["display_action"] == "Hold restock"
-            and pizza["qualifier"],
+    require(pizza["cleared"] is False and pizza["hold"] is True
+            and pizza["held_out_of_plan"] is False
+            and pizza["display_action"] == "Hold restock",
             "draft never restocks a non-cleared item")
-    context_names = [row["item"] for row in draft["presentation"]["dietary_context"]["items"]]
+    context = draft["dietary_context"]
+    context_names = [row["item"] for row in context["items"]]
     require(all(row["item"] in context_names for row in action_list),
             "draft dietary context covers every action row")
+    require(context["action_items_total"] == len(action_list),
+            "dietary context counts the action list it names")
+    require(context["engine_plan_items_total"] == len(draft["engine_plan"]["items"]),
+            "dietary context counts the engine plan it names")
+    require("named no item on this page" in
+            context["state_legend"]["not_evaluated"]["meaning"],
+            "draft legend states the orphan case, not the clearance wording")
     require("rotate into a meal" not in mixed_html,
             "no uncleared easy-food rotation copy")
     require("13 dietary evaluations" in mixed_html,

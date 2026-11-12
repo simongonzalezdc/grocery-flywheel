@@ -150,7 +150,7 @@ def test_contradictory_pair_is_fail_closed_in_every_call_site():
     rows = [row for row in ledger.split("<tr>") if "Peanut granola" in row]
     assert rows and all("data-raw-status='blocked'" in row for row in rows)
     assert all("data-raw-status='safe'" not in row for row in rows)
-    action = markup.split("Today &middot; one thing</h2>")[1].split('</article>')[0]
+    action = markup.split("Today &middot; before you shop</h2>")[1].split('</article>')[0]
     rows = [row.split('</li>')[0] for row in action.split("<li")[1:]]
     rows = [row for row in rows if ">Peanut granola<span class='action-why'>" in row]
     assert rows and all("data-raw-status='blocked'" in row for row in rows)
@@ -245,7 +245,7 @@ def test_action_copy_and_labels_are_household_language():
     assert "every item needs your approval before anything is bought." in text
     assert "every item is Needs your approval" not in text
     markup = render_dashboard(analysis())
-    action = markup.split("Today &middot; one thing</h2>")[1].split('</article>')[0]
+    action = markup.split("Today &middot; before you shop</h2>")[1].split('</article>')[0]
     assert "<span class='eyebrow-inline'>Action</span>" in action
     assert "<span class='eyebrow-inline'>Source</span>" in action
 

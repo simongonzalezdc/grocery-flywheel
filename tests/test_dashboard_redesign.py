@@ -57,7 +57,7 @@ def test_reading_order_is_attention_action_runway_ledger_then_evidence():
     before = deepcopy(a)
     markup = render_dashboard(a)
     assert a == before, 'rendering must not mutate the analysis'
-    order = ['Needs attention today', 'Today &middot; one thing', 'What will run out',
+    order = ['Needs attention today', 'Today &middot; before you shop', 'What will run out',
              'The ledger', 'Savings and sourcing']
     positions = [markup.index(item) for item in order]
     assert positions == sorted(positions)
@@ -183,13 +183,13 @@ def test_download_contains_actual_draft_not_prototype_sample():
     markup = render_dashboard(a)
     attrs = next(attrs for tag, attrs in Document(markup).tags if attrs.get('id') == 'buy-list-download')
     payload = json.loads(attrs['data-plan'])
-    # Every engine field of the real draft is retained verbatim.
-    for key, value in a['cart_plan'].items():
-        assert payload[key] == value
+    # Every engine field of the real draft is retained verbatim, under the
+    # reference-only key so no raw cart instruction reads as the action list.
+    assert payload['engine_plan'] == a['cart_plan']
     assert payload['approval_required'] is True
     assert payload['checkout_available'] is False
     # The download now carries the dietary state the page shows.
-    context = payload['presentation']['dietary_context']
+    context = payload['dietary_context']
     assert context['items_total'] == 13
     assert context['items_not_cleared'] == 13
     assert all(row['cleared'] is False for row in context['items'])

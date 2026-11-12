@@ -176,7 +176,7 @@ def test_action_list_and_draft_carry_dietary_context():
     assert text.count('Dietary') >= len(a['cart_plan']['items'])
     assert 'No label evidence' in text
     attrs = next(attrs for tag, attrs in _tags(markup) if attrs.get('id') == 'buy-list-download')
-    context = json.loads(attrs['data-plan'])['presentation']['dietary_context']
+    context = json.loads(attrs['data-plan'])['dietary_context']
     assert len(context['items']) == 13
     assert context['items_not_cleared'] == 13
     assert context['restrictions'][0]['safety_tier'] == 'preference'

@@ -108,7 +108,7 @@ p { max-width:var(--measure); }
   margin:2px 0 0; font-weight:600; text-underline-offset:3px; }
 .attention-context { margin:8px 0 0; }
 .attention-context > summary { padding:6px 0; min-height:32px; font-size:var(--step--1); }
-#today { scroll-margin-top:5.5rem; }
+#today, #household-review { scroll-margin-top:6.5rem; }
 .attention-notes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px 32px; margin-top:16px; padding-top:12px; border-top:1px solid var(--edge); }
 .attention-notes p { font-size:var(--step--1); color:var(--muted); margin:0; max-width:60ch; }
@@ -228,7 +228,9 @@ details.evidence > summary { color:var(--copper); font-weight:600; }
 footer { margin-top:56px; border-top:2px solid var(--ink); padding-top:24px;
   color:var(--muted); font-size:var(--step--1); }
 footer p { max-width:var(--measure); }
-@media (max-width:700px) {
+/* Stacked records below 820px: the 5-7 column tables (ledger, at-risk) are
+   compressed enough before this point that cells break words mid-word. */
+@media (max-width:820px) {
  table,tbody,tr,td { display:block; width:100%; }
  colgroup { display:none; }
  thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
@@ -250,6 +252,9 @@ footer p { max-width:var(--measure); }
 }
 @media (max-width:760px) {
  main { padding:24px 16px 48px; }
+ /* The sticky status banner is ~128px tall at these widths; the anchor offset
+    must clear it or the jump/skip target lands underneath (r7 major). */
+ #today, #household-review { scroll-margin-top:9.5rem; }
  .grid { gap:28px 0; }
  .span-4,.span-6 { grid-column:span 12; }
  .attention { padding:14px 14px 16px; border-left-width:6px; }

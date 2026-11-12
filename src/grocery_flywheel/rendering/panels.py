@@ -93,7 +93,8 @@ DIETARY_STATES: dict[str, tuple[str, str, str]] = {
     "cleared": ("ok", "Cleared",
                 "An explicit safe result with current evidence."),
     "not_evaluated": ("neutral", "Not evaluated",
-                      "No applicable evaluation, or evidence that did not match."),
+                      "No evaluation for this item, or an evaluation that named no "
+                      "item on this page."),
 }
 
 
@@ -466,12 +467,17 @@ def _dietary(a: dict[str, Any]) -> str:
                  else "warning tier" if open_items else "cleared")
     head = _section_head("Needs attention today", f"Dietary evidence &middot; {tier_note}")
 
-    cart_items, held, _plan_verdict = _action_plan(a)
+    action_rows, _action_verdict = _action_rows(a)
     jump_html = ""
-    if cart_items or held:
-        count = len(cart_items) + len(held)
-        jump_html = (f"<a class='jump-link' href='#today'>Review the {count} "
-                     f"{_plural(count, 'item')} that need a decision"
+    if action_rows:
+        open_actions = sum(1 for row in action_rows if not row["cleared"])
+        if open_actions:
+            label = (f"Review the {open_actions} "
+                     f"{_plural(open_actions, 'item')} that need a decision")
+        else:
+            label = (f"Review the {len(action_rows)} "
+                     f"{_plural(len(action_rows), 'item')} before you shop")
+        jump_html = (f"<a class='jump-link' href='#today'>{label}"
                      "<span aria-hidden='true'> &darr;</span></a>")
 
     rows = sorted(
@@ -604,13 +610,24 @@ def _dietary_context(a: dict[str, Any]) -> dict[str, Any]:
         for profile in a.get("dietary_profiles") or []
         for restriction in profile.get("restrictions") or []
     ]
+    action_rows, _verdict = _action_rows(a)
     return {
         "items_total": verdict["total"],
-        "cart_items_total": len(cart_items) + len(held),
+        # The two collections are counted separately: ``action_items_total`` is the
+        # page's action list (cart plan + held rows), ``engine_plan_items_total`` is
+        # the raw cart plan. A single ambiguous count read as both (r7 minor).
+        "action_items_total": len(action_rows),
+        "engine_plan_items_total": len(cart_items),
         "items_not_cleared": verdict["open"],
         "items_cleared": verdict["cleared"],
         "headline": _verdict_headline(verdict),
         "counts": _verdict_parts(verdict, separator="; "),
+        # The same five-state meanings the page's legend renders, so the download
+        # cannot define "Not evaluated" with the engine's clearance wording (r7).
+        "state_legend": {
+            key: {"label": DIETARY_STATES[key][1], "meaning": DIETARY_STATES[key][2]}
+            for key in ("blocked", "needs_review", "warning", "cleared", "not_evaluated")
+        },
         "restrictions": restrictions,
         "items": rows,
         "note": ("Dietary state is copied from the engine. A warning or an absent "
@@ -619,7 +636,13 @@ def _dietary_context(a: dict[str, Any]) -> dict[str, Any]:
 
 
 def _action_rows(a: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """The action area's rows, computed once and rendered twice: page and draft."""
+    """The action area's rows, computed once and rendered twice: page and draft.
+
+    ``hold`` is true for every row the household must not buy (any non-cleared
+    row). ``held_out_of_plan`` is the narrower fact that the engine cart plan has
+    no row for the item; a needs-review cart row can be held without being out of
+    plan, so the two flags cannot be collapsed (r7 `held:false` contradiction).
+    """
     items, held, verdict = _action_plan(a)
     rows: list[dict[str, Any]] = []
     for row in held:
@@ -627,7 +650,8 @@ def _action_rows(a: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any
         rows.append({
             "item": row["item"], "engine_action": None, "display_action": "Do not buy",
             "qualifier": f"— blocked: {reason}", "state": row["state"],
-            "cleared": False, "held": True, "reason": reason, "source": "",
+            "cleared": False, "hold": True, "held_out_of_plan": True,
+            "reason": reason, "source": "",
             "why": "Held out of the cart plan until this block is resolved.",
         })
     for item in items:
@@ -639,36 +663,49 @@ def _action_rows(a: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any
             "item": name, "engine_action": str(item.get("action") or "") or None,
             "display_action": action, "qualifier": qualifier,
             "state": evaluation["state"], "cleared": bool(evaluation["cleared"]),
-            "held": False, "reason": reason,
+            "hold": not evaluation["cleared"], "held_out_of_plan": False,
+            "reason": reason,
             "source": _source_label(item.get("source")), "why": reason,
         })
     return rows, verdict
 
 
 def _draft_payload(a: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
-    draft = json.loads(json.dumps(plan))
+    """The downloaded draft: one authoritative action list plus the raw plan.
+
+    ``items[]`` at the top level is the page's action list — the only
+    instruction-bearing collection in the file. The engine cart plan is preserved
+    verbatim under ``engine_plan``, which is reference data, not a shopping
+    instruction. A household can therefore read or print the download without
+    meeting an unqualified restock on an uncleared row (r6 B1, r7 blocker).
+    """
     action_rows, _verdict = _action_rows(a)
-    draft["presentation"] = {
-        "schema": "grocery-flywheel.dashboard-draft/1",
-        "note": ("Download-only draft. Nothing is bought and nothing is written back "
-                 "to your state file."),
+    items = [
+        {"item": row["item"], "display_action": row["display_action"],
+         "engine_action": row["engine_action"], "state": row["state"],
+         "cleared": row["cleared"], "hold": row["hold"],
+         "held_out_of_plan": row["held_out_of_plan"],
+         "qualifier": row["qualifier"], "reason": row["reason"],
+         "source": row["source"]}
+        for row in action_rows
+    ]
+    return {
+        "schema": "grocery-flywheel.dashboard-draft/2",
+        "note": ("Download-only draft. items[] is the action list this page shows; "
+                 "nothing is bought and nothing is written back to your state file."),
+        "mode": plan.get("mode"),
+        "approval_required": plan.get("approval_required"),
+        "checkout_available": plan.get("checkout_available"),
+        "items": items,
+        "items_note": (
+            "items[] is the page's action list and the only instruction-bearing "
+            "collection here. hold=true means do not buy; cleared=true is required "
+            "before restocking. engine_plan below is the engine's cart plan preserved "
+            "verbatim, including its raw source slugs, and is not a shopping "
+            "instruction."),
         "dietary_context": _dietary_context(a),
-        # The page's action area, mirrored. ``items`` above stays the engine's cart
-        # plan verbatim; this list is what the household actually reads (r6 B1).
-        "action_list": [
-            {"item": row["item"], "engine_action": row["engine_action"],
-             "display_action": row["display_action"], "state": row["state"],
-             "cleared": row["cleared"], "held": row["held"],
-             "qualifier": row["qualifier"], "reason": row["reason"],
-             "source": row["source"]}
-            for row in action_rows
-        ],
-        "action_list_note": (
-            "Every row the page's action area shows. held=true means do not buy; "
-            "cleared=false means not dietarily cleared — read qualifier. items[] above "
-            "is the engine cart plan, unchanged."),
+        "engine_plan": json.loads(json.dumps(plan)),
     }
-    return draft
 
 
 def _action_text(engine_action: object, verdict: dict[str, Any]) -> tuple[str, str]:
@@ -692,11 +729,20 @@ def _cart_plan(a: dict[str, Any]) -> str:
     plan = a.get("cart_plan") or {}
     action_rows, verdict = _action_rows(a)
     total_actions = len(action_rows)
+    cleared_actions = sum(1 for row in action_rows if row["cleared"])
+    held_actions = total_actions - cleared_actions
+    if cleared_actions == total_actions:
+        head_note = f"{total_actions} {_plural(total_actions, 'item')} &middot; all cleared"
+    elif cleared_actions:
+        head_note = (f"{total_actions} {_plural(total_actions, 'item')} &middot; "
+                     f"{cleared_actions} cleared &middot; {held_actions} need a decision")
+    else:
+        head_note = f"{total_actions} {_plural(total_actions, 'item')} &middot; none cleared"
     head = _section_head(
-        "Today &middot; one thing",
-        f"{total_actions} {_plural(total_actions, 'item')} &middot; every one needs your decision",
+        "Today &middot; before you shop",
+        head_note,
     )
-    note = ("<p class='approve-note'>Everything needs your approval. "
+    note = ("<p class='approve-note'>Every purchasable item needs your approval. "
             "No checkout surface exists.</p>")
     if not action_rows:
         return (f"<article class='panel span-12 today' id='today'>{head}"
@@ -707,7 +753,7 @@ def _cart_plan(a: dict[str, Any]) -> str:
     rows = []
     for index, row in enumerate(action_rows, 1):
         mark = _dietary_mark(_verdict_for(verdict, row["item"]))
-        if row["held"]:
+        if row["held_out_of_plan"]:
             rows.append(
                 f"<li class='action-hold' data-action-item='{escape(row['item'], quote=True)}'>"
                 f"<span class='action-num'>{index:02d}</span>"
@@ -755,7 +801,7 @@ def _cart_plan(a: dict[str, Any]) -> str:
             f"checkout available: <b>no</b> &middot; prices behind these numbers, whole "
             f"ledger ({ledger_count} {_plural(ledger_count, 'item')}): "
             f"<b>{_price_bucket_text(a)}</b> &middot; {approval_phrase}")
-    held_count = sum(1 for row in action_rows if row["held"])
+    held_count = sum(1 for row in action_rows if row["held_out_of_plan"])
     blocked_note = ""
     if held_count:
         blocked_note = (f" {held_count} {_plural(held_count, 'item is', 'items are')} blocked "
@@ -1137,12 +1183,13 @@ def _first_wow(a: dict[str, Any]) -> str:
     savings = float(wow.get("estimated_unit_savings", 0) or 0)
     if savings > 0:
         savings_value = _money(savings)
-        savings_note = ("Sum of the per-unit savings in the engine's sourcing and "
-                        "substitution rows.")
+        savings_note = ("Sum of the per-unit savings recorded in the engine's sourcing "
+                        "and substitution rows.")
     else:
         savings_value = "None recorded"
-        savings_note = ("The engine's sourcing rows record no per-unit saving to sum; "
-                        "this is not a $0.00 claim about the order.")
+        savings_note = ("No realised saving is recorded in the engine's sourcing or "
+                        "substitution rows. The candidate rows are modelled estimates, "
+                        "not recorded savings.")
     candidates = sum(len(row.get("alternatives") or [])
                      for row in a.get("sourcing_research") or [])
     candidate_values = ("None recorded" if not candidates
@@ -1160,8 +1207,8 @@ def _first_wow(a: dict[str, Any]) -> str:
                 best_item = name
         best_verdict = (_verdict_for(verdict, best_item) if best_item
                         else _item_verdict("", None))
-        best_html = (f"Best recorded move: {escape(best)}. Dietary state for this item: "
-                     f"{_dietary_mark(best_verdict)}. ")
+        best_html = (f"Engine's headline move: {escape(best)}. Dietary state for this "
+                     f"item: {_dietary_mark(best_verdict)}. ")
     candidate_note = best_html + ("Confidence and check dates vary by row — see Sourcing "
                                   "research. Alternatives carry no dietary evaluation; the "
                                   "mark applies to the item you already buy.")
@@ -1169,7 +1216,7 @@ def _first_wow(a: dict[str, Any]) -> str:
       <article class="panel">
         <h2>Savings and sourcing</h2>
         <div class="card-row">
-          <div><h3 class="stat-label">Recorded unit savings</h3>
+          <div><h3 class="stat-label">Recorded savings</h3>
             <div class="metric">{escape(savings_value)}</div>
             <p class="muted stat-note">{escape(savings_note)}</p></div>
           <div><h3 class="stat-label">Sourcing candidates</h3>
@@ -1182,13 +1229,55 @@ def _first_wow(a: dict[str, Any]) -> str:
       </article>"""
 
 
+def _role_rows(a: dict[str, Any]) -> list[dict[str, Any]]:
+    """Role rows whose displayed ``consumed`` cents add to the order-level figure.
+
+    The engine rounds each role to the cent, so the displayed rows can sum to a
+    cent less than ``consumed_value`` (r7 minor). Apportion that difference by
+    largest remainder: every row stays within one cent of the engine's own value
+    and the column adds to the figure the runway prints.
+    """
+    rows = [dict(row) for row in a.get("role_summary") or []]
+    if not rows:
+        return rows
+    exact: dict[str, float] = {}
+    have_items = False
+    for item in a.get("items") or []:
+        if "consumed_value" not in item:
+            continue
+        have_items = True
+        role = str(item.get("role") or "")
+        exact[role] = exact.get(role, 0.0) + float(item.get("consumed_value") or 0)
+    if not have_items:
+        return rows
+    target = int(round(float(a.get("consumed_value") or 0) * 100))
+    floors = [math.floor(exact.get(str(row.get("role") or ""), 0.0) * 100 + 1e-9)
+              for row in rows]
+    difference = target - sum(floors)
+    ranked = sorted(
+        range(len(rows)),
+        key=lambda index: exact.get(str(rows[index].get("role") or ""), 0.0) * 100
+        - floors[index],
+        reverse=difference > 0,
+    )
+    for index in ranked[:abs(difference)]:
+        floors[index] += 1 if difference > 0 else -1
+    for row, cents in zip(rows, floors):
+        row["consumed"] = cents / 100
+    return rows
+
+
 def _role_summary(a: dict[str, Any]) -> str:
     body = "\n".join(
         f"<tr><td>{escape(_role(r['role']))}</td><td>{_money(r['spend'])}</td>"
         f"<td>{_money(r['consumed'])}</td><td>{_bar(r['consumed_fraction'])}</td></tr>"
-        for r in a.get("role_summary", [])
+        for r in _role_rows(a)
     )
+    caption = ("<p class='table-caption'>Consumed amounts are apportioned so the "
+               "column adds to the order-level observed depletion the runway prints; "
+               "each row stays within one cent of the engine's own rounding.</p>")
     return ("<article class='panel span-6'><h2>Role Summary</h2>"
+            + caption +
             "<table><colgroup><col style='width:30%'><col style='width:22%'>"
             "<col style='width:22%'><col style='width:26%'></colgroup>"
             "<thead><tr><th>Role</th><th>Spend</th><th>Consumed</th><th>Drawdown</th></tr></thead>"
@@ -1393,8 +1482,10 @@ def _sourcing(a: dict[str, Any]) -> str:
     basis = ("<p class='basis-note'><b>Unit prices</b> are the engine's per-unit figures; "
              "the state file records no pack size, so no unit label can be stated. Savings "
              "are modelled from the engine's sourcing multiplier, not a checked shelf price. "
-             "Alternatives carry no dietary evaluation here; the mark applies to the item "
-             "you already buy.</p>")
+             "Percentages are the engine's, computed from its unrounded unit prices; "
+             "the prices shown are rounded to the cent, so a percentage will not always "
+             "reproduce exactly from them. Alternatives carry no dietary evaluation here; "
+             "the mark applies to the item you already buy.</p>")
     return ("<article class='panel span-6'><h2>Sourcing Research</h2>" + basis
             + "<div class='source-list'>" + "".join(records) + "</div></article>")
 

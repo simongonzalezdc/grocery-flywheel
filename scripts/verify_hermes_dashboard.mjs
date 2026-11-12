@@ -116,6 +116,20 @@ try{
   if(correction&&correction!=='1 captured')throw Error('Correction action blocked');
   measure.correction=correction;
   await evaluate(`document.querySelector('#buy-list-download')?.click();document.querySelector('#correction-download')?.click()`);await pause();
+  // Anchor jumps must land below the sticky status banner (r7 major: the 128px
+  // banner covered a 88px offset, and the skip target had no offset at all).
+  const jumpLink=await evaluate(`(()=>{const l=document.querySelector('a.jump-link');if(!l)return null;l.click();return true})()`);
+  if(jumpLink){await pause();
+    const jump=await evaluate(`(()=>{const b=document.querySelector('.masthead-status'),t=document.querySelector('#today');const rb=b.getBoundingClientRect(),rt=t.getBoundingClientRect();return {targetTop:Math.round(rt.top),bannerBottom:Math.round(rb.bottom),bannerPosition:getComputedStyle(b).position,scrollMargin:getComputedStyle(t).scrollMarginTop}})()`);
+    measure.jump=jump;
+    if(acceptance&&jump.targetTop<jump.bannerBottom)throw Error('Action jump lands under the sticky status banner: '+JSON.stringify(jump));
+  }
+  const skipLink=await evaluate(`(()=>{const l=document.querySelector('a.skip-link');if(!l)return null;l.focus();l.click();return true})()`);
+  if(skipLink){await pause();
+    const skip=await evaluate(`(()=>{const b=document.querySelector('.masthead-status'),t=document.querySelector('#household-review');const rb=b.getBoundingClientRect(),rt=t.getBoundingClientRect();return {targetTop:Math.round(rt.top),bannerBottom:Math.round(rb.bottom),scrollMargin:getComputedStyle(t).scrollMarginTop}})()`);
+    measure.skip=skip;
+    if(acceptance&&skip.targetTop<skip.bannerBottom)throw Error('Skip link lands under the sticky status banner: '+JSON.stringify(skip));
+  }
   measurements.push(measure);
  }
  const external=requests.filter(x=>/^https?:/.test(x));
@@ -124,27 +138,47 @@ try{
  try{exported=JSON.parse(await readFile(planFile,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
  if(exported&&(exported.approval_required!==true||exported.checkout_available!==false))throw Error('Unsafe export');
  if(exported&&acceptance){
-   // The draft is an artifact the household reads; it must mirror the page it was
-   // downloaded from. r6 B1: four engine rows restocked an item the page held.
-   const presentation=exported.presentation||{};
-   const list=presentation.action_list;
-   if(!Array.isArray(list))throw Error('Export has no presentation.action_list mirroring the page');
+   // The draft is an artifact the household reads; its top-level items[] is the
+   // page's action list. The engine cart plan is reference data under engine_plan
+   // (r7 blocker: four engine rows restocked an uncleared item and the held row
+   // was absent while a second mirror list looked correct).
+   if(String(exported.schema||'')!=='grocery-flywheel.dashboard-draft/2')throw Error('Export is not the action-list draft schema: '+exported.schema);
+   const buyInstruction=value=>/^(?!(?:do not|hold)\b).*\b(?:restock|rotate|buy|purchase)\b/i.test(String(value||''));
+   const list=exported.items;
+   if(!Array.isArray(list))throw Error('Export has no top-level items[] action list');
+   if(!exported.engine_plan||!Array.isArray(exported.engine_plan.items))throw Error('Export does not preserve the engine plan under engine_plan');
    const pageRows=(measurements[measurements.length-1].actionArea||{}).rows||[];
    if(!pageRows.length)throw Error('No rendered action rows to bind the export to');
-   if(list.length!==pageRows.length)throw Error('Exported action_list has '+list.length+' rows; page renders '+pageRows.length);
+   if(list.length!==pageRows.length)throw Error('Exported items[] has '+list.length+' rows; page renders '+pageRows.length);
    for(const row of pageRows){
      const entry=list.find(x=>x.item===row.item);
-     if(!entry)throw Error('Exported action_list omits a rendered row: '+row.item);
+     if(!entry)throw Error('Exported items[] omits a rendered row: '+row.item);
      if(entry.state!==row.verdict)throw Error('Exported state '+entry.state+' disagrees with rendered '+row.verdict+' for '+row.item);
      if(entry.cleared!==(row.verdict==='cleared'))throw Error('Exported cleared flag disagrees with the rendered mark for '+row.item);
-     if(!entry.cleared&&entry.display_action==='Restock')throw Error('Export restocks a non-cleared item: '+row.item);
+     if(entry.hold!==!entry.cleared)throw Error('Exported hold flag does not mark every non-cleared row: '+row.item);
+     if(!entry.cleared&&buyInstruction(entry.display_action))throw Error('Export carries a buy instruction on a non-cleared item: '+row.item);
      if(!entry.cleared&&!entry.qualifier)throw Error('Export drops the dietary qualifier for '+row.item);
-     if(entry.held&&(entry.cleared||entry.state!=='blocked'))throw Error('Exported hold is not a blocked row: '+JSON.stringify(entry));
+     if(entry.held_out_of_plan&&(entry.cleared||entry.state!=='blocked'))throw Error('Exported held_out_of_plan is not a blocked row: '+JSON.stringify(entry));
    }
-   const context=presentation.dietary_context||{};
+   // Every action-bearing entry outside the reference-only engine plan must obey
+   // the same rule; a second instruction collection cannot drift (r7 blocker).
+   const instructionScope=Object.fromEntries(Object.entries(exported).filter(([key])=>key!=='engine_plan'));
+   const bad=[];
+   const walk=(node,path)=>{
+     if(!node||typeof node!=='object')return;
+     if(Array.isArray(node)){node.forEach((value,index)=>walk(value,path+'['+index+']'));return;}
+     if(typeof node.display_action==='string'&&buyInstruction(node.display_action)&&node.cleared!==true)bad.push(path+':'+node.display_action);
+     for(const [key,value] of Object.entries(node))walk(value,path+'.'+key);
+   };
+   walk(instructionScope,'export');
+   if(bad.length)throw Error('A buy instruction appears on a non-cleared entry: '+JSON.stringify(bad));
+   const context=exported.dietary_context||{};
    const contextNames=(context.items||[]).map(x=>x.item);
    for(const row of pageRows)if(!contextNames.includes(row.item))throw Error('Dietary context omits an action row: '+row.item);
-   if(!String(presentation.action_list_note||'').includes('held=true'))throw Error('Export does not explain its hold flag');
+   if((context.action_items_total??-1)!==list.length)throw Error('dietary_context.action_items_total does not count the action list: '+context.action_items_total+' vs '+list.length);
+   if((context.engine_plan_items_total??-1)!==exported.engine_plan.items.length)throw Error('dietary_context.engine_plan_items_total does not count the engine plan');
+   if(!String(exported.items_note||'').includes('hold=true'))throw Error('Export does not explain its hold flag');
+   if(!String(context.state_legend?.not_evaluated?.meaning||'').includes('named no item on this page'))throw Error('Export legend conflates not-evaluated with the clearance wording');
  }
  const report={ok:true,mode,acceptance,artifactSha256,requests,errors,downloads,exported,measurements};
  await writeFile(resolve(output,'browser-report.json'),JSON.stringify(report,null,2));

@@ -91,7 +91,7 @@ def test_first_wow_cards_render():
     # No absolute candidate claim: the card states the real count (none here).
     assert "One sourcing candidate" not in html
     assert "None recorded" in html
-    assert "Recorded unit savings" in html
+    assert "Recorded savings" in html
     # A zero sum is not dressed up as a saving, and not shown as a $0.00 claim.
     assert "Potential Unit Savings" not in html
     assert "No unit savings" not in html
