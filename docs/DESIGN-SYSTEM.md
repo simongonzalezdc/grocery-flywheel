@@ -93,9 +93,9 @@ and never clears a row.
   dietarily cleared: resolve evidence first").
 - a **text severity token** in the section note (`Dietary evidence · warning
   tier` / `· blocked`), so state does not rest on hue alone;
-- a **jump link** to `#today` on every page with cart items, so the action is
-  reachable within an 844 px mobile first screen even when the attention panel
-  is tall;
+- a **jump link** directly under the counts at `--step-1` on every page with cart
+  items, so the action is the second thing read and remains reachable within an
+  844 px mobile first screen; the explanatory paragraph below is `--step--1`;
 - the five-state legend sits inside the evidence disclosure with the full
   evaluation table, so reference material does not push the action below the
   fold;
@@ -123,10 +123,11 @@ and never clears a row.
   a depletion warning never reads as a buy signal on its own.
 - the item↔evaluation join is casefolded and whitespace-collapsed for matching
   only; the engine's names are never rewritten.
-- the **status line** is sticky and stays visible while scrolling; it uses the
-  blocked count for grammar (`1 item is blocked`) and states the not-cleared
-  count (`12 of 13 items are not cleared`). The attention qualifier stays at
-  body size on mobile — it is never dropped to the smallest step.
+- the **status line** is sticky and stays visible while scrolling; it leads with
+  compact counts (`1 item blocked · 12 of 13 not cleared`), and its full verdict
+  sentence is hidden at ≥1440 px, where the attention panel states it once. The
+  attention qualifier stays at body size on mobile — it is never dropped to the
+  smallest step.
 
 Status colours: `blocked` and `needs_review` use `--brick`; `warn` uses
 `--ochre`; `safe` uses `--sage`; unknown/missing uses `--muted`. **`warn` must
@@ -151,7 +152,7 @@ One vocabulary per concept across every panel:
 |---|---|---|
 | priced, fresh | Priced | ink (`plain`) |
 | priced, stale with a check date | Stale price on file | ochre |
-| priced, stale with no check date | Price on file · date unknown | ochre |
+| priced, stale with no check date | Price · date unknown | ochre |
 | `unpriced` | No price captured | muted |
 | `estimated` | Estimated price | ochre |
 | `gift` | Gift — price optional | muted |
@@ -167,7 +168,7 @@ Sage is reserved for a dietary clearance. A price state never wears the sage
 token, so green cannot mean both "Cleared" and "Priced". Aggregates use five
 buckets derived from the rendered label — `priced · stale · price date unknown ·
 no price · estimated` (plus `gift` when present) — so an item whose own cell says
-"Price on file · date unknown" is counted as undated, never as stale.
+"Price · date unknown" is counted as undated, never as stale.
 
 The ledger, freshness panel and action list all read the freshness record, so a
 missing `items[*].pricing_status` no longer renders as "No price record" while
@@ -219,11 +220,12 @@ state and that nothing is bought or written back.
 - Legend, then a caption with elapsed days, remaining days, and consumed versus
   order value.
 - At-risk table: items at or past half life, with role, percent, a copper
-  drawdown bar (`--brick` at 80%+), spend and note. Captions are a
+  copper drawdown bar at every fraction, spend and note. Captions are a
   `.table-caption` paragraph above the table, never a `<caption>` squeezed by
   the table grid.
 - Arithmetic strip: observed depletion, estimated runway, order total.
-- Depletion never uses the success token; drawdown is copper/brick.
+- Depletion never uses the success token or the brick evidence token;
+  drawdown is copper at every fraction and the percentage text carries severity.
 
 ## Ledger contract
 
@@ -241,10 +243,11 @@ The reconciliation below repeats the arithmetic in words.
 ## Layout and contrast
 
 - Every table declares `table-layout:fixed` and an explicit `<colgroup>`; widths
-  are percentages that sum to 100. A 2,000-character unbroken token therefore
-  wraps inside its column instead of growing the table's min-content width. Long
-  notes open a `<details class="note-disclosure">`; captions live outside the
-  table.
+  are percentages that sum to 100 (ledger Item/Spend/Price/Dietary/Evidence =
+  26/13/23/17/21). A 2,000-character unbroken token therefore wraps inside its
+  column instead of growing the table's min-content width. Long notes and names
+  open a `<details class="note-disclosure">` (names clamp to two lines); Spend and
+  Price are right-aligned with the header; captions live outside the table.
 - Below 700px each row stacks into labelled blocks. A ledger record is a
   two-column grid; every value cell carries a `.cell-value` wrapper and every
   sub-line (`.cell-sub`, `.mark-detail`) is pinned to column 2, so the note sits

@@ -192,7 +192,7 @@ def run(bundle, scratch, offline):
     ledger = mixed_html.split("The ledger</h2>")[1].split("</article>")[0]
     require("not recorded" in ledger and "$0.00" not in ledger,
             "unpriced placeholder renders not recorded, never a fabricated $0.00")
-    require("Price on file · date unknown" in mixed_html,
+    require("Price · date unknown" in mixed_html,
             "a stale price with no check date is unknown, not asserted stale")
     require("set to block" in mixed_html
             and "data gap, not proof of a safety failure" not in mixed_html,
@@ -203,6 +203,13 @@ def run(bundle, scratch, offline):
     require("Homestyle waffles" in today and "class='action-hold'" in today
             and "Do not buy" in today,
             "blocked item absent from the cart plan is held in the action area")
+    require("data-hold='true'" in today and "data-hold='false'" in today,
+            "every held page row carries data-hold and the cleared row does not")
+    require("class='bar hot'" not in mixed_html and ".bar.hot" not in mixed_html,
+            "drawdown bars never borrow the brick dietary token")
+    require("Review 4 items before your next shop." in mixed_html
+            and "Review the 4 items that need a decision" in mixed_html,
+            "hero and action headline count the rows that need a decision")
     action_rows = [row.split("</li>")[0] for row in today.split("<li")[1:]]
     for row in action_rows:
         if "data-action-item=" not in row:
@@ -223,6 +230,35 @@ def run(bundle, scratch, offline):
     require(draft.get("schema") == "grocery-flywheel.dashboard-draft/2",
             "draft declares the action-list schema")
     require(len(action_list) == 5, "draft action list mirrors the five rendered rows")
+    require(all("engine_action" not in row for row in action_list),
+            "draft items[] never copies the raw engine action token")
+    keys = list(draft)
+    require(keys.index("items") < keys.index("items_note")
+            < keys.index("engine_plan_note") < keys.index("engine_plan")
+            and keys[-1] == "engine_plan",
+            "draft serializes items first and the reference plan last")
+    require("hold=true" in draft["items_note"] and "held_out_of_plan=true"
+            in draft["items_note"],
+            "draft documents both hold flags")
+    def _buy_violations(node, path="export"):
+        hits = []
+        if isinstance(node, dict):
+            for key in ("display_action", "engine_action", "action", "instruction",
+                        "buy", "restock"):
+                value = node.get(key)
+                if isinstance(value, str) and node.get("cleared") is not True:
+                    if re.search(r"^(?!(?:do not|hold)\b).*\b(?:restock|rotate|buy|purchase)\b",
+                                 value, re.I):
+                        hits.append(f"{path}:{key}")
+            for key, value in node.items():
+                hits.extend(_buy_violations(value, f"{path}.{key}"))
+        elif isinstance(node, list):
+            for index, value in enumerate(node):
+                hits.extend(_buy_violations(value, f"{path}[{index}]"))
+        return hits
+    scope = {key: value for key, value in draft.items() if key != "engine_plan"}
+    require(_buy_violations(scope) == [],
+            "no action-bearing entry outside engine_plan carries a buy instruction")
     engine_plan = draft.get("engine_plan") or {}
     require(len(engine_plan.get("items") or []) == 4,
             "engine cart plan is preserved verbatim under engine_plan")
@@ -266,6 +302,8 @@ def run(bundle, scratch, offline):
             "evidence drawer counts every evaluation")
     long_html = (scratch / "long-dashboard.html").read_text()
     require("Read the note (2520 characters)" in long_html, "long note is disclosed, not clipped")
+    require("<span class='clamp-2'>" in long_html and "Sanitized long item " in long_html,
+            "long item name is clamped with the full string disclosed")
     require(all("<colgroup>" in table for table in long_html.split("<table>")[1:]),
             "every table declares fixed column widths")
     empty_html = (scratch / "empty-dashboard.html").read_text()

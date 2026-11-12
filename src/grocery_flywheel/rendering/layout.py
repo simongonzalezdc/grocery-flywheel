@@ -98,17 +98,21 @@ p { max-width:var(--measure); }
   letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:8px;
   line-height:1.3; font-weight:600; }
 .attention-body { display:grid; grid-template-columns:minmax(6.5rem,auto) minmax(0,1fr);
-  gap:12px 28px; align-items:start; }
+  gap:12px 28px; align-items:center; }
 .attention-verdict h3 { margin-bottom:8px; }
 .attention-qualifier { font-size:var(--step-0); font-weight:600; color:var(--ink);
   margin:0 0 10px; max-width:60ch; }
 .attention-counts { font-size:var(--step--1); color:var(--muted); margin:0 0 8px;
   max-width:60ch; }
+.attention-support { font-size:var(--step--1); color:var(--muted); margin:8px 0 0;
+  max-width:60ch; }
 .jump-link { display:inline-flex; align-items:center; gap:.4em; min-height:44px;
-  margin:2px 0 0; font-weight:600; text-underline-offset:3px; }
+  margin:2px 0 0; font-size:var(--step-1); font-weight:600; text-underline-offset:3px; }
+.status-compact { display:inline; }
+.status-verdict { display:inline; }
 .attention-context { margin:8px 0 0; }
 .attention-context > summary { padding:6px 0; min-height:32px; font-size:var(--step--1); }
-#today, #household-review { scroll-margin-top:6.5rem; }
+#today, #household-review { scroll-margin-top:8rem; }
 .attention-notes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px 32px; margin-top:16px; padding-top:12px; border-top:1px solid var(--edge); }
 .attention-notes p { font-size:var(--step--1); color:var(--muted); margin:0; max-width:60ch; }
@@ -175,7 +179,13 @@ col { min-width:0; }
 .bar { display:block; height:8px; background:#E3D9C6; border:1px solid var(--edge-strong);
   border-radius:2px; overflow:hidden; min-width:3rem; box-sizing:border-box; }
 .bar > span { display:block; height:100%; background:var(--copper); }
-.bar.hot > span { background:var(--brick); }
+.money-col, th.money-col { text-align:right; }
+.clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; }
+@media (min-width:1440px) {
+  /* The attention panel already states the verdict on the same screen. */
+  .masthead-status .status-verdict { display:none; }
+}
 .reconcile { font-size:var(--step--1); color:var(--muted);
   border-left:3px solid var(--edge); padding:8px 12px; margin-top:14px; }
 button,select { font:inherit; color:var(--ink); background:var(--panel);
@@ -255,6 +265,9 @@ footer p { max-width:var(--measure); }
  /* The sticky status banner is ~128px tall at these widths; the anchor offset
     must clear it or the jump/skip target lands underneath (r7 major). */
  #today, #household-review { scroll-margin-top:9.5rem; }
+ .masthead-status { padding:8px 12px; }
+ /* Compact counts carry the state; the hero carries the sentence (r8 major). */
+ .masthead-status .status-verdict { display:none; }
  .grid { gap:28px 0; }
  .span-4,.span-6 { grid-column:span 12; }
  .attention { padding:14px 14px 16px; border-left-width:6px; }

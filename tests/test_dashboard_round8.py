@@ -26,6 +26,10 @@ from test_dashboard_round7 import mixed_state, sample_state
 ROOT = Path(__file__).resolve().parents[1]
 BUY_VERB = re.compile(
     r"^(?!(?:do not|hold)\b).*\b(?:restock|rotate|buy|purchase)\b", re.I)
+# Every key that can carry an action token. The r8 blocker was a guard that
+# scanned only ``display_action`` while ``engine_action`` still said "restock".
+ACTION_KEYS = ("display_action", "engine_action", "action", "instruction",
+               "buy", "restock")
 
 
 def visible(markup: str) -> str:
@@ -35,13 +39,17 @@ def visible(markup: str) -> str:
 
 
 def _violations(node: object, path: str = "export") -> list[str]:
-    """Every dictionary that carries a buy instruction without ``cleared``."""
+    """Every dictionary that carries a buy instruction without ``cleared``.
+
+    Scans every action-bearing key, not just ``display_action`` (r8 B1).
+    """
     if isinstance(node, dict):
         out: list[str] = []
-        action = node.get("display_action")
-        if (isinstance(action, str) and BUY_VERB.search(action)
-                and node.get("cleared") is not True):
-            out.append(path)
+        for key in ACTION_KEYS:
+            action = node.get(key)
+            if (isinstance(action, str) and BUY_VERB.search(action)
+                    and node.get("cleared") is not True):
+                out.append(f"{path}:{key}")
         for key, value in node.items():
             out.extend(_violations(value, f"{path}.{key}"))
         return out
@@ -72,6 +80,21 @@ def test_top_level_items_is_the_only_instruction_collection():
     assert action["Homestyle waffles"]["hold"] is True
     assert action["Homestyle waffles"]["held_out_of_plan"] is True
     assert action["Homestyle waffles"]["display_action"] == "Do not buy"
+    # Instruction-safe by construction: the raw engine token is not copied into
+    # the action collection (r8 B1).
+    assert all("engine_action" not in row for row in draft["items"])
+
+
+def test_engine_plan_serializes_last_after_the_authoritative_list():
+    a = analyze_state(mixed_state())
+    draft = _draft_payload(a, a["cart_plan"])
+    keys = list(draft)
+    assert keys.index("items") < keys.index("items_note")
+    assert keys.index("items_note") < keys.index("engine_plan_note")
+    assert keys.index("engine_plan_note") < keys.index("engine_plan")
+    assert keys[-1] == "engine_plan"
+    serialized = __import__("json").dumps(draft, sort_keys=False)
+    assert serialized.index('"items"') < serialized.index('"engine_plan"')
 
 
 def test_no_action_bearing_entry_outside_the_engine_plan_carries_a_buy_instruction():
@@ -80,9 +103,15 @@ def test_no_action_bearing_entry_outside_the_engine_plan_carries_a_buy_instructi
     scope = {key: value for key, value in draft.items() if key != "engine_plan"}
 
     assert _violations(scope) == []
-    # Positive control: the guard catches the exact r7 shape.
+    # Positive controls: the guard catches the r7 shape and the r8 engine_action
+    # shape, whichever key carries the instruction.
     assert _violations({"items": [{"item": "x", "display_action": "Restock",
-                                   "cleared": False}]}) == ["export.items[0]"]
+                                   "cleared": False}]}) == ["export.items[0]:display_action"]
+    assert _violations({"items": [{"item": "x", "display_action": "Hold restock",
+                                   "engine_action": "restock",
+                                   "cleared": False}]}) == ["export.items[0]:engine_action"]
+    assert _violations({"items": [{"item": "x", "action": "buy",
+                                   "cleared": False}]}) == ["export.items[0]:action"]
 
 
 def test_every_non_cleared_action_row_carries_hold_and_a_qualifier():
@@ -166,9 +195,32 @@ def test_action_headline_counts_cleared_and_held_rows():
     mixed = visible(render_dashboard(analyze_state(mixed_state())))
     assert "5 items · 1 cleared · 4 need a decision" in mixed
     assert "Review the 4 items that need a decision" in mixed
+    # One count vocabulary: the Today headline counts the rows that need a
+    # decision, and explains the cleared row that is also listed (r8 major).
+    assert "Review 4 items before your next shop." in mixed
+    assert "The 1 cleared item is listed for reference." in mixed
+    assert "Review 5 items" not in mixed
     sample = visible(render_dashboard(analyze_state(sample_state())))
     assert "4 items · none cleared" in sample
     assert "Review the 4 items that need a decision" in sample
+    assert "Review 4 items before your next shop." in sample
+
+
+def test_every_held_page_row_carries_the_same_marker():
+    markup = render_dashboard(analyze_state(mixed_state()))
+    today = markup.split("id='today'")[1].split("</article>")[0]
+    held_rows = re.findall(r"<li class='action-hold' data-action-item='([^']+)'"
+                           r" data-hold='true' data-held-out-of-plan='(true|false)'", today)
+    assert dict(held_rows) == {
+        "Homestyle waffles": "true",
+        "Rising crust pizza": "false",
+        "Espresso bricks": "false",
+        "Dish soap": "false",
+    }
+    # A held row is never rendered without the marker, and the cleared row is
+    # never marked held.
+    assert today.count("data-hold='true'") == 4
+    assert today.count("data-hold='false'") == 1
 
 
 def test_savings_copy_separates_recorded_from_modelled():

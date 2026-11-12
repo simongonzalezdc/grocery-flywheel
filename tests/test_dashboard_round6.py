@@ -261,12 +261,12 @@ def test_orphan_blocked_evaluation_is_surfaced_not_dropped():
 
 def test_stale_price_without_a_check_date_is_unknown_not_asserted():
     markup = render_dashboard(analyze_state(sample_state()))
-    assert "Price on file · date unknown" in markup
+    assert "Price · date unknown" in markup
     # The label is chosen from the row's own detail, not asserted from `stale`.
     from grocery_flywheel.rendering.panels import _price_state
     unknown, _css, _detail = _price_state({}, {
         "pricing_status": "priced", "pricing_stale": True, "age_label": "no check date"})
-    assert unknown == "Price on file · date unknown"
+    assert unknown == "Price · date unknown"
     stale, _css, _detail = _price_state({}, {
         "pricing_status": "priced", "pricing_stale": True, "age_label": "12 days"})
     assert stale == "Stale price on file"

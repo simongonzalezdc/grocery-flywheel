@@ -93,8 +93,10 @@ def test_warn_never_uses_the_success_token_and_depletion_is_not_success():
     assert warn_spans
     css = markup.split('<style>')[1].split('</style>')[0]
     assert '.bar > span { display:block; height:100%; background:var(--copper); }' in css
-    assert '.bar.hot > span { background:var(--brick); }' in css
-    assert "class='bar hot'" in markup  # 100% drawdown reads as depletion, not success
+    # Brick is reserved for dietary evidence; drawdown caps at copper (r8 B2).
+    assert '.bar.hot' not in css
+    assert "class='bar hot'" not in markup
+    assert "class='bar'" in markup and "data-pct='100'" in markup
 
 
 def test_cart_review_shows_each_reason_and_source_in_visible_prose():
@@ -130,11 +132,11 @@ def test_visible_copy_humanizes_engine_vocabulary_and_plurals():
 
 def test_ledger_carries_dietary_price_and_product_evidence_columns():
     markup = render_dashboard(analysis())
-    assert '<th>Price</th><th>Dietary</th><th>Product evidence</th>' in markup
+    assert '<th class=\'money-col\'>Price</th><th>Dietary</th><th>Product evidence</th>' in markup
     assert 'No label evidence' in markup
     # One price vocabulary: the ledger uses the freshness record's resolved state.
     # A stale row with no check date is unknown, not asserted stale.
-    assert 'Price on file · date unknown' in markup
+    assert 'Price · date unknown' in markup
     assert 'No price record' not in markup
     text = visible(markup)
     assert 'Priced' in text and 'No price captured' in text

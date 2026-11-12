@@ -13,6 +13,8 @@ These tests bind to the roast-committee findings on t_0cad5d1a (dashboard sha
 
 from __future__ import annotations
 
+import re
+
 import json
 from html.parser import HTMLParser
 from pathlib import Path
@@ -147,7 +149,7 @@ def test_one_price_vocabulary_across_ledger_and_freshness():
     assert 'No price record' not in text
     assert 'priced but stale' not in text
     # A stale price with no check date is unknown, not asserted stale.
-    assert 'Price on file · date unknown' in text
+    assert 'Price · date unknown' in text
     assert 'No price captured' in text
     assert 'Estimated price' in text
     assert 'Priced' in text
@@ -203,7 +205,7 @@ def _tags(markup):
 def test_ledger_has_five_columns_and_captions_stay_outside_tables():
     markup = render_dashboard(analysis())
     ledger = markup.split("The ledger</h2>")[1].split('</article>')[0]
-    assert ledger.count('<th>') == 5
+    assert len(re.findall(r"<th(?:\s|>)", ledger)) == 5
     assert '<caption' not in markup
     assert "<p class='table-caption'>" in ledger
     assert 'All 13 items share the same dietary display (Warning)' in visible(markup)

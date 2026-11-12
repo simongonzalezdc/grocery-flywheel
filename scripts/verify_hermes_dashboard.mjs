@@ -16,7 +16,7 @@ const artifactBytes=await readFile(resolve(artifact));
 const artifactSha256=createHash('sha256').update(artifactBytes).digest('hex');
 const captureManifest={artifact:resolve(artifact),artifactSha256,mode,captures:[]};
 const captureSection=async(sessionCall,sessionEval,name,selector,width)=>{
- const rect=await sessionEval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e)return null;e.scrollIntoView({block:'start'});const r=e.getBoundingClientRect();return {x:Math.max(0,Math.floor(r.left+scrollX)),y:Math.max(0,Math.floor(r.top+scrollY)),width:Math.min(Math.ceil(r.width),3000),height:Math.min(Math.ceil(r.height),12000)}})()`);
+ const rect=await sessionEval(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e)return null;e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect();return {x:Math.max(0,Math.floor(r.left+scrollX)),y:Math.max(0,Math.floor(r.top+scrollY)),width:Math.min(Math.ceil(r.width),3000),height:Math.min(Math.ceil(r.height),12000)}})()`);
  if(!rect||!rect.width||!rect.height)return;
  const shot=await sessionCall('Page.captureScreenshot',{format:'png',captureBeyondViewport:true,clip:{...rect,scale:1}});
  const buf=Buffer.from(shot.data,'base64');
@@ -73,16 +73,47 @@ try{
     if(authority.lies.length)throw Error('A mark token disagrees with the authority receipt: '+JSON.stringify(authority.lies));
     // The action area must carry every blocked item, and no non-cleared row may
     // present an unqualified action.
-    const actionArea=await evaluate(`(()=>{const t=document.querySelector('.today');if(!t)return null;const blocked=[...new Set([...document.querySelectorAll(".mark[data-verdict='blocked'][data-item]")].map(m=>m.dataset.item))];const text=t.textContent;const missing=blocked.filter(n=>!text.includes(n));const rows=[...t.querySelectorAll('li[data-action-item]')].map(li=>{const m=li.querySelector('.mark[data-verdict]');return {item:li.dataset.actionItem,verdict:m?m.dataset.verdict:'',qualifier:!!li.querySelector('.action-qualifier')}});return {blocked,missing,rows,unqualified:rows.filter(r=>r.verdict&&r.verdict!=='cleared'&&!r.qualifier)}})()`);
+    const actionArea=await evaluate(`(()=>{const t=document.querySelector('.today');if(!t)return null;const blocked=[...new Set([...document.querySelectorAll(".mark[data-verdict='blocked'][data-item]")].map(m=>m.dataset.item))];const text=t.textContent;const missing=blocked.filter(n=>!text.includes(n));const rows=[...t.querySelectorAll('li[data-action-item]')].map(li=>{const m=li.querySelector('.mark[data-verdict]');return {item:li.dataset.actionItem,verdict:m?m.dataset.verdict:'',qualifier:!!li.querySelector('.action-qualifier'),hold:li.dataset.hold,outOfPlan:li.dataset.heldOutOfPlan}});return {blocked,missing,rows,unqualified:rows.filter(r=>r.verdict&&r.verdict!=='cleared'&&!r.qualifier),badHold:rows.filter(r=>r.verdict&&(r.hold!==String(r.verdict!=='cleared'))),noHoldAttr:rows.filter(r=>r.hold!=='true'&&r.hold!=='false')}})()`);
     if(actionArea&&actionArea.missing.length)throw Error('A blocked item is absent from the action area: '+JSON.stringify(actionArea));
     if(actionArea&&actionArea.unqualified.length)throw Error('A non-cleared action has no dietary qualifier: '+JSON.stringify(actionArea));
+    if(actionArea&&actionArea.badHold.length)throw Error('A page row\u2019s data-hold disagrees with its verdict: '+JSON.stringify(actionArea.badHold));
+    if(actionArea&&actionArea.noHoldAttr.length)throw Error('A page row carries no data-hold flag: '+JSON.stringify(actionArea.noHoldAttr));
     measure.actionArea=actionArea;
+    // One count vocabulary: the hero jump and the action headline count the same rows.
+    const counts=await evaluate(`(()=>{const j=document.querySelector('a.jump-link'),h=document.querySelector('#today .card-headline');const num=s=>{const m=(s||'').match(/\\d+/);return m?Number(m[0]):null};return {jump:num(j&&j.textContent),headline:num(h&&h.textContent),jumpText:j?j.textContent.trim():null,headlineText:h?h.textContent.trim():null}})()`);
+    measure.counts=counts;
+    if(acceptance&&counts.jump!==null&&counts.headline!==null&&counts.jump!==counts.headline)throw Error('Two review counts on one page: '+JSON.stringify(counts));
+    // Brick is dietary evidence only: the drawdown bar is copper at every fraction.
+    const bars=await evaluate(`(()=>{const out=[...document.querySelectorAll('.bar > span')].map(s=>getComputedStyle(s).backgroundColor);const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules]}catch(e){return []}}).map(r=>r.cssText).join(' ');return {count:out.length,colors:[...new Set(out)],brickRule:/\\.bar\\.hot/.test(css)}})()`);
+    measure.bars=bars;
+    if(acceptance&&bars.brickRule)throw Error('A .bar.hot brick rule still exists: '+JSON.stringify(bars));
+    if(acceptance&&bars.colors.some(c=>c!=='rgb(162, 81, 42)'))throw Error('A drawdown bar is not copper: '+JSON.stringify(bars));
+    // Hero: the action sits directly under the counts, not after the paragraphs.
+    const hero=await evaluate(`(()=>{const q=s=>{const e=document.querySelector(s);return e?Math.round(e.getBoundingClientRect().top+scrollY):null};const fs=s=>{const e=document.querySelector(s);return e?parseFloat(getComputedStyle(e).fontSize):null};return {counts:q('.attention-counts'),jump:q('.jump-link'),qualifier:q('.attention-qualifier'),support:q('.attention-support'),jumpPx:fs('.jump-link'),bodyPx:fs('body')}})()`);
+    measure.hero=hero;
+    if(acceptance&&hero.jump!==null&&hero.counts!==null&&!(hero.counts<hero.jump))throw Error('Hero action is not under the counts: '+JSON.stringify(hero));
+    if(acceptance&&hero.jumpPx!==null&&hero.bodyPx!==null&&hero.jumpPx<=hero.bodyPx)throw Error('Hero action is not raised above body size: '+JSON.stringify(hero));
+    // Ledger craft: money right-aligned, Price cell not a three-line stack.
+    const ledgerCraft=await evaluate(`(()=>{const t=document.querySelector('.ledger table');if(!t)return null;const ths=[...t.querySelectorAll('th')];const price=ths[2],spend=ths[1];const first=t.querySelector('tbody tr');const priceCell=first&&first.children[2];return {spendAlign:spend?getComputedStyle(spend).textAlign:null,priceAlign:price?getComputedStyle(price).textAlign:null,priceCellAlign:priceCell?getComputedStyle(priceCell).textAlign:null,priceCellH:priceCell?Math.round(priceCell.getBoundingClientRect().height):null,label:(priceCell&&priceCell.textContent||'').replace(/\\s+/g,' ').trim(),maxLabelLines:Math.max(0,...[...t.querySelectorAll('tbody tr')].map(r=>{const m=r.children[2]&&r.children[2].querySelector('.cell-value .mark');return m?m.getClientRects().length:0}))}})()`);
+    measure.ledgerCraft=ledgerCraft;
+    if(acceptance&&ledgerCraft){
+      if(ledgerCraft.spendAlign!=='right'||ledgerCraft.priceAlign!=='right'||ledgerCraft.priceCellAlign!=='right')throw Error('Ledger money columns are not right-aligned: '+JSON.stringify(ledgerCraft));
+      if(ledgerCraft.priceCellH>120)throw Error('Ledger Price cell still stacks over three lines: '+JSON.stringify(ledgerCraft));
+      if(ledgerCraft.maxLabelLines>(width>=821?1:2))throw Error('Ledger Price label wraps beyond its column: '+JSON.stringify(ledgerCraft));
+    }
     // An unpriced placeholder is not a recorded zero.
     const ledgerSpend=await evaluate(`(()=>{const rows=[...document.querySelectorAll('.ledger tbody tr')].map(r=>r.textContent.replace(/\\s+/g,' '));return {rows:rows.length,fabricated:rows.filter(t=>/No price captured/.test(t)&&/\\$0\\.00/.test(t))}})()`);
     if(ledgerSpend.fabricated.length)throw Error('Unpriced ledger row renders a fabricated $0.00: '+JSON.stringify(ledgerSpend));
   }
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   await writeFile(resolve(output,`dashboard-${mode==='zoom'?'native-400pct':width}.png`),Buffer.from(shot.data,'base64'));
+  if(mode==='capture'&&(width===1440||width===390)){
+    // Cold-load: every disclosure still closed, nothing clicked or scrolled.
+    const cold=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});
+    const coldFile=`cold-full-${width}.png`;
+    await writeFile(resolve(output,coldFile),Buffer.from(cold.data,'base64'));
+    captureManifest.captures.push({file:coldFile,sha256:createHash('sha256').update(Buffer.from(cold.data,'base64')).digest('hex'),width,section:'cold-load-full-page'});
+  }
   await evaluate(`document.querySelectorAll('details').forEach(x=>x.open=true)`);await pause();
   const expanded=await evaluate(`(()=>{const w=innerWidth;const bad=[...document.querySelectorAll('body *')].map(e=>({e,r:e.getBoundingClientRect()})).filter(x=>x.r.right>w+1&&x.r.width>0).slice(0,4).map(x=>x.e.tagName+'.'+String(x.e.className||'').slice(0,50)+' right='+Math.round(x.r.right)+' w='+Math.round(x.r.width));return {width:w,scrollWidth:document.documentElement.scrollWidth,bad,unlabelledCells:[...document.querySelectorAll('td')].filter(x=>!x.dataset.label).length,unlabelledSelects:[...document.querySelectorAll('select')].filter(x=>!document.querySelector('label[for="'+x.id+'"]')).length}})()`);
   if(acceptance&&expanded.scrollWidth>expanded.width)throw Error('Expanded viewport overflow at '+width+'px: '+JSON.stringify(expanded));
@@ -144,9 +175,16 @@ try{
    // was absent while a second mirror list looked correct).
    if(String(exported.schema||'')!=='grocery-flywheel.dashboard-draft/2')throw Error('Export is not the action-list draft schema: '+exported.schema);
    const buyInstruction=value=>/^(?!(?:do not|hold)\b).*\b(?:restock|rotate|buy|purchase)\b/i.test(String(value||''));
+   const actionKeys=['display_action','engine_action','action','instruction','buy','restock'];
    const list=exported.items;
    if(!Array.isArray(list))throw Error('Export has no top-level items[] action list');
    if(!exported.engine_plan||!Array.isArray(exported.engine_plan.items))throw Error('Export does not preserve the engine plan under engine_plan');
+   // The raw engine token is never copied into the instruction collection (r8 B1).
+   for(const entry of list)if('engine_action' in entry)throw Error('Exported items[] carries a raw engine_action: '+entry.item);
+   // Top-down order: the authoritative list and its note come before the plan.
+   const keys=Object.keys(exported);
+   if(!(keys.indexOf('items')<keys.indexOf('items_note')&&keys.indexOf('items_note')<keys.indexOf('engine_plan_note')&&keys.indexOf('engine_plan_note')<keys.indexOf('engine_plan')))throw Error('Export serializes engine_plan before the action list: '+JSON.stringify(keys));
+   if(!String(exported.items_note||'').includes('held_out_of_plan'))throw Error('Export does not document held_out_of_plan');
    const pageRows=(measurements[measurements.length-1].actionArea||{}).rows||[];
    if(!pageRows.length)throw Error('No rendered action rows to bind the export to');
    if(list.length!==pageRows.length)throw Error('Exported items[] has '+list.length+' rows; page renders '+pageRows.length);
@@ -155,7 +193,8 @@ try{
      if(!entry)throw Error('Exported items[] omits a rendered row: '+row.item);
      if(entry.state!==row.verdict)throw Error('Exported state '+entry.state+' disagrees with rendered '+row.verdict+' for '+row.item);
      if(entry.cleared!==(row.verdict==='cleared'))throw Error('Exported cleared flag disagrees with the rendered mark for '+row.item);
-     if(entry.hold!==!entry.cleared)throw Error('Exported hold flag does not mark every non-cleared row: '+row.item);
+     if(entry.hold!==(row.verdict!=='cleared'))throw Error('Exported hold flag disagrees with the rendered row for '+row.item);
+     if(row.hold!==String(entry.hold))throw Error('Page data-hold disagrees with the export for '+row.item);
      if(!entry.cleared&&buyInstruction(entry.display_action))throw Error('Export carries a buy instruction on a non-cleared item: '+row.item);
      if(!entry.cleared&&!entry.qualifier)throw Error('Export drops the dietary qualifier for '+row.item);
      if(entry.held_out_of_plan&&(entry.cleared||entry.state!=='blocked'))throw Error('Exported held_out_of_plan is not a blocked row: '+JSON.stringify(entry));
@@ -168,6 +207,7 @@ try{
      if(!node||typeof node!=='object')return;
      if(Array.isArray(node)){node.forEach((value,index)=>walk(value,path+'['+index+']'));return;}
      if(typeof node.display_action==='string'&&buyInstruction(node.display_action)&&node.cleared!==true)bad.push(path+':'+node.display_action);
+     for(const key of actionKeys){const value=node[key];if(typeof value==='string'&&key!=='display_action'&&buyInstruction(value)&&node.cleared!==true)bad.push(path+':'+key+'='+value);}
      for(const [key,value] of Object.entries(node))walk(value,path+'.'+key);
    };
    walk(instructionScope,'export');

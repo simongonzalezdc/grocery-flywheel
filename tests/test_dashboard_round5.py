@@ -242,7 +242,7 @@ def test_money_never_fabricates_a_zero():
 
 def test_action_copy_and_labels_are_household_language():
     text = " ".join(render_dashboard(analysis()).replace("&middot;", " ").split())
-    assert "every item needs your approval before anything is bought." in text
+    assert "every purchasable item needs your approval before anything is bought." in text
     assert "every item is Needs your approval" not in text
     markup = render_dashboard(analysis())
     action = markup.split("Today &middot; before you shop</h2>")[1].split('</article>')[0]

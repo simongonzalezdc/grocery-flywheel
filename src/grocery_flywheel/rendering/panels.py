@@ -525,15 +525,20 @@ def _dietary(a: dict[str, Any]) -> str:
     return (f"<article class='panel span-12 {panel_class}'>{head}"
             f"<div class='attention-body'>{figure}"
             f"<div class='attention-verdict'><h3>{escape(headline)}</h3>"
-            f"{counts_html}"
+            f"{counts_html}{jump_html}"
             f"{qualifier_html}{orphan_note}"
-            f"<p>{escape(evidence_summary)}</p>{jump_html}</div></div>"
+            f"<p class='attention-support'>{escape(evidence_summary)}</p></div></div>"
             f"<div class='attention-notes'>{notes}</div>"
             f"{disclosure}</article>")
 
 
 def _status_line(a: dict[str, Any]) -> str:
-    """One persistent line above every section: the dietary state, in words."""
+    """One persistent line above every section: the dietary state, in words.
+
+    The compact counts are always visible; the full verdict sentence is hidden
+    at 1440px and wider, where the attention panel already states it (Design F1),
+    so the banner does not repeat the hero's sentence on the same screen.
+    """
     if not (a.get("dietary_profiles") or []):
         return ("<p class='masthead-status quiet'>No dietary profile configured. "
                 "Dietary checks are off until you add one.</p>")
@@ -542,15 +547,22 @@ def _status_line(a: dict[str, Any]) -> str:
     if verdict["blocked"]:
         count = verdict["blocked"]
         not_cleared = verdict["open"]
-        return (f"<p class='masthead-status alert'>{count} "
-                f"{_plural(count, 'item is', 'items are')} blocked by your household "
-                f"dietary restrictions; {not_cleared} of {total} "
-                f"{_plural(total, 'item is', 'items are')} not cleared. "
+        compact = (f"{count} {_plural(count, 'item')} blocked &middot; "
+                   f"{not_cleared} of {total} not cleared")
+        full = (f"{count} {_plural(count, 'item is', 'items are')} blocked by your "
+                f"household dietary restrictions; {not_cleared} of {total} "
+                f"{_plural(total, 'item is', 'items are')} not cleared.")
+        return (f"<p class='masthead-status alert'><span class='status-compact'>"
+                f"{compact}.</span><span class='status-verdict'> {full}</span> "
                 "<span class='status-note'>See Needs attention today.</span></p>")
     if verdict["open"]:
         cleared = (f"{verdict['cleared']} of {total} cleared; " if verdict["cleared"] else "")
-        return (f"<p class='masthead-status warn'>{cleared}{verdict['open']} of {total} "
-                f"{_plural(total, 'item is', 'items are')} not cleared. "
+        compact = (f"{verdict['cleared']} of {total} cleared &middot; {verdict['open']} "
+                   "of " + f"{total} not cleared")
+        full = (f"{cleared}{verdict['open']} of {total} "
+                f"{_plural(total, 'item is', 'items are')} not cleared.")
+        return (f"<p class='masthead-status warn'><span class='status-compact'>"
+                f"{compact}.</span><span class='status-verdict'> {full}</span> "
                 "<span class='status-note'>Dietary evidence needs attention before you "
                 "shop.</span></p>")
     return (f"<p class='masthead-status clear'>All {total} "
@@ -674,16 +686,20 @@ def _draft_payload(a: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
     """The downloaded draft: one authoritative action list plus the raw plan.
 
     ``items[]`` at the top level is the page's action list — the only
-    instruction-bearing collection in the file. The engine cart plan is preserved
-    verbatim under ``engine_plan``, which is reference data, not a shopping
-    instruction. A household can therefore read or print the download without
-    meeting an unqualified restock on an uncleared row (r6 B1, r7 blocker).
+    instruction-bearing collection in the file, and instruction-safe by
+    construction: it carries ``display_action`` only, never the engine's raw
+    action token (r8 B1: a needs-review row still carried ``engine_action:
+    "restock"`` while the guard only scanned ``display_action``).
+
+    The engine cart plan is preserved verbatim under ``engine_plan``, which is
+    reference data, not a shopping instruction. It serializes last, after
+    ``items`` and its note, so a top-down reader meets the authoritative list
+    first; ``engine_plan_note`` marks the reference block immediately before it.
     """
     action_rows, _verdict = _action_rows(a)
     items = [
         {"item": row["item"], "display_action": row["display_action"],
-         "engine_action": row["engine_action"], "state": row["state"],
-         "cleared": row["cleared"], "hold": row["hold"],
+         "state": row["state"], "cleared": row["cleared"], "hold": row["hold"],
          "held_out_of_plan": row["held_out_of_plan"],
          "qualifier": row["qualifier"], "reason": row["reason"],
          "source": row["source"]}
@@ -693,17 +709,22 @@ def _draft_payload(a: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
         "schema": "grocery-flywheel.dashboard-draft/2",
         "note": ("Download-only draft. items[] is the action list this page shows; "
                  "nothing is bought and nothing is written back to your state file."),
-        "mode": plan.get("mode"),
-        "approval_required": plan.get("approval_required"),
-        "checkout_available": plan.get("checkout_available"),
         "items": items,
         "items_note": (
             "items[] is the page's action list and the only instruction-bearing "
-            "collection here. hold=true means do not buy; cleared=true is required "
-            "before restocking. engine_plan below is the engine's cart plan preserved "
-            "verbatim, including its raw source slugs, and is not a shopping "
-            "instruction."),
+            "collection here. hold=true means do not buy for any reason — blocked, "
+            "needs review, warning, or no evaluation. held_out_of_plan=true is the "
+            "narrower fact that the engine cart plan has no row for the item; it is "
+            "a subset of hold, not a different instruction. cleared=true is required "
+            "before restocking."),
+        "mode": plan.get("mode"),
+        "approval_required": plan.get("approval_required"),
+        "checkout_available": plan.get("checkout_available"),
         "dietary_context": _dietary_context(a),
+        "engine_plan_note": (
+            "Reference data. engine_plan below is the engine's cart plan preserved "
+            "verbatim, including raw action tokens and source slugs. It is not a "
+            "shopping instruction; use items[] above."),
         "engine_plan": json.loads(json.dumps(plan)),
     }
 
@@ -753,35 +774,30 @@ def _cart_plan(a: dict[str, Any]) -> str:
     rows = []
     for index, row in enumerate(action_rows, 1):
         mark = _dietary_mark(_verdict_for(verdict, row["item"]))
-        if row["held_out_of_plan"]:
-            rows.append(
-                f"<li class='action-hold' data-action-item='{escape(row['item'], quote=True)}'>"
-                f"<span class='action-num'>{index:02d}</span>"
-                f"<span class='action-item'>{escape(row['item'])}"
-                f"<span class='action-why'>{escape(row['why'])}</span>"
-                f"<span class='action-diet'><span class='eyebrow-inline'>Dietary</span> "
-                f"{mark}</span></span>"
-                "<span class='action-source'><span class='eyebrow-inline'>Action</span> "
-                f"{escape(row['display_action'])} "
-                f"<span class='action-qualifier'>{escape(row['qualifier'])}</span>"
-                "</span></li>")
-            continue
+        # Every held row carries the same marker on the page, not only the
+        # out-of-plan one; `held_out_of_plan` stays a separate fact (r8 major).
+        classes = " class='action-hold'" if row["hold"] else ""
+        hold_attr = " data-hold='true'" if row["hold"] else " data-hold='false'"
+        plan_attr = " data-held-out-of-plan='true'" if row["held_out_of_plan"] \
+            else " data-held-out-of-plan='false'"
+        source_html = ("" if row["held_out_of_plan"]
+                       else "<br><span class='eyebrow-inline'>Source</span> "
+                            f"{escape(row['source'])}")
         qualifier_html = (f"<span class='action-qualifier'>{escape(row['qualifier'])}</span>"
                           if row["qualifier"] else "")
         rows.append(
-            f"<li data-action-item='{escape(row['item'], quote=True)}'>"
+            f"<li{classes} data-action-item='{escape(row['item'], quote=True)}'"
+            f"{hold_attr}{plan_attr}>"
             f"<span class='action-num'>{index:02d}</span>"
-            f"<span class='action-item'>{escape(row['item'])}"
+            f"<span class='action-item'>{_name_cell(row['item'])}"
             f"<span class='action-why'>{escape(row['why'])}</span>"
             f"<span class='action-diet'><span class='eyebrow-inline'>Dietary</span> "
             f"{mark}</span></span>"
             "<span class='action-source'><span class='eyebrow-inline'>Action</span> "
-            f"{escape(row['display_action'])} {qualifier_html}<br>"
-            f"<span class='eyebrow-inline'>Source</span> "
-            f"{escape(row['source'])}</span></li>")
+            f"{escape(row['display_action'])} {qualifier_html}{source_html}</span></li>")
     draft = _draft_payload(a, plan)
     export = ("<button class='primary' id='buy-list-download' type='button' data-plan='"
-              + escape(json.dumps(draft, sort_keys=True), quote=True) + "'>Download draft JSON</button>"
+              + escape(json.dumps(draft, sort_keys=False), quote=True) + "'>Download draft JSON</button>"
               "<script>document.getElementById('buy-list-download').addEventListener('click', function () {"
               "var url = URL.createObjectURL(new Blob([this.dataset.plan], {type:'application/json'}));"
               "var link = document.createElement('a'); link.href = url; link.download = 'buy-list.json';"
@@ -792,7 +808,7 @@ def _cart_plan(a: dict[str, Any]) -> str:
               "written back to your state file.</span>")
 
     approval = _label(APPROVAL_LABELS, (plan.get("items") or [{}])[0].get("approval_state"))
-    approval_phrase = ("every item needs your approval before anything is bought."
+    approval_phrase = ("every purchasable item needs your approval before anything is bought."
                        if approval == APPROVAL_LABELS["needs_human_approval"]
                        else f"approval state: {escape(approval)}.")
     ledger_count = len(a.get("items") or [])
@@ -806,9 +822,20 @@ def _cart_plan(a: dict[str, Any]) -> str:
     if held_count:
         blocked_note = (f" {held_count} {_plural(held_count, 'item is', 'items are')} blocked "
                         "by dietary evidence and must not be bought.")
+    # One count vocabulary with the attention jump: both count the rows that
+    # need a decision. The cleared row is in the list, so say why (r8 major).
+    if not held_actions:
+        headline = (f"All {total_actions} {_plural(total_actions, 'item is', 'items are')} "
+                    "cleared; nothing needs a decision.")
+    else:
+        headline = (f"Review {held_actions} {_plural(held_actions, 'item')} "
+                    "before your next shop.")
+        if cleared_actions:
+            headline += (f" The {cleared_actions} cleared "
+                         f"{_plural(cleared_actions, 'item is', 'items are')} listed for "
+                         "reference.")
     return (f"<article class='panel span-12 today' id='today'>{head}"
-            f"<h3 class='card-headline'>Review {total_actions} "
-            f"{_plural(total_actions, 'item')} before your next shop.{blocked_note}</h3>"
+            f"<h3 class='card-headline'>{headline}{blocked_note}</h3>"
             "<p class='lede'>Nothing here is bought for you. There is no checkout, no "
             "retailer login and no basket to send — this list is yours to take to the "
             "shelf.</p>"
@@ -862,6 +889,21 @@ def _ruler(a: dict[str, Any]) -> str:
             "</div></div>")
 
 
+def _name_cell(name: object) -> str:
+    """A two-line-clamped name, with the full string behind the disclosure.
+
+    The long fixture's 2 000-character name stays inside its column either way;
+    clamping stops one row from towering over the page (Design F6/r8 minor).
+    """
+    text = str(name)
+    if len(text) <= 90:
+        return escape(text)
+    preview = text[:90].rstrip() + "…"
+    return (f"<details class='note-disclosure'><summary>"
+            f"<span class='clamp-2'>{escape(preview)}</span></summary>"
+            f"<p class='muted'>{escape(text)}</p></details>")
+
+
 def _note_cell(text: object) -> str:
     note = str(text or "No note recorded.")
     if len(note) <= 160:
@@ -879,7 +921,7 @@ def _at_risk(a: dict[str, Any]) -> str:
     verdict = _dietary_verdict(a)
     body = "".join(
         f"<tr><td data-label='Item'><span class='cell-value'>"
-        f"{escape(str(item['name']))}</span></td>"
+        f"{_name_cell(item['name'])}</span></td>"
         f"<td data-label='Role' data-role='{escape(str(item.get('role') or ''))}'>"
         f"<span class='cell-value'>{escape(_role(item.get('role')))}</span></td>"
         f"<td data-label='Consumed'><span class='cell-value'>"
@@ -896,8 +938,8 @@ def _at_risk(a: dict[str, Any]) -> str:
     )
     return ("<p class='table-caption'>Items at or past half their observed life. A restock "
             "of any row waits for its dietary state.</p>"
-            "<table class='at-risk'><colgroup><col style='width:22%'><col style='width:13%'>"
-            "<col style='width:9%'><col style='width:14%'><col style='width:10%'>"
+            "<table class='at-risk'><colgroup><col style='width:21%'><col style='width:12%'>"
+            "<col style='width:11%'><col style='width:14%'><col style='width:10%'>"
             "<col style='width:16%'><col style='width:16%'></colgroup>"
             "<thead><tr><th>Item</th><th>Role</th><th>Consumed</th><th>Drawn down</th>"
             "<th>Spend</th><th>Dietary</th><th>Note</th></tr></thead>"
@@ -952,10 +994,11 @@ def _runway(a: dict[str, Any]) -> str:
                 "how many days of cover are left.</p>"
                 f"{_runway_math(a)}</article>")
     basis = (
-        "<p class='basis-note'><b>How this is estimated:</b> the full order total "
-        f"({_money(order_total)}), including {_money(unattributed)} not attributed to a "
-        f"tracked item, spread dollar-weighted over {_days(elapsed)} observed "
-        f"{_plural(int(elapsed) or 1, 'day')}. It is not a pantry audit.</p>")
+        "<p class='basis-note'><b>How this is estimated:</b> for the runway, the full "
+        f"order total ({_money(order_total)}), including {_money(unattributed)} not "
+        f"attributed to a tracked item, is spread dollar-weighted over "
+        f"{_days(elapsed)} observed {_plural(int(elapsed) or 1, 'day')}. Observed "
+        f"depletion on its own is {_money(consumed)}. It is not a pantry audit.</p>")
     caption = (
         "<div class='ruler-caption'>"
         f"<span><b>{_days(elapsed)} days</b> observed since "
@@ -1046,7 +1089,7 @@ def _price_state(item: dict[str, Any], fresh: dict[str, Any] | None) -> tuple[st
             detail = ""
         elif stale and detail in ("", "no check date"):
             # A stale price with no check date is unknown, not asserted stale.
-            return ("Price on file · date unknown", "warn", "staleness unknown")
+            return ("Price · date unknown", "warn", "staleness unknown")
     else:
         status = str(item.get("pricing_status") or "").strip()
         if not status:
@@ -1082,7 +1125,7 @@ def _price_buckets(a: dict[str, Any]) -> dict[str, int]:
     key_by_label = {
         "Priced": "priced",
         "Stale price on file": "stale",
-        "Price on file · date unknown": "unknown",
+        "Price · date unknown": "unknown",
         "No price captured": "unpriced",
         "Estimated price": "estimated",
         "Gift — price optional": "gift",
@@ -1118,6 +1161,11 @@ def _spend_cell(item: dict[str, Any], fresh: dict[str, Any] | None) -> str:
         pct = float(item.get("consumed_fraction") or 0) * 100
         return ("<span class='cell-value'>not recorded</span>"
                 f"<span class='cell-sub'>unpriced placeholder &middot; {pct:.0f}% consumed</span>")
+    if label == "No price captured":
+        # A recorded spend with no unit price is not a contradiction: say which
+        # number exists and which one does not (r8 minor, grapefruit juice).
+        return (f"<span class='cell-value'>{_money(spend)}</span>"
+                "<span class='cell-sub'>recorded spend &middot; unit price not captured</span>")
     return (f"<span class='cell-value'>{_money(spend)}</span>"
             f"<span class='cell-sub'>{float(item.get('consumed_fraction') or 0) * 100:.0f}% consumed</span>")
 
@@ -1151,11 +1199,11 @@ def _items(a: dict[str, Any]) -> str:
         caption += (f" All {len(items)} items share the same dietary display "
                     f"({DIETARY_STATES[only][1]}); the attention panel explains why.")
     body = "".join(
-        f"<tr><td><span class='cell-value'>{escape(str(item['name']))}</span>"
+        f"<tr><td><span class='cell-value'>{_name_cell(item['name'])}</span>"
         f"<span class='cell-sub'>{escape(_role(item.get('role')))} &middot; "
         f"{escape(humanize_key(item.get('category') or ''))}</span></td>"
-        f"<td>{_spend_cell(item, fresh.get(str(item.get('name'))))}</td>"
-        f"<td><span class='cell-value'>{_price_mark(item, fresh.get(str(item.get('name'))))}</span></td>"
+        f"<td class='money-col'>{_spend_cell(item, fresh.get(str(item.get('name'))))}</td>"
+        f"<td class='money-col'><span class='cell-value'>{_price_mark(item, fresh.get(str(item.get('name'))))}</span></td>"
         f"<td><span class='cell-value'>{_dietary_mark(_verdict_for(verdict, str(item.get('name'))))}</span></td>"
         f"<td><span class='cell-value'>{_evidence_drawer(item)}</span></td></tr>"
         for item in items
@@ -1166,9 +1214,10 @@ def _items(a: dict[str, Any]) -> str:
         f"<b>{_money(unattributed)}</b> of the order total is not attributed to any "
         "tracked item, so totals and runway are estimates, not a reconciliation.</p>")
     table = (
-        "<table><colgroup><col style='width:30%'><col style='width:13%'>"
-        "<col style='width:17%'><col style='width:21%'><col style='width:19%'>"
-        "</colgroup><thead><tr><th>Item</th><th>Spend</th><th>Price</th>"
+        "<table><colgroup><col style='width:26%'><col style='width:13%'>"
+        "<col style='width:23%'><col style='width:17%'><col style='width:21%'>"
+        "</colgroup><thead><tr><th>Item</th><th class='money-col'>Spend</th>"
+        "<th class='money-col'>Price</th>"
         "<th>Dietary</th><th>Product evidence</th></tr></thead>"
         f"<tbody>{body}</tbody></table>")
     return (f"<article class='panel span-12 ledger'>{head}"
@@ -1549,9 +1598,12 @@ def _pulses(a: dict[str, Any]) -> str:
 
 
 def _bar(fraction: float) -> str:
+    """Depletion bar. Brick is reserved for dietary evidence, so drawdown caps
+    at copper at every fraction; the percentage text carries the severity (r8 B2).
+    """
     pct = max(0, min(100, round(float(fraction) * 100)))
-    css = "bar hot" if pct >= 80 else "bar"
-    return (f"<span class='{css}' role='img' aria-label='{pct}% consumed'>"
+    return (f"<span class='bar' role='img' aria-label='{pct}% consumed' "
+            f"data-pct='{pct}'>"
             f"<span style='width:{pct}%'></span></span>")
 
 
@@ -1596,7 +1648,7 @@ def _responsive_table_labels(document: str) -> str:
     """
     def table(match: re.Match[str]) -> str:
         markup = match.group(0)
-        labels = re.findall(r"<th>(.*?)</th>", markup, re.S)
+        labels = re.findall(r"<th(?:\s[^>]*)?>(.*?)</th>", markup, re.S)
 
         def row(match: re.Match[str]) -> str:
             index = 0
