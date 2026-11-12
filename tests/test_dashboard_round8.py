@@ -178,7 +178,7 @@ def test_role_rows_add_to_the_figure_the_runway_prints():
 
 def test_layout_offsets_clear_the_sticky_banner_and_stack_wide_tables():
     layout = (ROOT / "src/grocery_flywheel/rendering/layout.py").read_text()
-    assert "#today, #household-review { scroll-margin-top:6.5rem; }" in layout
+    assert "#today, #household-review { scroll-margin-top:8rem; }" in layout
     assert "scroll-margin-top:9.5rem" in layout
     assert "@media (max-width:820px)" in layout
     assert "@media (max-width:700px)" not in layout
