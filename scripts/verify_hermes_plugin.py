@@ -136,6 +136,36 @@ def run(bundle, scratch, offline):
     require(injected.get("ok"), "injection fixture rendered with trusted interactions")
     injected_path = home / "plugin-data/grocery-flywheel" / injected["data"]["artifact"]
     shutil.copyfile(injected_path, scratch / "injected-dashboard.html")
+    # Real native dispatch for empty, no-profile, long-content and consent variants.
+    variants = {}
+    empty = json.loads(sample)
+    empty["items"] = []
+    empty["dietary_profiles"] = []
+    empty["order"]["total"] = 0
+    variants["empty"] = empty
+    long_state = json.loads(sample)
+    long_state["items"][-1]["name"] = "Sanitized long item " + "x" * 2000
+    long_state["items"][-1]["notes"] = "Sanitized long note " + "y" * 2500
+    variants["long"] = long_state
+    for label, state in variants.items():
+        response = call("grocery_dashboard", {"state_json": json.dumps(state)})
+        require(response.get("ok"), label + " native dashboard")
+        output = home / "plugin-data/grocery-flywheel" / response["data"]["artifact"]
+        shutil.copyfile(output, scratch / (label + "-dashboard.html"))
+    for consent, visible in ((None, False), ({}, False), ({"correction_telemetry": "disabled"}, False),
+                             ({"correction_telemetry": "local_only"}, True),
+                             ({"correction_telemetry": "hosted_opt_in"}, True)):
+        state = json.loads(sample)
+        if consent is None:
+            state.pop("consent", None)
+        else:
+            state["consent"] = consent
+        response = call("grocery_dashboard", {"state_json": json.dumps(state)})
+        require(response.get("ok"), "consent variant native dashboard")
+        output = home / "plugin-data/grocery-flywheel" / response["data"]["artifact"]
+        require(('id="correction-item"' in output.read_text()) == visible, "consent visibility")
+    results["malformed_state"] = call("grocery_dashboard", {"state_json": "{"})
+    require(results["malformed_state"]["ok"] is False, "malformed state returns error not dashboard")
     # Same-process profile rebinding via the supported effective-home resolver.
     second = scratch / "profile-b"
     second.mkdir(mode=0o700)
