@@ -148,6 +148,14 @@ def test_one_price_vocabulary_across_ledger_and_freshness():
     assert 'Priced' in text
 
 
+def test_ledger_without_a_freshness_record_keeps_the_same_words():
+    a = analysis()
+    a.pop('freshness', None)
+    text = visible(render_dashboard(a))
+    assert 'No price record' not in text
+    assert 'No price captured' in text
+
+
 def test_runway_states_its_basis_beside_the_figure():
     text = visible(render_dashboard(analysis()))
     assert 'How this is estimated' in text

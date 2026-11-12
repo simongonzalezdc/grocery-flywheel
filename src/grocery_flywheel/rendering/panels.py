@@ -616,7 +616,7 @@ def _price_state(item: dict[str, Any], fresh: dict[str, Any] | None) -> tuple[st
     else:
         status = str(item.get("pricing_status") or "").strip()
         if not status:
-            return ("No price record", "neutral", "")
+            return ("No price captured", "neutral", "")
         stale = False
         detail = ""
     label, css = _price_label(status, stale)
