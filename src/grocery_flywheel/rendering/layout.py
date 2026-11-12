@@ -125,6 +125,9 @@ p { max-width:var(--measure); }
 .action-item { font-weight:600; }
 .action-why { display:block; font-weight:400; font-size:var(--step--1); color:var(--muted); }
 .action-source { font-size:var(--step--1); color:var(--muted); text-align:right; }
+.action-qualifier { display:block; color:var(--brick); font-weight:600; }
+.action-hold { border-left:3px solid var(--brick); padding-left:0.9rem !important; }
+.action-hold .action-num { color:var(--brick); font-weight:700; }
 .btn-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:16px; }
 .today-meta { font-size:var(--step--1); color:var(--muted); border-top:1px solid var(--edge);
   margin:14px 0 0; padding-top:12px; max-width:none; }

@@ -44,6 +44,20 @@ The engine returns `dietary_status` per item and `evidence_status` per
 evaluation. The dashboard derives its own per-item result map from
 `dietary_evaluations`; it never trusts an item's `dietary_status` on its own.
 
+**One verdict authority.** `_item_verdict(name, evaluation)` computes every
+field a dietary surface may render: `state`, `token`, `label`, `detail`,
+`cleared`, `result`, `evidence`, `tier` and `reason`. `_dietary_mark(verdict)`
+accepts nothing else — it cannot see an item's `dietary_status`, a price field
+or a missing value, so no surface can infer a clearance of its own choosing.
+The ledger, action list, substitutions, sourcing rows, easy-food rotation,
+evidence drawer, headline counts and the downloadable draft all render that
+same object. The invariant, asserted over every fixture and every viewport, is
+`mark_token == cleared` iff `evaluation.result == safe` AND
+`evidence_status == current`; one item must show one verdict everywhere it
+appears. An evaluation whose item name matches no item on the page is never
+silently dropped: it is surfaced as **not evaluated — evidence did not match**
+and never clears a row.
+
 - `{open}/{total}` with the caption **"items blocked or not cleared"** when any
   item is blocked, otherwise "items unverified". *open* counts every item that is
   not cleared: `blocked`, `needs_review`, `warn`, unknown, or **no evaluation at
@@ -66,8 +80,17 @@ evaluation. The dashboard derives its own per-item result map from
 - profile label and restriction (`value`, `safety_tier`, `behaviour`) in a
   `.attention-context` disclosure, so the mobile first screen is the verdict and
   the action, not two explanatory paragraphs; the qualifier stays visible at
-  body size directly under the verdict headline: **"Missing evidence is a data
-  gap, not proof of a safety failure."**
+  body size directly under the verdict headline and is selected from the
+  configured behaviour: under **warn**, "Missing evidence is a data gap, not
+  proof of a safety failure."; under **block** (or a critical/allergy tier),
+  "Missing evidence is treated as not cleared: the engine never clears an item
+  it cannot verify." The engine-rule paragraph and the restriction note are
+  selected the same way — a blocking profile never reuses the warn wording.
+- the action area carries **every blocked item**, including one the engine's
+  cart plan does not name: it renders a held row, `Do not buy — blocked:
+  <engine reason>`. No non-cleared row may present an unqualified action; each
+  next to it carries its dietary qualifier (for example "Restock — not
+  dietarily cleared: resolve evidence first").
 - a **text severity token** in the section note (`Dietary evidence · warning
   tier` / `· blocked`), so state does not rest on hue alone;
 - a **jump link** to `#today` on every page with cart items, so the action is
@@ -103,10 +126,18 @@ One vocabulary per concept across every panel:
 | price state (resolved by `freshness.item_freshness`) | label | token |
 |---|---|---|
 | priced, fresh | Priced | ink (`plain`) |
-| priced, stale | Stale price on file | ochre |
+| priced, stale with a check date | Stale price on file | ochre |
+| priced, stale with no check date | Price on file · date unknown | ochre |
 | `unpriced` | No price captured | muted |
 | `estimated` | Estimated price | ochre |
 | `gift` | Gift — price optional | muted |
+
+An unpriced placeholder with no recorded amount renders its spend cell as
+**not recorded**, never `$0.00`; a recorded zero (priced, estimated or gift)
+still renders `$0.00`. The sourcing card states the real number of modelled
+saving rows in the engine's research (never an absolute "one candidate"), and
+recent pulses are labelled **unverified note** with a caption saying they are
+not reconciled against the ledger or the depletion model.
 
 Sage is reserved for a dietary clearance. A price state never wears the sage
 token, so green cannot mean both "Cleared" and "Priced". Aggregates use four
@@ -221,8 +252,12 @@ used by every artifact.
   ruler/legend/bar, word-intact cells, a five-column ledger *when a ledger table
   exists*, the empty ledger's own copy when it does not, the one action
   starting above the 900px fold at desktop width, a visible `#today` jump link
-  on mobile, and no `.mark.ok` for an item whose evaluation is not
-  `safe`+`current`.
+  on mobile, **one dietary verdict per item across every surface**, a
+  `.mark.ok` only where the authority says `cleared` with `safe`+`current`,
+  **every blocked item present in the action area** (including a cart-absent
+  hold), **no non-cleared action without its qualifier**, and no `$0.00` on a
+  row whose price state is `No price captured`. Zoom mode runs on **all six**
+  fixtures, not only the sample.
 - Long content is a standard fixture: a 2,000-character item name and a
   2,500-character note must not widen any table past its panel; a long note is
   disclosed, and the page gains no horizontal overflow.

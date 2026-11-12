@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import socket
 import subprocess
@@ -178,11 +179,37 @@ def run(bundle, scratch, offline):
     require("data-raw-status='safe'" in mixed_html, "mixed ledger shows an explicit clearance")
     require("Not evaluated" in mixed_html, "mixed ledger marks unevaluated items neutral")
     counts = mixed_html.split("class='attention-counts'")[1].split("</p>")[0]
-    require("cleared" in counts and "blocked" in counts,
+    require("1 of 13 cleared" in counts and "1 blocked" in counts,
             "mixed fixture states exact cleared and blocked counts")
-    require(mixed_html.count("class='mark ok' data-raw-status") ==
-            mixed_html.count("class='mark ok' data-raw-status='safe' data-result='safe'"),
-            "every sage clearance mark is backed by a safe evaluation")
+    # Authority invariant: every sage mark carries an explicit safe+current receipt.
+    ok_spans = [span.split(">")[0] for span in mixed_html.split("class='mark ok'")[1:]]
+    ok_spans = [span for span in ok_spans if "data-verdict=" in span]
+    require(ok_spans and all("data-verdict='cleared'" in span
+                             and "data-result='safe'" in span
+                             and "data-evidence='current'" in span for span in ok_spans),
+            "every sage clearance mark is an explicit safe+current verdict")
+    ledger = mixed_html.split("The ledger</h2>")[1].split("</article>")[0]
+    require("not recorded" in ledger and "$0.00" not in ledger,
+            "unpriced placeholder renders not recorded, never a fabricated $0.00")
+    require("Price on file · date unknown" in mixed_html,
+            "a stale price with no check date is unknown, not asserted stale")
+    require("set to block" in mixed_html
+            and "data gap, not proof of a safety failure" not in mixed_html,
+            "restriction copy derives from the configured behaviour")
+    require("Sourcing candidates" in mixed_html and "2 modelled saving rows" in mixed_html,
+            "sourcing card states the real candidate count")
+    today = mixed_html.split("id='today'")[1].split("</article>")[0]
+    require("Homestyle waffles" in today and "class='action-hold'" in today
+            and "Do not buy" in today,
+            "blocked item absent from the cart plan is held in the action area")
+    action_rows = [row.split("</li>")[0] for row in today.split("<li")[1:]]
+    for row in action_rows:
+        if "data-action-item=" not in row:
+            continue
+        verdict = re.search(r"data-verdict='([^']+)'", row)
+        if verdict and verdict.group(1) != "cleared":
+            require("class='action-qualifier'" in row,
+                    "non-cleared action carries its dietary qualifier")
     require("Dietary evidence &middot; blocked" in mixed_html,
             "mixed fixture names its severity in text")
     long_html = (scratch / "long-dashboard.html").read_text()

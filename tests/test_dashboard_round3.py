@@ -121,8 +121,11 @@ def test_safe_requires_current_evidence_and_a_dietary_evaluation():
     assert '1/2' not in text  # figure is "not cleared" (2 of 3)
     assert '2/3' in text
     assert '1 item is blocked by your household dietary restrictions.' in text
-    assert "class='mark ok' data-raw-status='safe'" in markup
-    assert "class='mark missing' data-raw-status='blocked'" in markup
+    ok_spans = [span for span in markup.split("class='mark ok'")[1:]
+                if "data-raw-status='safe'" in span.split('>')[0]]
+    blocked_spans = [span for span in markup.split("class='mark missing'")[1:]
+                     if "data-raw-status='blocked'" in span.split('>')[0]]
+    assert ok_spans and blocked_spans
     assert 'Needs review' in text
 
 
@@ -142,7 +145,8 @@ def test_one_price_vocabulary_across_ledger_and_freshness():
     text = visible(markup)
     assert 'No price record' not in text
     assert 'priced but stale' not in text
-    assert 'Stale price on file' in text
+    # A stale price with no check date is unknown, not asserted stale.
+    assert 'Price on file · date unknown' in text
     assert 'No price captured' in text
     assert 'Estimated price' in text
     assert 'Priced' in text

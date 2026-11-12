@@ -66,6 +66,19 @@ try{
   if(acceptance){
     const lies=await evaluate(`(()=>{const out=[];for(const m of document.querySelectorAll('.mark.ok')){if(m.closest('.state-legend'))continue;if(m.dataset.result!=='safe')out.push(m.dataset.result||'no-result');}return out})()`);
     if(lies.length)throw Error('A clearance mark is not backed by a safe evaluation: '+JSON.stringify(lies));
+    // One verdict authority: every surface must agree per item, and a cleared
+    // token exists only with an explicit safe+current receipt.
+    const authority=await evaluate(`(()=>{const marks=[...document.querySelectorAll('.mark[data-verdict][data-item]')].map(m=>({item:m.dataset.item,verdict:m.dataset.verdict,result:m.dataset.result||'',evidence:m.dataset.evidence||'',ok:m.classList.contains('ok')}));const conflicts=[];const seen=new Map();for(const m of marks){if(!m.item)continue;if(seen.has(m.item)&&seen.get(m.item)!==m.verdict)conflicts.push([m.item,seen.get(m.item),m.verdict]);else seen.set(m.item,m.verdict);}const lies=marks.filter(m=>((m.verdict==='cleared')!==m.ok)||(m.ok&&(m.result!=='safe'||m.evidence!=='current')));return {count:marks.length,conflicts,lies}})()`);
+    if(authority.conflicts.length)throw Error('One item renders contradictory dietary verdicts: '+JSON.stringify(authority.conflicts));
+    if(authority.lies.length)throw Error('A mark token disagrees with the authority receipt: '+JSON.stringify(authority.lies));
+    // The action area must carry every blocked item, and no non-cleared row may
+    // present an unqualified action.
+    const actionArea=await evaluate(`(()=>{const t=document.querySelector('.today');if(!t)return null;const blocked=[...new Set([...document.querySelectorAll(".mark[data-verdict='blocked'][data-item]")].map(m=>m.dataset.item))];const text=t.textContent;const missing=blocked.filter(n=>!text.includes(n));const rows=[...t.querySelectorAll('li[data-action-item]')].map(li=>{const m=li.querySelector('.mark[data-verdict]');return {item:li.dataset.actionItem,verdict:m?m.dataset.verdict:'',qualifier:!!li.querySelector('.action-qualifier')}});return {blocked,missing,rows,unqualified:rows.filter(r=>r.verdict&&r.verdict!=='cleared'&&!r.qualifier)}})()`);
+    if(actionArea&&actionArea.missing.length)throw Error('A blocked item is absent from the action area: '+JSON.stringify(actionArea));
+    if(actionArea&&actionArea.unqualified.length)throw Error('A non-cleared action has no dietary qualifier: '+JSON.stringify(actionArea));
+    // An unpriced placeholder is not a recorded zero.
+    const ledgerSpend=await evaluate(`(()=>{const rows=[...document.querySelectorAll('.ledger tbody tr')].map(r=>r.textContent.replace(/\\s+/g,' '));return {rows:rows.length,fabricated:rows.filter(t=>/No price captured/.test(t)&&/\\$0\\.00/.test(t))}})()`);
+    if(ledgerSpend.fabricated.length)throw Error('Unpriced ledger row renders a fabricated $0.00: '+JSON.stringify(ledgerSpend));
   }
   const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   await writeFile(resolve(output,`dashboard-${mode==='zoom'?'native-400pct':width}.png`),Buffer.from(shot.data,'base64'));

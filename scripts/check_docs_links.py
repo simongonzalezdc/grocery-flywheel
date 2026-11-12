@@ -14,7 +14,10 @@ LINK_RE = re.compile(r"\]\(([^)#\s]+)(?:#[^)\s]*)?\)")
 errors: list[str] = []
 
 md_files = sorted(REPO.rglob("*.md"))
-md_files = [p for p in md_files if ".venv" not in p.parts and "node_modules" not in p.parts]
+# delivery evidence is gitignored review record, not product documentation; its
+# links cite file:line snapshots that are not resolvable link targets.
+md_files = [p for p in md_files if ".venv" not in p.parts and "node_modules" not in p.parts
+            and "evidence" not in p.parts]
 
 for md in md_files:
     rel_root = md.parent

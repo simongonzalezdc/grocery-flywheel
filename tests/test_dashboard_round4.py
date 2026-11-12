@@ -167,7 +167,8 @@ def test_sourcing_states_its_unit_and_confidence_basis():
     assert 'modelled' in text and 'not a checked shelf price' in text
     assert 'confidence; checked 20 May 2026' in text
     assert 'Best sourcing move' not in text
-    assert 'One sourcing candidate' in text
+    assert 'Sourcing candidates' in text
+    assert '2 modelled saving rows' in text
 
 
 def test_easy_food_and_sourcing_alternatives_carry_dietary_state():

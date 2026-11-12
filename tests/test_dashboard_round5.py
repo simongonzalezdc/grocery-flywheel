@@ -23,7 +23,7 @@ from pathlib import Path
 
 from grocery_flywheel.core import analyze_state
 from grocery_flywheel.render import render_dashboard
-from grocery_flywheel.rendering.panels import _dietary_mark, _money
+from grocery_flywheel.rendering.panels import _dietary_mark, _item_verdict, _money
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -101,27 +101,44 @@ def _with_cart_plan(a):
 
 
 def test_contradictory_pair_never_paints_a_green_clearance():
-    blocked = _dietary_mark('safe', {'result': 'blocked', 'evidence_status': 'current',
-                                     'safety_tier': 'allergy'})
+    # The authority is the only input to the mark: an item's own ``safe`` field
+    # cannot be passed, so a contradictory evaluation wins by construction.
+    blocked = _dietary_mark(_item_verdict("Peanut granola", {
+        'result': 'blocked', 'evidence_status': 'current', 'safety_tier': 'allergy'}))
     assert "class='mark ok'" not in blocked
     assert ">Cleared<" not in blocked
     assert ">Blocked<" in blocked
 
-    review = _dietary_mark('safe', {'result': 'needs_review', 'evidence_status': 'current'})
+    review = _dietary_mark(_item_verdict("x", {
+        'result': 'needs_review', 'evidence_status': 'current'}))
     assert "class='mark ok'" not in review
     assert ">Needs review<" in review
 
-    warn = _dietary_mark('safe', {'result': 'warn', 'evidence_status': 'current'})
+    warn = _dietary_mark(_item_verdict("x", {
+        'result': 'warn', 'evidence_status': 'current'}))
     assert "class='mark ok'" not in warn
     assert ">Warning<" in warn
 
-    cleared = _dietary_mark('safe', {'result': 'safe', 'evidence_status': 'current'})
+    cleared = _dietary_mark(_item_verdict("x", {
+        'result': 'safe', 'evidence_status': 'current'}))
     assert "class='mark ok'" in cleared and ">Cleared<" in cleared
 
-    stale = _dietary_mark('safe', {'result': 'safe', 'evidence_status': 'stale'})
+    stale = _dietary_mark(_item_verdict("x", {
+        'result': 'safe', 'evidence_status': 'stale'}))
     assert "class='mark ok'" not in stale and "Not evaluated" in stale
 
-    assert "Not evaluated" in _dietary_mark('safe', None)
+    assert "Not evaluated" in _dietary_mark(_item_verdict("x", None))
+
+
+def test_item_status_cannot_reach_the_mark_authority():
+    """The r2/r4 fail-open class is impossible at the presentation boundary."""
+    import inspect
+    params = list(inspect.signature(_dietary_mark).parameters)
+    assert params == ["verdict"], params
+    verdict = _item_verdict("Peanut granola", {
+        'result': 'blocked', 'evidence_status': 'current'})
+    assert verdict["cleared"] is False and verdict["state"] == "blocked"
+    assert "item_status" not in repr(verdict)
 
 
 def test_contradictory_pair_is_fail_closed_in_every_call_site():
@@ -134,8 +151,8 @@ def test_contradictory_pair_is_fail_closed_in_every_call_site():
     assert rows and all("data-raw-status='blocked'" in row for row in rows)
     assert all("data-raw-status='safe'" not in row for row in rows)
     action = markup.split("Today &middot; one thing</h2>")[1].split('</article>')[0]
-    rows = [row for row in action.split("<li>")[1:]
-            if ">Peanut granola<span class='action-why'>" in row]
+    rows = [row.split('</li>')[0] for row in action.split("<li")[1:]]
+    rows = [row for row in rows if ">Peanut granola<span class='action-why'>" in row]
     assert rows and all("data-raw-status='blocked'" in row for row in rows)
     assert all("data-raw-status='safe'" not in row for row in rows)
     substitution = markup.split('>Substitutions</summary>')[1].split('</details>')[0]

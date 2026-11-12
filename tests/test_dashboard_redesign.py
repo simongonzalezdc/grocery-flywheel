@@ -88,7 +88,9 @@ def test_warn_never_uses_the_success_token_and_depletion_is_not_success():
     markup = render_dashboard(analysis())
     assert "<span class='tag ok'>warn" not in markup
     assert "class='mark ok' data-raw-status='warn'" not in markup
-    assert "class='mark warn' data-raw-status='warn'" in markup
+    warn_spans = [span for span in markup.split("class='mark warn'")[1:]
+                  if "data-raw-status='warn'" in span.split('>')[0]]
+    assert warn_spans
     css = markup.split('<style>')[1].split('</style>')[0]
     assert '.bar > span { display:block; height:100%; background:var(--copper); }' in css
     assert '.bar.hot > span { background:var(--brick); }' in css
@@ -131,7 +133,8 @@ def test_ledger_carries_dietary_price_and_product_evidence_columns():
     assert '<th>Price</th><th>Dietary</th><th>Product evidence</th>' in markup
     assert 'No label evidence' in markup
     # One price vocabulary: the ledger uses the freshness record's resolved state.
-    assert 'Stale price on file' in markup
+    # A stale row with no check date is unknown, not asserted stale.
+    assert 'Price on file · date unknown' in markup
     assert 'No price record' not in markup
     text = visible(markup)
     assert 'Priced' in text and 'No price captured' in text
