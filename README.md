@@ -1,5 +1,7 @@
 # Grocery Flywheel
 
+<p align="center"><img src="branding/grocery-flywheel-512.png" alt="Grocery Flywheel icon: raw green aventurine with a brass coin in a slot" width="160"></p>
+
 **Free, open-source, local-first groceries without decision fatigue.**
 
 Grocery Flywheel is a personal tool that ends the "what do we need?" loop. It tracks what you bought, notices what you've used, flags what's going stale, learns your corrections, and drafts the next cart — **you** approve everything. It never places orders, never touches a retailer account, and never sends your data anywhere. Python, zero runtime dependencies, works offline.
